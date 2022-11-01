@@ -19,11 +19,6 @@ public class LoginController {
     @FXML
     TextField passwordTextEntry;
 
-
-
-
-
-
     public void ButtonClick(ActionEvent event) {
         String username = usernameTextEntry.getText();
         String password = passwordTextEntry.getText();
@@ -36,11 +31,8 @@ public class LoginController {
                 Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AccessGranted.fxml",
                         Main.getMainStage(), 450, 385,"Welcome + ");//get user name from database
             }
-
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
-
 }
