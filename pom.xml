@@ -61,7 +61,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.example.customerdatabaseprojectii/com.example.customerdatabaseprojectii.HelloApplication
+                                com.example.customerdatabaseprojectii/com.example.customerdatabaseprojectii.Main
                             </mainClass>
                         </configuration>
                     </execution>
