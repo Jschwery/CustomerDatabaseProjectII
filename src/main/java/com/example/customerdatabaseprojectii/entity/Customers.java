@@ -1,14 +1,27 @@
 package com.example.customerdatabaseprojectii.entity;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class Customers {
 
     private int customerID;
     private String customerName;
     private String address;
     private long postalCode;
-    private String creationDate;
+
+    public long getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(long phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    private long phoneNumber;
+    private Time creationDate;
     private String CreatedBy;
-    private String lastUpdate;
+    private Timestamp lastUpdate;
     private String lastUpdatedBy;
     private int divisionID;
 
@@ -60,11 +73,11 @@ public class Customers {
         this.postalCode = postalCode;
     }
 
-    public String getCreationDate() {
+    public Time getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(String creationDate) {
+    public void setCreationDate(Time creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -76,11 +89,11 @@ public class Customers {
         CreatedBy = createdBy;
     }
 
-    public String getLastUpdate() {
+    public Timestamp getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(String lastUpdate) {
+    public void setLastUpdate(Timestamp lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 

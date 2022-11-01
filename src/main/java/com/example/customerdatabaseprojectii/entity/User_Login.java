@@ -2,7 +2,12 @@ package com.example.customerdatabaseprojectii.entity;
 
 public class User_Login {
 
+    private static int userCount = 0;
     private int userId;
+
+    public User_Login(){++userCount;}
+
+    private String firstName;
     private String userName;
     private String userPassword;
 
@@ -15,12 +20,28 @@ public class User_Login {
                 '}';
     }
 
+    public static int getUserCount() {
+        return userCount;
+    }
+
+    public static void setUserCount(int userCount) {
+        User_Login.userCount = userCount;
+    }
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+
     public int getUserId() {
         return userId;
     }
 
     public void setUserId(int userId) {
-        this.userId = userId;
+        this.userId = getUserCount();
     }
 
     public String getUserName() {

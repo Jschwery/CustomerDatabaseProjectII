@@ -1,11 +1,14 @@
 package com.example.customerdatabaseprojectii.entity;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class Countries {
     private int countryID;
     private String country;
-    private String creationDate;
+    private Time creationDate;
     private String createdBy;
-    private String lastUpdate;
+    private Timestamp lastUpdate;
     private String lastUpdatedBy;
 
     @Override
@@ -36,11 +39,11 @@ public class Countries {
         this.country = country;
     }
 
-    public String getCreationDate() {
+    public Time getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(String creationDate) {
+    public void setCreationDate(Time creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -52,11 +55,11 @@ public class Countries {
         this.createdBy = createdBy;
     }
 
-    public String getLastUpdate() {
+    public Timestamp getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(String lastUpdate) {
+    public void setLastUpdate(Timestamp lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 

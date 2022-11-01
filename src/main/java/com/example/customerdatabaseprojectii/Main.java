@@ -1,7 +1,6 @@
 package com.example.customerdatabaseprojectii;
 
 import com.example.customerdatabaseprojectii.util.DbConnection;
-import com.example.customerdatabaseprojectii.util.SceneChanger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

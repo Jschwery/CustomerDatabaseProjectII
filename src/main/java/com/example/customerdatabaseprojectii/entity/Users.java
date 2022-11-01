@@ -1,12 +1,24 @@
 package com.example.customerdatabaseprojectii.entity;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class Users {
-    private String userId;
+    private int userId;
     private String username;
     private String password;
-    private String createDate;
-    private String lastUpdate;
+    private Time createDate;
+    private String createdBy;
+    private Timestamp lastUpdate;
     private String lastUpdatedBy;
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
     @Override
     public String toString() {
@@ -20,11 +32,11 @@ public class Users {
                 '}';
     }
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
@@ -44,19 +56,19 @@ public class Users {
         this.password = password;
     }
 
-    public String getCreateDate() {
+    public Time getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Time createDate) {
         this.createDate = createDate;
     }
 
-    public String getLastUpdate() {
+    public Timestamp getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(String lastUpdate) {
+    public void setLastUpdate(Timestamp lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
