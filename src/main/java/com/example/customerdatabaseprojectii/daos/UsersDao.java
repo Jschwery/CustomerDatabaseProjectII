@@ -26,8 +26,19 @@ public class UsersDao {
         ObservableList<Users> observableUsersList = FXCollections.observableArrayList();
         if (ps != null) {
             ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("User_ID"));
+                user.setUsername(rs.getString("User_Name"));
+                user.setPassword(rs.getString("User_Password"));
+                user.setCreateDate(rs.getTime("Create_Date"));
+                user.setCreatedBy(rs.getString("Created_By"));
+                user.setLastUpdate(rs.getTimestamp("Last_Update"));
+                user.setLastUpdatedBy(rs.getString("Last_Updated_By"));
+
+                observableUsersList.add(user);
+            }
         }
-
+        return observableUsersList;
     }
-
 }

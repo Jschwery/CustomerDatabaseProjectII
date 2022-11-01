@@ -26,8 +26,19 @@ public class First_Level_DivisionsDao {
         ObservableList<First_Level_Divisions> observableFrstLvlDvsnList = FXCollections.observableArrayList();
         if (ps != null) {
             ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                First_Level_Divisions div = new First_Level_Divisions();
+                div.setCountryID(rs.getInt("Division_ID"));
+                div.setDivision(rs.getString("Division"));
+                div.setCreationDate(rs.getTime("Create_Date"));
+                div.setCreatedBy(rs.getString("Created_By"));
+                div.setLastUpdate(rs.getTimestamp("Last_Update"));
+                div.setLastUpdatedBy(rs.getString("Last_Updated_By"));
+                div.setCountryID(rs.getInt("Country_ID"));
+
+                observableFrstLvlDvsnList.add(div);
+            }
         }
-
+        return observableFrstLvlDvsnList;
     }
-
 }

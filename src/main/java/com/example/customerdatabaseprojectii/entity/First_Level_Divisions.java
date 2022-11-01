@@ -1,12 +1,25 @@
 package com.example.customerdatabaseprojectii.entity;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class First_Level_Divisions {
 
     private int divisionID;
     private String division;
-    private String creationDate;
+    private Time creationDate;
     private String createdBy;
-    private String lastUpdate;
+    private Timestamp lastUpdate;
+
+    public String getLastUpdatedBy() {
+        return lastUpdatedBy;
+    }
+
+    public void setLastUpdatedBy(String lastUpdatedBy) {
+        this.lastUpdatedBy = lastUpdatedBy;
+    }
+
+    private String lastUpdatedBy;
     private int countryID;
 
     @Override
@@ -37,11 +50,11 @@ public class First_Level_Divisions {
         this.division = division;
     }
 
-    public String getCreationDate() {
+    public Time getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(String creationDate) {
+    public void setCreationDate(Time creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -53,11 +66,11 @@ public class First_Level_Divisions {
         this.createdBy = createdBy;
     }
 
-    public String getLastUpdate() {
+    public Timestamp getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(String lastUpdate) {
+    public void setLastUpdate(Timestamp lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 

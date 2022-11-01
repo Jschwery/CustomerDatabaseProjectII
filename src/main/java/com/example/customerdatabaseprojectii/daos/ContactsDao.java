@@ -14,7 +14,6 @@ import java.sql.SQLException;
 public class ContactsDao {
 
     private String contactQuery = "SELECT * FROM contacts";
-
     private String getAllContactsQuery() {
         return contactQuery;
     }
@@ -26,7 +25,22 @@ public class ContactsDao {
         ObservableList<Contacts> observableContactsList = FXCollections.observableArrayList();
         if (ps != null) {
             ResultSet rs = ps.executeQuery();
-        }
+            while(rs.next()) {
+                Contacts contact = new Contacts();
+                contact.setContactID(rs.getInt("Contact_ID"));
+                contact.setContactName(rs.getString("Contact_Name"));
+                contact.setEmail(rs.getString("Email"));
 
+                observableContactsList.add(contact);
+            }
+        }
+        return observableContactsList;
     }
 }
+
+//TODO
+/*
+The login is not getting saved to the database,
+try and create a basic button and method to extract information from one of the tables and print it to the console
+
+ */

@@ -1,14 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.customerdatabaseprojectii.view.AccessGranted"
-            prefHeight="400.0" prefWidth="600.0">
 
+<AnchorPane prefHeight="473.0" prefWidth="733.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.AccessGranted">
+   <children>
+      <TableView layoutX="24.0" layoutY="75.0" prefHeight="323.0" prefWidth="600.0">
+        <columns>
+          <TableColumn prefWidth="75.0" text="C1" />
+          <TableColumn prefWidth="75.0" text="C2" />
+            <TableColumn prefWidth="75.0" text="C2" />
+            <TableColumn prefWidth="75.0" text="C2" />
+            <TableColumn prefWidth="75.0" text="C2" />
+            <TableColumn prefWidth="75.0" text="C2" />
+            <TableColumn prefWidth="75.0" text="C2" />
+            <TableColumn prefWidth="75.0" text="C2" />
+        </columns>
+      </TableView>
+      <Label layoutX="14.0" layoutY="22.0" prefHeight="53.0" prefWidth="309.0" text="Welcome">
+         <font>
+            <Font size="36.0" />
+         </font>
+      </Label>
+      <MenuButton layoutX="507.0" layoutY="22.0" mnemonicParsing="false" text="MenuButton">
+        <items>
+          <MenuItem mnemonicParsing="false" text="Action 1" />
+          <MenuItem mnemonicParsing="false" text="Action 2" />
+            <MenuItem mnemonicParsing="false" text="Action 3" />
+        </items>
+      </MenuButton>
+   </children>
 </AnchorPane>

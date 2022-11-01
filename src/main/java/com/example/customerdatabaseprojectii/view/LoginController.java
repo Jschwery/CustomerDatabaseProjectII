@@ -6,9 +6,12 @@ import com.example.customerdatabaseprojectii.entity.User_Login;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class LoginController {
 
@@ -18,11 +21,13 @@ public class LoginController {
     TextField usernameTextEntry;
     @FXML
     TextField passwordTextEntry;
+    @FXML
+    Hyperlink createAccountLink;
 
 
-
-
-
+    public void createAccountLinkClicked(ActionEvent e) throws IOException {
+        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CreateUser.fxml", Main.getMainStage(), 500, 500, "Create User");
+    }
 
     public void ButtonClick(ActionEvent event) {
         String username = usernameTextEntry.getText();
@@ -42,5 +47,4 @@ public class LoginController {
         }
 
     }
-
 }
