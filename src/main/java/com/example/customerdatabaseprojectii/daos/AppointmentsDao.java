@@ -14,7 +14,6 @@ public class AppointmentsDao {
     private String appointmentsQuery = "SELECT * FROM appointments";
 
     public ObservableList<Appointments> generateAppointmentList() throws SQLException {
-        DbConnection.makeConnection();
         Connection apptConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(appointmentsQuery, apptConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
