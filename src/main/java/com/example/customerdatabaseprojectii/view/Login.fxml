@@ -25,6 +25,7 @@
                 <Button fx:id="loginButton" layoutX="153.0" layoutY="333.0" mnemonicParsing="false" onAction="#ButtonClick" prefHeight="38.0" prefWidth="150.0" text="Login" />
                 <Hyperlink fx:id="createAccountLink" layoutX="343.0" layoutY="386.0" onAction="#createAccountLinkClicked" text="Create Account" />
                 <PasswordField fx:id="passwordTextEntry" layoutX="93.0" layoutY="236.0" prefHeight="26.0" prefWidth="231.0" promptText="Password" />
+            <Button fx:id="btn2" layoutX="39.0" layoutY="339.0" mnemonicParsing="false" onAction="#anotherButtonClickTest" text="btn2" />
             </children>
         </Pane>
         <Label layoutX="21.0" layoutY="347.0" prefHeight="18.0" prefWidth="114.0" />

@@ -29,7 +29,7 @@ public class AppointmentsDao {
                 apt.setType(rs.getString("Type"));
                 apt.setStartDateTime(rs.getTimestamp("Start"));
                 apt.setEndDateTime(rs.getTimestamp("End"));
-                apt.setCreateDateTime(rs.getDate("Create_Date"));
+                apt.setCreateDateTime(rs.getTime("Create_Date"));
                 apt.setLastUpdate(rs.getTimestamp("Last_Update"));
                 apt.setLastUpdatedBy(rs.getString("Last_Updated_By"));
                 apt.setCustomerID(rs.getInt("Customer_ID"));

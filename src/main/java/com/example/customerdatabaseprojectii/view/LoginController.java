@@ -10,6 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class LoginController {
 
     @FXML
@@ -19,10 +21,10 @@ public class LoginController {
     @FXML
     TextField passwordTextEntry;
 
-
-
-
-
+    public void anotherButtonClickTest(ActionEvent event) throws IOException {
+        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AccessGranted.fxml",
+                Main.getMainStage(), 450, 385,"Welcome + ");
+    }
 
     public void ButtonClick(ActionEvent event) {
         String username = usernameTextEntry.getText();

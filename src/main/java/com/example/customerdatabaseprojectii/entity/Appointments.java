@@ -1,6 +1,6 @@
 package com.example.customerdatabaseprojectii.entity;
 
-import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 
 public class Appointments {
@@ -11,7 +11,7 @@ public class Appointments {
     private String type;
     private Timestamp startDateTime;
     private Timestamp endDateTime;
-    private Date createDateTime;
+    private Time createDateTime;
     private String createdBy;
     private Timestamp lastUpdate;
     private String lastUpdatedBy;
@@ -97,11 +97,11 @@ public class Appointments {
         this.endDateTime = endDateTime;
     }
 
-    public Date getCreateDateTime() {
+    public Time getCreateDateTime() {
         return createDateTime;
     }
 
-    public void setCreateDateTime(Date createDateTime) {
+    public void setCreateDateTime(Time createDateTime) {
         this.createDateTime = createDateTime;
     }
 
