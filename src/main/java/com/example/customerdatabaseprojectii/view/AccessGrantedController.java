@@ -30,33 +30,33 @@ public class AccessGrantedController implements Initializable {
     @FXML
     TableView<Appointments> accessTableView;
     @FXML
-    TableColumn<Appointments, Integer> appointmentID;
+    TableColumn<Appointments, Integer> accessApptID;
     @FXML
-    TableColumn<Appointments, String> title;
+    TableColumn<Appointments, String> accessTitle;
     @FXML
-    TableColumn<Appointments,String > description;
+    TableColumn<Appointments,String > accessDesc;
     @FXML
-    TableColumn<Appointments, String> location;
+    TableColumn<Appointments, String> accessType;
     @FXML
-    TableColumn<Appointments, String> type;
+    TableColumn<Appointments, Timestamp> accessStart;
     @FXML
-    TableColumn<Appointments, Timestamp> startDateTime;
+    TableColumn<Appointments, Timestamp> accessEnd;
     @FXML
-    TableColumn<Appointments, Timestamp> endDateTime;
+    TableColumn<Appointments, Time> accessCreateDate;
     @FXML
-    TableColumn<Appointments, Time> createDateTime;
+    TableColumn<Appointments, String> accessCreateBy;
     @FXML
-    TableColumn<Appointments, String> createdBy;
+    TableColumn<Appointments, Timestamp> accessLastUpdate;
     @FXML
-    TableColumn<Appointments, Timestamp> lastUpdate;
+    TableColumn<Appointments, String> accessLastUpdateBy;
     @FXML
-    TableColumn<Appointments, String> lastUpdatedBy;
+    TableColumn<Appointments, Integer> accessCustID;
     @FXML
-    TableColumn<Appointments, Integer> customerID;
+    TableColumn<Appointments, Integer> accessUserID;
     @FXML
-    TableColumn<Appointments, Integer> usersID;
+    TableColumn<Appointments, Integer> accessContactID;
     @FXML
-    TableColumn<Appointments, Integer> contactsID;
+    TableColumn<Appointments,String> accessLoc;
     @FXML
     Button customerFormButton;
     @FXML
@@ -87,30 +87,27 @@ public class AccessGrantedController implements Initializable {
 
         try {
             accessTableView.setItems(AppointmentsDao.generateAppointmentList());
-            ObservableList<Appointments> ls = accessTableView.getItems();
-            System.out.println(ls);
-
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
-//        description.setCellValueFactory(new PropertyValueFactory<>("description"));
+        accessDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 
-//          type.setCellValueFactory(new PropertyValueFactory<>("type"));
-//        appointmentID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
-//        location.setCellValueFactory(new PropertyValueFactory<>("location"));
-//        startDateTime.setCellValueFactory(new PropertyValueFactory<>("startDateTime"));
-//        endDateTime.setCellValueFactory(new PropertyValueFactory<>("endDateTime"));
-//        createDateTime.setCellValueFactory(new PropertyValueFactory<>("createDateTime"));
-//        createdBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
-//        lastUpdate.setCellValueFactory(new PropertyValueFactory<>("lastUpdate"));
-//        lastUpdatedBy.setCellValueFactory(new PropertyValueFactory<>("lastUpdatedBy"));
-//        customerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
-//        usersID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
-//        contactsID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
+          accessType.setCellValueFactory(new PropertyValueFactory<>("type"));
+        accessApptID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
+        accessLoc.setCellValueFactory(new PropertyValueFactory<>("location"));
+        accessStart.setCellValueFactory(new PropertyValueFactory<>("startDateTime"));
+        accessEnd.setCellValueFactory(new PropertyValueFactory<>("endDateTime"));
+        accessCreateDate.setCellValueFactory(new PropertyValueFactory<>("createDateTime"));
+        accessCreateBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
+        accessLastUpdate.setCellValueFactory(new PropertyValueFactory<>("lastUpdate"));
+        accessLastUpdateBy.setCellValueFactory(new PropertyValueFactory<>("lastUpdatedBy"));
+        accessCustID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
+        accessUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
+        accessContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
 
 
     }

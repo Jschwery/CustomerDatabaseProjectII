@@ -21,7 +21,7 @@
             <TableColumn fx:id="accessStart" prefWidth="61.0" text="start" />
             <TableColumn fx:id="accessEnd" prefWidth="63.0" text="end" />
             <TableColumn fx:id="accessCreateDate" prefWidth="73.0" text="createDate" />
-            <TableColumn fx:id="accessCreeateBy" prefWidth="67.0" text="createBy" />
+            <TableColumn fx:id="accessCreateBy" prefWidth="67.0" text="createBy" />
             <TableColumn fx:id="accessLastUpdate" prefWidth="74.0" text="lastUpdate" />
             <TableColumn fx:id="accessLastUpdateBy" text="lastupdateBY" />
             <TableColumn fx:id="accessCustID" prefWidth="61.0" text="custID" />
