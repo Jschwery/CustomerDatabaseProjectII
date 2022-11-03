@@ -1,7 +1,5 @@
 package com.example.customerdatabaseprojectii.daos;
 
-import com.example.customerdatabaseprojectii.entity.Appointments;
-import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.entity.Customers;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
@@ -14,15 +12,12 @@ import java.sql.SQLException;
 
 
 public class CustomersDao {
-    public String getCustomersQuery() {
-        return customersQuery;
-    }
 
-    private String customersQuery = "SELECT * FROM customers";
+    private static final String customersQuery = "SELECT * FROM customers";
 
     public ObservableList<Customers> addCustomersToObservableList() throws SQLException {
         Connection customersConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(getCustomersQuery(), customersConnection);
+        DbConnection.makePreparedStatement(customersQuery, customersConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
         ObservableList<Customers> observableCustomersList = FXCollections.observableArrayList();
         if (ps != null) {

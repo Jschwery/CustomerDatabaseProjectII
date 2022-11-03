@@ -26,6 +26,11 @@ public class LoginController {
                 Main.getMainStage(), 450, 385,"Welcome + ");
     }
 
+    public void createAccountLinkClicked(ActionEvent event) throws IOException {
+        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CreateUser.fxml",
+                Main.getMainStage(), 450, 385,"Welcome + ");
+    }
+
     public void ButtonClick(ActionEvent event) {
         String username = usernameTextEntry.getText();
         String password = passwordTextEntry.getText();

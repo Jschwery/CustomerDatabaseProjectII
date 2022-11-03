@@ -1,7 +1,5 @@
 package com.example.customerdatabaseprojectii.daos;
 
-import com.example.customerdatabaseprojectii.entity.Appointments;
-import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.entity.Countries;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
@@ -13,16 +11,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CountriesDao {
-    public String getCountriesQuery() {
-        return countriesQuery;
-    }
-    private String countriesQuery = "SELECT * FROM countries";
+    private static final String countriesQuery = "SELECT * FROM countries";
+    private static final ObservableList<Countries> observableCountriesList = FXCollections.observableArrayList();
 
-    public ObservableList<Countries> addContactToObservableList() throws SQLException {
+    public void addCountriesToObservableList(Countries country){
+        observableCountriesList.add(country);
+    }
+
+    public ObservableList<Countries> getObservableCountries(){
+        return observableCountriesList;
+    }
+
+    public ObservableList<Countries> addCountriesToObservableList() throws SQLException {
         Connection countriesConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(getCountriesQuery(), countriesConnection);
+        DbConnection.makePreparedStatement(countriesQuery, countriesConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
-        ObservableList<Countries> observableCountriesList = FXCollections.observableArrayList();
         if (ps != null) {
             ResultSet rs = ps.executeQuery();
 
@@ -38,6 +41,6 @@ public class CountriesDao {
                 observableCountriesList.add(country);
             }
         }
-        return observableCountriesList;
+        return getObservableCountries();
     }
 }

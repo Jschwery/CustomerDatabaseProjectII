@@ -1,10 +1,7 @@
 package com.example.customerdatabaseprojectii.daos;
 
-import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.User_Login;
 import com.example.customerdatabaseprojectii.util.DbConnection;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,22 +10,16 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class User_LoginDao {
-    private final String userLoginQuery = "SELECT * FROM user_login";
+    private static final String userLoginQuery = "SELECT * FROM user_login";
 
-    public String getInsertUserQuery() {
-        return insertUserQuery;
-    }
 
-    private final String insertUserQuery = "Insert INTO user_login (userName, userPassword, firstName) " +
+    private static final String insertUserQuery = "Insert INTO user_login (userName, userPassword, firstName) " +
             "VALUES (?,?,?)";
 
-    public String getUserLoginQuery() {
-        return userLoginQuery;
-    }
 
     public boolean accountVerified(User_Login login) throws SQLException {
         Connection actConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(getUserLoginQuery(), actConnection);
+        DbConnection.makePreparedStatement(userLoginQuery, actConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
         if(ps != null){
             ResultSet rs = ps.executeQuery();
@@ -44,9 +35,9 @@ public class User_LoginDao {
         return false;
     }
 
-    public void insertUserIntoDB(User_Login login) throws SQLException {
+    public void insertUserLoginIntoDB(User_Login login) throws SQLException {
         Connection connection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(getInsertUserQuery(), connection);
+        DbConnection.makePreparedStatement(insertUserQuery, connection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
         if(ps != null){
             ps.setString(1, login.getUserName());

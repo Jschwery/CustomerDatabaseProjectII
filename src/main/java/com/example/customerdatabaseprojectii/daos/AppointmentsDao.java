@@ -11,13 +11,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class AppointmentsDao {
-    private String appointmentsQuery = "SELECT * FROM appointments";
 
-    public ObservableList<Appointments> generateAppointmentList() throws SQLException {
+
+    private static final String appointmentsQuery = "SELECT * FROM appointments";
+    private static final ObservableList<Appointments> observableAppointmentList = FXCollections.observableArrayList();
+
+    public static ObservableList<Appointments> getObservableAppointments(){
+        return observableAppointmentList;
+    }
+    public void addAppointmentToObservableList(Appointments app){
+        observableAppointmentList.add(app);
+    }
+
+    public static ObservableList<Appointments> generateAppointmentList() throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(appointmentsQuery, apptConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
-        ObservableList<Appointments> observableAppointmentList = FXCollections.observableArrayList();
         if(ps != null){
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
@@ -30,17 +39,16 @@ public class AppointmentsDao {
                 apt.setStartDateTime(rs.getTimestamp("Start"));
                 apt.setEndDateTime(rs.getTimestamp("End"));
                 apt.setCreateDateTime(rs.getTime("Create_Date"));
+                apt.setCreatedBy(rs.getString("Created_By"));
                 apt.setLastUpdate(rs.getTimestamp("Last_Update"));
                 apt.setLastUpdatedBy(rs.getString("Last_Updated_By"));
                 apt.setCustomerID(rs.getInt("Customer_ID"));
                 apt.setUsersID(rs.getInt("User_ID"));
                 apt.setContactsID(rs.getInt("Contact_ID"));
+
                 observableAppointmentList.add(apt);
             }
         }
-        else{
-            System.out.println("Prepared Statement is Null");
-        }
-        return observableAppointmentList;
+        return getObservableAppointments();
     }
 }

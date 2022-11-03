@@ -1,6 +1,5 @@
 package com.example.customerdatabaseprojectii.daos;
 
-import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
@@ -13,14 +12,11 @@ import java.sql.SQLException;
 
 public class ContactsDao {
 
-    private String contactQuery = "SELECT * FROM contacts";
-    private String getAllContactsQuery() {
-        return contactQuery;
-    }
+    private static final String contactQuery = "SELECT * FROM contacts";
 
-    public ObservableList<Contacts> addContactToObservableList() throws SQLException {
+    public static ObservableList<Contacts> addContactToObservableList() throws SQLException {
         Connection contactsConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(getAllContactsQuery(), contactsConnection);
+        DbConnection.makePreparedStatement(contactQuery, contactsConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
         ObservableList<Contacts> observableContactsList = FXCollections.observableArrayList();
         if (ps != null) {
@@ -40,7 +36,13 @@ public class ContactsDao {
 
 //TODO
 /*
-The login is not getting saved to the database,
-try and create a basic button and method to extract information from one of the tables and print it to the console
+DB connection now works
+
+But the DAOs is either not properly filling in the entities with the neccessary data
+then adding them to an observable list
+
+setcellvalue --> set property value is not able to get the data from the objects set in the tableView
+soo... is the tableView being filled with the data from set items
+
 
  */

@@ -70,7 +70,7 @@ public class createAccountController {
             userLogin.setUserName(username);
             userLogin.setUserPassword(password);
             try {
-                userDao.insertUserIntoDB(userLogin);
+                userDao.insertUserLoginIntoDB((userLogin));
                 Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml", Main.getMainStage(), 495, 485, "Login");
             }catch (SQLException | IOException e){
                 e.printStackTrace();
