@@ -2,6 +2,7 @@ package com.example.customerdatabaseprojectii.view;
 
 import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
+import com.example.customerdatabaseprojectii.daos.User_LoginDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.Customers;
 import javafx.collections.ObservableList;
@@ -84,7 +85,12 @@ public class AccessGrantedController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
+        try {
+            tableVarText.setText(String.format("Hello %s!", User_LoginDao.getLogin().getFirstName()));
+        }catch (NullPointerException npe){
+            npe.printStackTrace();
+            tableVarText.setText("Welcome!");
+        }
         try {
             accessTableView.setItems(AppointmentsDao.generateAppointmentList());
 
@@ -96,7 +102,7 @@ public class AccessGrantedController implements Initializable {
         accessDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 
-          accessType.setCellValueFactory(new PropertyValueFactory<>("type"));
+        accessType.setCellValueFactory(new PropertyValueFactory<>("type"));
         accessApptID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         accessLoc.setCellValueFactory(new PropertyValueFactory<>("location"));
         accessStart.setCellValueFactory(new PropertyValueFactory<>("startDateTime"));

@@ -10,11 +10,20 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class User_LoginDao {
+
+    public static User_Login getLogin() {
+        return loggedIn;
+    }
+
+
+    private static final User_Login loggedIn = new User_Login();
+
     private static final String userLoginQuery = "SELECT * FROM user_login";
 
 
     private static final String insertUserQuery = "Insert INTO user_login (userName, userPassword, firstName) " +
             "VALUES (?,?,?)";
+
 
 
     public boolean accountVerified(User_Login login) throws SQLException {
@@ -25,7 +34,11 @@ public class User_LoginDao {
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 String username = rs.getString("userName"); //check username from sql table
-                String password = rs.getString("password"); //check password from sql table
+                String password = rs.getString("userPassword"); //check password from sql table
+                String name = rs.getString("firstName");
+                loggedIn.setUserName(username);
+                loggedIn.setUserPassword(password);
+                loggedIn.setFirstName(name);
                 if(Objects.equals(login.getUserName(), username) && Objects.equals(login.getUserPassword(), password)){
                     return true;
                 }
