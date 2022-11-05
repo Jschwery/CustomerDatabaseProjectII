@@ -1,7 +1,9 @@
 package com.example.customerdatabaseprojectii.daos;
 
+import com.example.customerdatabaseprojectii.entity.Countries;
 import com.example.customerdatabaseprojectii.entity.Customers;
 import com.example.customerdatabaseprojectii.util.DbConnection;
+import com.example.customerdatabaseprojectii.view.CustomerFormController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -15,13 +17,11 @@ public class CustomersDao {
 
     private static final String customersQuery = "SELECT * FROM customers";
 
-    public ObservableList<Customers> addCustomersToObservableList() throws SQLException {
+    public void addCustomersToObservableListFromDB() throws SQLException {
         Connection customersConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(customersQuery, customersConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
-        ObservableList<Customers> observableCustomersList = FXCollections.observableArrayList();
-        if (ps != null) {
-            ResultSet rs = ps.executeQuery();
+        if (ps != null) {            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Customers customer = new Customers();
                 customer.setCustomerID(rs.getInt("Customer_ID"));
@@ -34,9 +34,8 @@ public class CustomersDao {
                 customer.setLastUpdatedBy(rs.getString("Last_Updated_By"));
                 customer.setCreationDate(rs.getTime("Create_Date"));
 
-                observableCustomersList.add(customer);
+                CustomerFormController.getAllCustomers().add(customer);
             }
         }
-        return observableCustomersList;
     }
 }

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="568.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.CustomerFormController">
+<AnchorPane fx:id="customerFormBG" prefHeight="568.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.CustomerFormController">
    <children>
       <ComboBox fx:id="cfCustomerCountry" layoutX="62.0" layoutY="383.0" prefHeight="25.0" prefWidth="172.0" promptText="select country" />
       <TextField fx:id="cfCustomerAddress" layoutX="62.0" layoutY="196.0" promptText="enter address" />
