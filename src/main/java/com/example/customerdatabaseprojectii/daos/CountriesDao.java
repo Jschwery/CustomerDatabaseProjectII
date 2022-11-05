@@ -14,11 +14,27 @@ public class CountriesDao {
     private static final String countriesQuery = "SELECT * FROM countries";
     private static final ObservableList<Countries> observableCountriesList = FXCollections.observableArrayList();
 
-    public void addCountriesToObservableList(Countries country){
+
+    public static void addCountriesToObservableList(Countries country){
         observableCountriesList.add(country);
     }
 
-    public ObservableList<Countries> getObservableCountries(){
+
+    public static void deleteCountryFromAllCountries(Countries country){
+        for(Countries c : getAllCountries()){
+            if(c.equals(country)){
+                if(observableCountriesList.remove(country)){
+                    System.out.println("Country Successfully removed");
+                }else{
+                    System.out.println("Failed to remove country");
+                }
+            }
+        }
+    }
+
+
+
+    public static ObservableList<Countries> getAllCountries(){
         return observableCountriesList;
     }
 
@@ -41,6 +57,6 @@ public class CountriesDao {
                 observableCountriesList.add(country);
             }
         }
-        return getObservableCountries();
+        return getAllCountries();
     }
 }

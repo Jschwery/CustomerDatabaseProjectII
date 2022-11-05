@@ -10,13 +10,6 @@ public class Customers {
     private String address;
     private long postalCode;
 
-    public long getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(long phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
 
     private long phoneNumber;
     private Time creationDate;
@@ -39,6 +32,15 @@ public class Customers {
                 ", lastUpdatedBy='" + lastUpdatedBy + '\'' +
                 ", divisionID=" + divisionID +
                 '}';
+    }
+
+
+    public long getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(long phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public int getCustomerID() {

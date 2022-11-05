@@ -7,15 +7,13 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.io.IOException;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class CustomerFormController implements Initializable {
@@ -34,8 +32,61 @@ public class CustomerFormController implements Initializable {
     @FXML
     Button cfCancel;
 
+    private static final ObservableList<Customers> allCustomersObservableList = FXCollections.observableArrayList();
 
+    public static ObservableList<Customers> getAllCustomers(){
+        return allCustomersObservableList;
+    }
 
+    public static void addCustomerToObservableList(Customers customer){
+        allCustomersObservableList.add(customer);
+    }
+
+    public static void deleteCustomerFromAllCustomers(Customers customer){
+        for(Customers c : getAllCustomers()){
+            if(c.equals(customer)){
+                if(allCustomersObservableList.remove(customer)){
+                    System.out.println("Customer Successfully removed");
+                }else{
+                    System.out.println("Failed to remove customer");
+                }
+            }
+        }
+    }
+
+    public static void setCustomerByIndex(int customerIndex, Customers customer){
+        getAllCustomers().set(customerIndex, customer);
+    }
+    public static int getCustomerIndex(Customers customer){
+        for(Customers c : getAllCustomers()){
+            if(c.equals(customer)){
+                return getAllCustomers().indexOf(c);
+            }
+
+        }
+        return -1;
+    }
+
+//    public void deleteCustomer(ActionEvent event) {
+//        //part
+//        Customers customerToDel = customerTableView.getSelectionModel().getSelectedItem();
+//        {
+//            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete this part?");
+//            Optional<ButtonType> buttonResult = alert.showAndWait();
+//
+//            if (buttonResult.get() == ButtonType.OK) {
+//
+//                inventoryPartsTable.setItems(allParts);
+//                indexPartUpdater();
+//
+//            } else {
+//                if (buttonResult.get() == ButtonType.CANCEL) {
+//                    inventoryPartsTable.setItems(allParts);
+//                    return;
+//                }
+//            }
+//        }
+//    }
 
     public void addCustomerLabel(ActionEvent event) throws IOException {
         Customers customerToAdd = new Customers();
@@ -57,12 +108,12 @@ public class CustomerFormController implements Initializable {
         //and translate it into data that is stored in the customer data field within the table
 
 
-        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AccessGranted.fxml", Main.getMainStage(), 473, 990, "TableView");
+        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/TableMenu.fxml", Main.getMainStage(), 473, 990, "TableView");
     }
 
     public void cancelButtonClicked(ActionEvent event) throws IOException {
         cfCancel.getScene();
-        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AccessGranted.fxml", Main.getMainStage(), 473, 990, "TableView");
+        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/TableMenu.fxml", Main.getMainStage(), 473, 990, "TableView");
     }
 
 
