@@ -40,6 +40,12 @@ public class LoginController implements Initializable {
                 Main.getMainStage(), 450, 385,"Welcome + ");
     }
 
+    public void detectAndTranslate(){
+        ZoneId userTimeZone = ZoneId.systemDefault();
+
+
+    }
+
     public void setTimeLabel() {
         ZoneId userTimeZone = ZoneId.systemDefault();
         timeLabel.setText(String.valueOf(userTimeZone));
