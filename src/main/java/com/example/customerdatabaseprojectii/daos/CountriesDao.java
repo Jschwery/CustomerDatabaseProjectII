@@ -32,13 +32,11 @@ public class CountriesDao {
         }
     }
 
-
-
     public static ObservableList<Countries> getAllCountries(){
         return observableCountriesList;
     }
 
-    public ObservableList<Countries> addCountriesToObservableList() throws SQLException {
+    public static ObservableList<Countries> addCountriesToObservableList() throws SQLException {
         Connection countriesConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(countriesQuery, countriesConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
@@ -49,10 +47,7 @@ public class CountriesDao {
                 Countries country = new Countries();
                 country.setCountryID(rs.getInt("Country_ID"));
                 country.setCountry(rs.getString("Country"));
-                country.setCreationDate(rs.getTime("Create_Date"));
-                country.setCreatedBy(rs.getString("Created_By"));
-                country.setLastUpdate(rs.getTimestamp("Last_Update"));
-                country.setLastUpdatedBy(rs.getString("Last_Updated_By"));
+
 
                 observableCountriesList.add(country);
             }

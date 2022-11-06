@@ -2,9 +2,9 @@ package com.example.customerdatabaseprojectii.util;
 
 import java.sql.*;
 
-public class tester {
+public class Tester {
 
-    public tester() throws SQLException {
+    public Tester() throws SQLException {
 
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/client_schedule", "root","Bearsfan580!");
         PreparedStatement stmt = con.prepareStatement("SELECT * FROM appointments");

@@ -2,6 +2,8 @@ package com.example.customerdatabaseprojectii.entity;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Appointments {
     private int appointmentID;
@@ -9,17 +11,11 @@ public class Appointments {
     private String description;
     private String location;
     private String type;
-    private Timestamp startDateTime;
-    private Timestamp endDateTime;
-    private Time createDateTime;
-    private String createdBy;
-    private Timestamp lastUpdate;
-    private String lastUpdatedBy;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
     private int customerID;
     private int usersID;
     private int contactsID;
-
-    public Appointments(){}
 
     @Override
     public String toString() {
@@ -29,17 +25,15 @@ public class Appointments {
                 ", description='" + description + '\'' +
                 ", location='" + location + '\'' +
                 ", type='" + type + '\'' +
-                ", startDateTime='" + startDateTime + '\'' +
-                ", endDateTime='" + endDateTime + '\'' +
-                ", createDateTime='" + createDateTime + '\'' +
-                ", createdBy='" + createdBy + '\'' +
-                ", lastUpdate='" + lastUpdate + '\'' +
-                ", lastUpdatedBy='" + lastUpdatedBy + '\'' +
+                ", startDateTime=" + startDateTime +
+                ", endDateTime=" + endDateTime +
                 ", customerID=" + customerID +
                 ", usersID=" + usersID +
                 ", contactsID=" + contactsID +
                 '}';
     }
+
+    public Appointments(){}
 
     public int getAppointmentID() {
         return appointmentID;
@@ -81,52 +75,20 @@ public class Appointments {
         this.type = type;
     }
 
-    public Timestamp getStartDateTime() {
+    public LocalDateTime getStartDateTime() {
         return startDateTime;
     }
 
-    public void setStartDateTime(Timestamp startDateTime) {
+    public void setStartDateTime(LocalDateTime startDateTime) {
         this.startDateTime = startDateTime;
     }
 
-    public Timestamp getEndDateTime() {
+    public LocalDateTime getEndDateTime() {
         return endDateTime;
     }
 
-    public void setEndDateTime(Timestamp endDateTime) {
+    public void setEndDateTime(LocalDateTime endDateTime) {
         this.endDateTime = endDateTime;
-    }
-
-    public Time getCreateDateTime() {
-        return createDateTime;
-    }
-
-    public void setCreateDateTime(Time createDateTime) {
-        this.createDateTime = createDateTime;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Timestamp getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Timestamp lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public String getLastUpdatedBy() {
-        return lastUpdatedBy;
-    }
-
-    public void setLastUpdatedBy(String lastUpdatedBy) {
-        this.lastUpdatedBy = lastUpdatedBy;
     }
 
     public int getCustomerID() {
