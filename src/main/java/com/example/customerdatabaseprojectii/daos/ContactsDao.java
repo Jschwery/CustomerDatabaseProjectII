@@ -31,8 +31,7 @@ public class ContactsDao {
         }
         return observableContactsList;
     }
-    //todo
-    //need to
+
     public static Integer returnContactIDbyName(String contactName) throws SQLException {
         Connection contactsConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(contactQuery, contactsConnection);
@@ -45,6 +44,7 @@ public class ContactsDao {
                 contact.setContactID(rs.getInt("Contact_ID"));
                 contact.setContactName(rs.getString("Contact_Name"));
                 contact.setEmail(rs.getString("Email"));
+                System.out.println(contact.getContactName() + ": "+ contact.getContactID());
                 if(Objects.equals(contact.getContactName(), contactName)){
                     return contact.getContactID();
                 }

@@ -14,8 +14,8 @@ public class DbConnection {
     private static final String driver = "com.mysql.cj.jdbc.Driver";
     private static final String userName = "root";
     private static final String password = "Bearsfan580!";
-   private static Connection connection = null;
-   private static PreparedStatement preparedStatement;
+    private static Connection connection = null;
+    private static PreparedStatement preparedStatement;
     public static void makeConnection() {
         try {
             Class.forName(driver);

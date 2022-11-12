@@ -157,8 +157,8 @@ public class AppointmentsMainController implements Initializable {
     }
     public void updateAppointmentForm(ActionEvent event) throws IOException {
         if(selectedAppointment!= null){
-            Main.genNewStageAndScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml", 568, 340, "Customer Form");
             AppointmentFormController.isModified = true;
+            Main.genNewStageAndScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml", 568, 340, "Customer Form");
         }
         else{
             Alerter.informationAlert("Please select an appointment to modify!");

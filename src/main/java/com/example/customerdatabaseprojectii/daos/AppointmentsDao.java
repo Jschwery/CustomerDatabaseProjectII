@@ -50,7 +50,11 @@ public class AppointmentsDao {
             ps.setInt(12, appointment.getContactsID());
             ps.setInt(13, appointment.getAppointmentID());
 
-            ps.execute();
+            try {
+                ps.execute();
+            }catch(SQLIntegrityConstraintViolationException e){
+                System.out.println("Parent table no matching id");
+            }
             System.out.println("Successfully inserted appointment into database" +
                     "\nTime: " + LocalTime.now());
         }

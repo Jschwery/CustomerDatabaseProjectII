@@ -7,58 +7,64 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="customerFormBG" prefHeight="568.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.CustomerFormController">
+<AnchorPane fx:id="customerFormBG" prefHeight="616.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.CustomerFormController">
     <children>
-        <ComboBox fx:id="cfCustomerCountry" layoutX="62.0" layoutY="383.0" onAction="#filterFirstLevelByCountry" prefHeight="25.0" prefWidth="172.0" promptText="select country" />
-        <TextField fx:id="cfCustomerAddress" layoutX="62.0" layoutY="196.0" promptText="enter address" />
-        <TextField fx:id="cfCustomerPostal" layoutX="62.0" layoutY="253.0" promptText="enter postal code" />
-        <TextField fx:id="cfCustomerName" layoutX="62.0" layoutY="132.0" promptText="enter name" />
-        <TextField fx:id="cfCustomerNumber" layoutX="62.0" layoutY="318.0" promptText="enter phone number" />
-        <Label layoutX="94.0" layoutY="33.0" text="Customer Form">
+        <ComboBox fx:id="cfCustomerCountry" layoutX="61.0" layoutY="421.0" onAction="#filterFirstLevelByCountry" prefHeight="25.0" prefWidth="172.0" promptText="select country" />
+        <TextField fx:id="cfCustomerAddress" layoutX="61.0" layoutY="228.0" prefHeight="26.0" prefWidth="172.0" promptText="enter address" />
+        <TextField fx:id="cfCustomerPostal" layoutX="61.0" layoutY="291.0" prefHeight="26.0" prefWidth="172.0" promptText="enter postal code" />
+        <TextField fx:id="cfCustomerName" layoutX="61.0" layoutY="164.0" prefHeight="26.0" prefWidth="172.0" promptText="enter name" />
+        <TextField fx:id="cfCustomerNumber" layoutX="61.0" layoutY="360.0" prefHeight="26.0" prefWidth="172.0" promptText="enter phone number" />
+        <Label layoutX="86.0" layoutY="14.0" text="Customer Form">
             <font>
                 <Font size="22.0" />
             </font>
         </Label>
-        <Label layoutX="63.0" layoutY="112.0" text="Customer Name">
+        <Label layoutX="62.0" layoutY="146.0" text="Customer Name">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Label layoutX="62.0" layoutY="176.0" prefHeight="17.0" prefWidth="56.0" text="Address">
+        <Label layoutX="61.0" layoutY="210.0" prefHeight="17.0" prefWidth="56.0" text="Address">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Label layoutX="64.0" layoutY="233.0" text="Postal Code">
+        <Label layoutX="63.0" layoutY="271.0" text="Postal Code">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Label layoutX="62.0" layoutY="298.0" text="Phone Number">
+        <Label layoutX="62.0" layoutY="342.0" prefHeight="18.0" prefWidth="96.0" text="Phone Number">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Label layoutX="62.0" layoutY="363.0" prefHeight="20.0" prefWidth="56.0" text="Country">
+        <Label layoutX="61.0" layoutY="401.0" prefHeight="20.0" prefWidth="56.0" text="Country">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Button fx:id="cfAddCustomer" layoutX="133.0" layoutY="504.0" mnemonicParsing="false" onAction="#addCustomerClicked" prefHeight="30.0" prefWidth="164.0" text="Add Customer">
+        <Button fx:id="cfAddCustomer" layoutX="132.0" layoutY="542.0" mnemonicParsing="false" onAction="#addCustomerClicked" prefHeight="30.0" prefWidth="164.0" text="Add Customer">
             <font>
                 <Font size="14.0" />
             </font>
         </Button>
-        <ComboBox fx:id="cfCustomerFirstLevel" layoutX="62.0" layoutY="443.0" prefHeight="25.0" prefWidth="172.0" promptText="select first-level division" />
-        <Label layoutX="64.0" layoutY="423.0" text="First-Level Division">
+        <ComboBox fx:id="cfCustomerFirstLevel" layoutX="61.0" layoutY="481.0" prefHeight="25.0" prefWidth="172.0" promptText="select first-level division" />
+        <Label layoutX="63.0" layoutY="461.0" text="First-Level Division">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Button fx:id="cfCancel" layoutX="60.0" layoutY="504.0" mnemonicParsing="false" onAction="#closeSceneWindow" text="Cancel">
+        <Button fx:id="cfCancel" layoutX="59.0" layoutY="542.0" mnemonicParsing="false" onAction="#closeSceneWindow" text="Cancel">
             <font>
                 <Font size="14.0" />
             </font>
         </Button>
+      <TextField fx:id="cfCustomerID" disable="true" layoutX="61.0" layoutY="94.0" prefHeight="26.0" prefWidth="172.0" promptText="Auto-Generated" />
+      <Label layoutX="62.0" layoutY="76.0" text="Customer ID">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>

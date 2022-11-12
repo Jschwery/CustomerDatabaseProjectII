@@ -32,6 +32,8 @@ public class CustomerFormController implements Initializable {
     @FXML
     TextField cfCustomerPostal;
     @FXML
+    TextField cfCustomerID;
+    @FXML
     TextField cfCustomerNumber;
     @FXML
     ComboBox<String> cfCustomerCountry;
