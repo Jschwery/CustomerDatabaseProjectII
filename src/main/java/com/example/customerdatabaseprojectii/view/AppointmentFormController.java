@@ -3,8 +3,10 @@ package com.example.customerdatabaseprojectii.view;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.daos.ContactsDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
+import com.example.customerdatabaseprojectii.util.Validator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,10 +24,7 @@ import java.sql.Time;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AppointmentFormController implements Initializable {
@@ -55,9 +54,10 @@ public class AppointmentFormController implements Initializable {
     @FXML
     Label appointmentVarTitle;
 
-
     public static boolean isModified = false;
     public static boolean isValidated = false;
+    public static Map<Integer, Appointments> usersIDToAppointment = new HashMap<>();
+    static DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
 
     /**
      * Iterates through an observable list of contacts returned from the database, and compares each contacts appointmentID
@@ -134,20 +134,76 @@ public class AppointmentFormController implements Initializable {
     }
 
     /*
+    They click on add button, need to check that the map is not taken
+    we get the selected times from the user if those times are already within the map then cant inser
+
+     */
+
+    public void insertAppointmentIntoMap(Integer id, Appointments appointment) {
+        if (!isAppointmentTimeTaken(LocalTime.parse(appointment.getStartDateTime().
+                        toLocalTime().format(hourAndMinuteFormat)),
+                        LocalTime.parse(appointment.getEndDateTime().toLocalTime().format(hourAndMinuteFormat)))){
+                        usersIDToAppointment.put(id, appointment);
+            System.out.println("Complete & appointment is mapped");
+        }else{
+            Alerter.informationAlert("Cannot create an appointment because that time slot is reserved already!");
+        }
+    }
+
+    //if the appointment we are passing in has its start within the time range, or end within the time range return false
+    public boolean isAppointmentTimeTaken(LocalTime appointmentStart, LocalTime appointmentEnd) {
+        for (Map.Entry<Integer, Appointments> entry : usersIDToAppointment.entrySet()) {
+            Appointments appointments = entry.getValue();
+            /*if the appointmentstart time is within the appointments time range stored in the list, then return true
+            or also if the end time falls within the appointment start-end within the Map
+            since the map is only containing currently booked times.
+            */
+            if (appointmentStart.isAfter
+                    (LocalTime.parse(appointments.getStartDateTime().toLocalTime().
+                            format(hourAndMinuteFormat))) && appointmentStart.
+                    isBefore(LocalTime.parse(appointments.getEndDateTime().
+                            toLocalTime().format(hourAndMinuteFormat))) || appointmentEnd.
+                    isAfter(LocalTime.parse(appointments.getStartDateTime().toLocalTime().
+                            format(hourAndMinuteFormat))) && appointmentEnd.
+                    isBefore(LocalTime.parse(appointments.getEndDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
+                    return true;
+            }
+        }
+        return false;
+    }
+    /*
     we have our appointment that we are going to add to the db
     appointment id is 0, and contact id is -1
      */
+    static int fieldCode;
+
     public void addAppointmentClicked(ActionEvent event) throws SQLException {
         Appointments scheduleAppointment = new Appointments();
 
-        scheduleAppointment.setAppointmentID(Integer.parseInt(afAppointmentID.getText()));
-        scheduleAppointment.setTitle(afTitle.getText());
-        scheduleAppointment.setDescription(afDescription.getText());
-        scheduleAppointment.setLocation(afLocation.getText());
-        scheduleAppointment.setType(afType.getText());
-        scheduleAppointment.setCustomerID(Integer.parseInt(afCustomerID.getText()));
-        scheduleAppointment.setUsersID(Integer.parseInt(afUserID.getText()));
-        scheduleAppointment.setContactsID(ContactsDao.returnContactIDbyName(afContact.getSelectionModel().getSelectedItem()));
+            if (Validator.intChecker(afAppointmentID.getText(), "Please enter number characters for AppointmentID text field!")) {
+                scheduleAppointment.setAppointmentID(Integer.parseInt(afAppointmentID.getText()));
+            }
+            if (Validator.stringChecker(afTitle.getText(), "Please only enter alphabetical characters for Title field!")) {
+                scheduleAppointment.setTitle(afTitle.getText());
+            }
+            if (Validator.stringChecker(afDescription.getText(), "Please only enter alphabetical characters for Description field!")) {
+                scheduleAppointment.setTitle(afDescription.getText());
+            }
+            if (Validator.stringChecker(afLocation.getText(), "Please only enter alphabetical characters for Location field!")) {
+                scheduleAppointment.setLocation(afLocation.getText());
+            }
+            if (Validator.stringChecker(afType.getText(), "Please only enter alphabetical characters for Type field!")) {
+                scheduleAppointment.setType(afType.getText());
+            }
+            if (Validator.intChecker(afCustomerID.getText(), "Please only enter number characters for Description field!")) {
+                scheduleAppointment.setCustomerID(Integer.parseInt(afCustomerID.getText()));
+            }
+            if (Validator.intChecker(afUserID.getText(), "Please only enter number characters for UserID field!")) {
+                scheduleAppointment.setUsersID(Integer.parseInt(afUserID.getText()));
+            }
+
+        //userid comparison not finding user with the id from the textfield
+        //customerid not found on loop
         DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
         try {
             LocalDate localAppointmentDate = afDatePicker.getValue();
@@ -160,15 +216,11 @@ public class AppointmentFormController implements Initializable {
         }catch (NullPointerException e){
             System.out.println("Date or time selection is null");
         }
-
-        /*First validate all fields and selections,
-        if the appointment complies to business times from the usertime then allow it to
-        be submitted to the database in utc which is*/
         try {
             if (!isModified) {
-                System.out.println(scheduleAppointment);
                 if(fieldValidator()) {
-                    if (compareAppointmentToBusiness(scheduleAppointment)) {
+                    if (compareAppointmentToBusiness(scheduleAppointment)) {//is validated is false if this does not eval to true
+                        insertAppointmentIntoMap(scheduleAppointment.getAppointmentID(), scheduleAppointment);//is validated false if sql exception caught
                         AppointmentsDao.insertAppointmentIntoDB(scheduleAppointment);
                         isModified = false;
                         if(isValidated) {
@@ -182,13 +234,13 @@ public class AppointmentFormController implements Initializable {
                 System.out.println("There was an error inserting the appointment into the database");
             }
         try {
-            if(fieldValidator()) {
-                if (isModified) {
-                    System.out.println(scheduleAppointment);
+            if (isModified) {
+                if(fieldValidator()) {
                     if (compareAppointmentToBusiness(scheduleAppointment)) {
+                        insertAppointmentIntoMap(scheduleAppointment.getAppointmentID(), scheduleAppointment);
                         AppointmentsDao.updateAppointment(scheduleAppointment);
                         isModified = false;
-                        if(isValidated) {
+                        if(isValidated){
                             closeSceneWindow();
                         }
                     }
@@ -203,6 +255,23 @@ public class AppointmentFormController implements Initializable {
     //we get the local time and set it to
 
 
+    }
+    //TODO after db insert queries but within this class becuase can be static place this to reset the fields and boxes
+    //may not be needed? check and see
+    //TODO on application start check to see if the logged in user has an appointment from the map within the next 15
+    //minutes if they do then prompt them
+    public void resetBoxes() {
+        afDescription.clear();
+        afLocation.clear();
+        afType.clear();
+        afCustomerID.clear();
+        afUserID.clear();
+        afDatePicker.setValue(null);
+        afStartTimePicker.setValue(null);//maybe""?
+        afEndTimePicker.setValue(null);
+        afCustomerID.clear();
+        afUserID.clear();
+        afContact.setValue(null);
     }
 
     /**
@@ -254,14 +323,10 @@ public class AppointmentFormController implements Initializable {
             isValidated= false;
             return false;
         }
-
-
         if (estLocalTimeStart.isAfter(businessOpenTime) && estLocalTimeStart.isBefore(businessCloseTime)) {
             if (checkWithinBusinessWeek > startBusinessWeek && checkWithinBusinessWeek < endBusinessWeek) {
                 afStartTimePicker.getItems().removeIf(s -> RelatedTime.formattedTimeParser(hourAndMinuteFormat, s).equals(estLocalTimeStart));
                 afEndTimePicker.getItems().removeIf(s -> RelatedTime.formattedTimeParser(hourAndMinuteFormat, s).equals(estLocalTimeStart));
-                //formatting the time from the combobox into a local time, and comparing it with the ESTlocal time
-                //if there is a match then remove it from the local time
             }
             isValidated = true;
             return true;
@@ -269,13 +334,11 @@ public class AppointmentFormController implements Initializable {
         isValidated = false;
         return false;
     }
-    //TODO create autogenerated appointmentID
-    //also add the textfield for customer_ID and display it, but make it disabled, and prompt text with the value
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         afStartTimePicker.setItems(setTimeComboBoxes());
         afEndTimePicker.setItems(setTimeComboBoxes());
+        AppointmentsDao.appointmentCount = AppointmentsDao.getObservableAppointments().size() + 2;
         if(isModified) {
             try {
                 populateContactList();
@@ -297,10 +360,12 @@ public class AppointmentFormController implements Initializable {
                 afStartTimePicker.setValue(AppointmentsMainController.selectedAppointment.getStartDateTime().format(DateTimeFormatter.ofPattern("HH:mm")));
             }
             if(AppointmentsMainController.selectedAppointment.getEndDateTime()!=null){
-                afStartTimePicker.setValue(AppointmentsMainController.selectedAppointment.getEndDateTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+                afEndTimePicker.setValue(AppointmentsMainController.selectedAppointment.getEndDateTime().format(DateTimeFormatter.ofPattern("HH:mm")));
             }
         }
         if(!isModified) {
+
+            afAppointmentID.setText(String.valueOf(AppointmentsDao.appointmentCount)); //TODO CHECK THIS IS incremented 1 from the end of the list
             appointmentVarTitle.setText("Schedule Appointment");
             try {
                 populateContactList();

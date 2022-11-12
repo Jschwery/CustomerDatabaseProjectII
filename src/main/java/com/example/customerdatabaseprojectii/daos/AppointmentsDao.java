@@ -1,18 +1,23 @@
 package com.example.customerdatabaseprojectii.daos;
 
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.entity.Customers;
+import com.example.customerdatabaseprojectii.entity.Users;
+import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
+import com.example.customerdatabaseprojectii.view.AppointmentFormController;
+import com.example.customerdatabaseprojectii.view.CustomerMainController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
+import java.util.Optional;
 
 public class AppointmentsDao {
-
-
     private static final String appointmentsQuery = "SELECT * FROM appointments";
     private static final String insertAppointmenteQuery = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type, " +
             "Start, End, Create_Date, Created_By, Last_Update, Last_Updated_By, Customer_ID, User_ID, Contact_ID) " +
@@ -24,12 +29,16 @@ public class AppointmentsDao {
 
     private static final ObservableList<Appointments> observableAppointmentList = FXCollections.observableArrayList();
 
-    public static ObservableList<Appointments> getObservableAppointments(){
+    public static ObservableList<Appointments> getObservableAppointments() {
         return observableAppointmentList;
     }
-    public void addAppointmentToObservableList(Appointments app){
+
+    public void addAppointmentToObservableList(Appointments app) {
         observableAppointmentList.add(app);
     }
+
+
+    public static int appointmentCount = 0;
 
     public static void updateAppointment(Appointments appointment) throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
@@ -49,17 +58,25 @@ public class AppointmentsDao {
             ps.setInt(11, appointment.getUsersID());
             ps.setInt(12, appointment.getContactsID());
             ps.setInt(13, appointment.getAppointmentID());
-
             try {
                 ps.execute();
-            }catch(SQLIntegrityConstraintViolationException e){
-                System.out.println("Parent table no matching id");
+                AppointmentFormController.isValidated = true;
+            //TODO fix this
+            } catch (SQLIntegrityConstraintViolationException e) {
+                if (UsersDao.getAllUsersObservableList().stream().noneMatch(s -> Objects.equals(s.getUser_ID(), appointment.getUsersID()))) {
+                    Alerter.warningAlert("User not found with the ID: " + appointment.getUsersID());
+                    AppointmentFormController.isValidated = false;
+                }
+                if (CustomerMainController.getAllCustomers().stream().noneMatch(s -> Objects.equals(s.getCustomerID(), appointment.getCustomerID()))) {
+                    Alerter.warningAlert("Customer does not exist with the ID: " + appointment.getCustomerID());
+                    AppointmentFormController.isValidated = false;
+                }
             }
-            System.out.println("Successfully inserted appointment into database" +
-                    "\nTime: " + LocalTime.now());
         }
+        System.out.println("Successfully inserted appointment into database" +
+                "\nTime: " + LocalTime.now());
     }
-    //todo
+
     public static void insertAppointmentIntoDB(Appointments appointment) throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(insertAppointmenteQuery, apptConnection);
@@ -75,20 +92,26 @@ public class AppointmentsDao {
             ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
             ps.setString(9, UsersDao.getUserNameByID(appointment.getUsersID()));
             ps.setTimestamp(10, Timestamp.valueOf(RelatedTime.getCurrentDateTime()));
-            ps.setString(11,UsersDao.getUserNameByID(appointment.getUsersID()));
+            ps.setString(11, UsersDao.getUserNameByID(appointment.getUsersID()));
             ps.setInt(12, appointment.getCustomerID());
             ps.setInt(13, appointment.getUsersID());
             ps.setInt(14, appointment.getContactsID());
 
-            ps.execute();
-            System.out.println("Successfully inserted appointment into database" +
-                    "\nTime: "+ LocalTime.now());
+//            try {
+                ps.execute();
+                appointmentCount++;
+                System.out.println("Successfully inserted appointment into database" +
+                        "\nTime: " + LocalTime.now());
+                AppointmentFormController.isValidated = true;
+//            } catch (SQLIntegrityConstraintViolationException s) {
+//                if (UsersDao.getAllUsersObservableList().stream().anyMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))) {
+//                    Alerter.warningAlert("User with that ID already exists: " + appointment.getUsersID());
+//                    AppointmentFormController.isValidated = false;
+//                }
+            }
         }
-    }
-
-
-
-
+        //an appointment can only be fit to one customer and one contact
+//    }
     public static ObservableList<Appointments> generateAppointmentList() throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(appointmentsQuery, apptConnection);
