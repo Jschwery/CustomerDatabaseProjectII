@@ -7,29 +7,15 @@ public class First_Level_Divisions {
 
     private int divisionID;
     private String division;
-    private Time creationDate;
-    private String createdBy;
-    private Timestamp lastUpdate;
-
-    public String getLastUpdatedBy() {
-        return lastUpdatedBy;
-    }
-
-    public void setLastUpdatedBy(String lastUpdatedBy) {
-        this.lastUpdatedBy = lastUpdatedBy;
-    }
-
-    private String lastUpdatedBy;
     private int countryID;
+
+    public First_Level_Divisions(){}
 
     @Override
     public String toString() {
         return "First_Level_Divisions{" +
                 "divisionID=" + divisionID +
                 ", division='" + division + '\'' +
-                ", creationDate='" + creationDate + '\'' +
-                ", createdBy='" + createdBy + '\'' +
-                ", lastUpdate='" + lastUpdate + '\'' +
                 ", countryID=" + countryID +
                 '}';
     }
@@ -48,30 +34,6 @@ public class First_Level_Divisions {
 
     public void setDivision(String division) {
         this.division = division;
-    }
-
-    public Time getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Time creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Timestamp getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Timestamp lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 
     public int getCountryID() {

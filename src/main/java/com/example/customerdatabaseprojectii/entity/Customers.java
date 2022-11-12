@@ -1,23 +1,13 @@
 package com.example.customerdatabaseprojectii.entity;
 
-import java.sql.Time;
-import java.sql.Timestamp;
-
 public class Customers {
 
     private int customerID;
     private String customerName;
     private String address;
-    private long postalCode;
-
-
-    private long phoneNumber;
-    private Time creationDate;
-    private String CreatedBy;
-    private Timestamp lastUpdate;
-    private String lastUpdatedBy;
+    private String postalCode;
+    private String phoneNumber;
     private int divisionID;
-
 
     @Override
     public String toString() {
@@ -26,21 +16,9 @@ public class Customers {
                 ", customerName='" + customerName + '\'' +
                 ", address='" + address + '\'' +
                 ", postalCode=" + postalCode +
-                ", creationDate='" + creationDate + '\'' +
-                ", CreatedBy='" + CreatedBy + '\'' +
-                ", lastUpdate='" + lastUpdate + '\'' +
-                ", lastUpdatedBy='" + lastUpdatedBy + '\'' +
+                ", phoneNumber=" + phoneNumber +
                 ", divisionID=" + divisionID +
                 '}';
-    }
-
-
-    public long getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(long phoneNumber) {
-        this.phoneNumber = phoneNumber;
     }
 
     public int getCustomerID() {
@@ -67,44 +45,20 @@ public class Customers {
         this.address = address;
     }
 
-    public long getPostalCode() {
+    public String getPostalCode() {
         return postalCode;
     }
 
-    public void setPostalCode(long postalCode) {
+    public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
     }
 
-    public Time getCreationDate() {
-        return creationDate;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setCreationDate(Time creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public String getCreatedBy() {
-        return CreatedBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        CreatedBy = createdBy;
-    }
-
-    public Timestamp getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Timestamp lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public String getLastUpdatedBy() {
-        return lastUpdatedBy;
-    }
-
-    public void setLastUpdatedBy(String lastUpdatedBy) {
-        this.lastUpdatedBy = lastUpdatedBy;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public int getDivisionID() {

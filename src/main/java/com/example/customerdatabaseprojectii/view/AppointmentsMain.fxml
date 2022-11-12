@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="521.0" prefWidth="774.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.AppointmentsMainController">
+   <children>
+      <Label fx:id="appointmentTableLabel" layoutX="221.0" layoutY="42.0" prefHeight="35.0" prefWidth="180.0" text="Appointments">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="appointmentsSwitchTableComboBox" layoutX="468.0" layoutY="46.0" prefHeight="31.0" prefWidth="150.0" promptText="Tables" />
+      <Button fx:id="appointmentsSwitchTableButton" layoutX="627.0" layoutY="46.0" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="27.0" prefWidth="115.0" text="Switch Table">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Button>
+      <TabPane fx:id="appointmentsTabPane" layoutX="14.0" layoutY="91.0" prefHeight="305.0" prefWidth="751.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab fx:id="appointmentsWeeklyTab" text="Weekly">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="276.0" prefWidth="769.0">
+                     <children>
+                        <TableView fx:id="aptWeeklyTableView" layoutY="14.0" onMouseClicked="#setSelectedAppointment" prefHeight="224.0" prefWidth="755.0">
+                          <columns>
+                            <TableColumn fx:id="aptWeekID" prefWidth="75.0" text="ID" />
+                            <TableColumn fx:id="aptWeekTitle" prefWidth="75.0" text="Title" />
+                              <TableColumn fx:id="aptWeekDescription" prefWidth="75.0" text="Decription" />
+                              <TableColumn fx:id="aptWeekLocation" prefWidth="75.0" text="Location" />
+                              <TableColumn fx:id="aptWeekType" prefWidth="75.0" text="Type" />
+                              <TableColumn fx:id="aptWeekStartDate" prefWidth="75.0" text="Start Date" />
+                              <TableColumn fx:id="aptWeekEndDate" prefWidth="75.0" text="End Date" />
+                              <TableColumn fx:id="aptWeekCustomerID" prefWidth="75.0" text="CustomerID" />
+                              <TableColumn fx:id="aptWeekUserID" prefWidth="75.0" text="UserID" />
+                              <TableColumn fx:id="aptWeekContactID" prefWidth="75.0" text="ContactID" />
+                          </columns>
+                        </TableView>
+                        <Button fx:id="wkUpdateAppointmentButton" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
+                        <Button fx:id="wkDeleteAppointmentButton" layoutX="622.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
+                        <Button fx:id="wkAddAppointmentButton" layoutX="378.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab fx:id="appointmentsMonthlyTab" text="Monthly">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="aptMonthlyTableView" layoutY="14.0" onMouseClicked="#setSelectedAppointment" prefHeight="224.0" prefWidth="755.0">
+                           <columns>
+                              <TableColumn fx:id="aptMonthID" prefWidth="75.0" text="ID" />
+                              <TableColumn fx:id="aptMonthTitle" prefWidth="75.0" text="Title" />
+                              <TableColumn fx:id="aptMonthDescription" prefWidth="75.0" text="Decription" />
+                              <TableColumn fx:id="aptMonthLocation" prefWidth="75.0" text="Location" />
+                              <TableColumn fx:id="aptMonthType" prefWidth="75.0" text="Type" />
+                              <TableColumn fx:id="aptMonthStartDate" prefWidth="75.0" text="Start Date" />
+                              <TableColumn fx:id="aptMonthEndDate" prefWidth="75.0" text="End Date" />
+                              <TableColumn fx:id="aptMonthCustomerID" prefWidth="75.0" text="CustomerID" />
+                              <TableColumn fx:id="aptMonthUserID" prefWidth="75.0" text="UserID" />
+                              <TableColumn fx:id="aptMonthContactID" prefWidth="75.0" text="ContactID" />
+                           </columns>
+                        </TableView>
+                        <Button fx:id="mnthUpdateAppointmentButton" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
+                        <Button fx:id="mnthDeleteAppointmentButton" layoutX="622.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
+                        <Button fx:id="mnthAddAppointmentButton" layoutX="378.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+            <Tab fx:id="appointmentsAllTab" text="All">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="348.0" prefWidth="731.0">
+                     <children>
+                        <TableView fx:id="aptAllTableView" layoutY="14.0" onMouseClicked="#setSelectedAppointment" prefHeight="224.0" prefWidth="755.0">
+                           <columns>
+                              <TableColumn fx:id="aptAllID" prefWidth="75.0" text="ID" />
+                              <TableColumn fx:id="aptAllTitle" prefWidth="75.0" text="Title" />
+                              <TableColumn fx:id="aptAllDescription" prefWidth="75.0" text="Decription" />
+                              <TableColumn fx:id="aptAllLocation" prefWidth="75.0" text="Location" />
+                              <TableColumn fx:id="aptAllType" prefWidth="75.0" text="Type" />
+                              <TableColumn fx:id="aptAllStartDate" prefWidth="75.0" text="Start Date" />
+                              <TableColumn fx:id="aptAllEndDate" prefWidth="75.0" text="End Date" />
+                              <TableColumn fx:id="aptAllCustomerID" prefWidth="75.0" text="CustomerID" />
+                              <TableColumn fx:id="aptAllUserID" prefWidth="75.0" text="UserID" />
+                              <TableColumn fx:id="aptAllContactID" prefWidth="75.0" text="ContactID" />
+                           </columns>
+                        </TableView>
+                        <Button fx:id="allUpdateAppointmentButton" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
+                        <Button fx:id="allDeleteAppointmentButton" layoutX="622.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
+                        <Button fx:id="allAddAppointmentButton" layoutX="378.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
+                     </children></AnchorPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>

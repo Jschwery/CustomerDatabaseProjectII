@@ -1,7 +1,8 @@
 package com.example.customerdatabaseprojectii;
 
 import com.example.customerdatabaseprojectii.util.DbConnection;
-import com.example.customerdatabaseprojectii.util.tester;
+//import com.example.customerdatabaseprojectii.util.GenLists;
+import com.example.customerdatabaseprojectii.util.GenLists;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,7 +11,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 
@@ -23,9 +23,9 @@ public class Main extends Application {
         Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml",
                 stage,495, 485, "Login");
     }
-
     public static void main(String[] args) throws SQLException {
         DbConnection.makeConnection();
+        GenLists.populateObservableListsFromDB();
         launch(args);
         DbConnection.closeConnection();
     }

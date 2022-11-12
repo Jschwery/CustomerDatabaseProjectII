@@ -1,30 +1,38 @@
 package com.example.customerdatabaseprojectii.view;
 
 import com.example.customerdatabaseprojectii.Main;
+import com.example.customerdatabaseprojectii.daos.CustomersDao;
+import com.example.customerdatabaseprojectii.daos.First_Level_DivisionsDao;
 import com.example.customerdatabaseprojectii.entity.Customers;
+import com.example.customerdatabaseprojectii.entity.First_Level_Divisions;
+import com.example.customerdatabaseprojectii.util.Alerter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.ZoneId;
-import java.util.Locale;
-import java.util.Optional;
+import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public class CustomerFormController implements Initializable {
     @FXML
     TextField cfCustomerName;
     @FXML
+    TextField cfCustomerAddress;
+    @FXML
     TextField cfCustomerPostal;
     @FXML
     TextField cfCustomerNumber;
-    @FXML
-    TextField cfCustomerAddress;
     @FXML
     ComboBox<String> cfCustomerCountry;
     @FXML
@@ -32,157 +40,206 @@ public class CustomerFormController implements Initializable {
     @FXML
     Button cfCancel;
 
-    private static final ObservableList<Customers> allCustomersObservableList = FXCollections.observableArrayList();
 
-    public static ObservableList<Customers> getAllCustomers(){
-        return allCustomersObservableList;
+    static boolean modifyCustomer = false;
+    private static ObservableList<First_Level_Divisions> unitedStatesFirstLevelDiv = FXCollections.observableArrayList();
+    private static ObservableList<First_Level_Divisions> unitedKingdomFirstLevelDiv = FXCollections.observableArrayList();
+    private static ObservableList<First_Level_Divisions> canadaFirstLevelDiv = FXCollections.observableArrayList();
+    private static ObservableList<String> customerCountries = FXCollections.observableArrayList();
+
+
+    public void addCountriesToObservableList(){
+        customerCountries.add("U.S");
+        customerCountries.add("UK");
+        customerCountries.add("Canada");
     }
 
-    public static void addCustomerToObservableList(Customers customer){
-        allCustomersObservableList.add(customer);
-    }
+      /*
+    What is going on in the application
+
+    First: when uk is selected, it is getting canadas values
+
+    when the save button or cancel button is clicked we need to clear
+    the firstlevel divisions & the form textfields
 
 
+     */
 
-    //need the db connection to pass in query
-    //DELETE FROM Appointments where Customer.CustomerID = Customer.CustomerID
 
-    //
-
-    public static void deleteCustomerFromAllCustomers(Customers customer){
-        for(Customers c : getAllCustomers()){
-            if(c.equals(customer)){
-                if(allCustomersObservableList.remove(customer)){
-                    System.out.println("Customer Successfully removed");
-                }else{
-                    System.out.println("Failed to remove customer");
-                }
+    public void populateObservableFirstLevelDivs(){
+        try {
+        ObservableList<First_Level_Divisions> firstLevels = First_Level_DivisionsDao.addDivisionToObservableList();
+        for(First_Level_Divisions div : firstLevels){
+            if(div.getCountryID() == 1) {
+                unitedStatesFirstLevelDiv.add(div);
             }
+            else if(div.getCountryID() == 3){
+                canadaFirstLevelDiv.add(div);
+            }
+            else if(div.getCountryID() == 2){
+                unitedKingdomFirstLevelDiv.add(div);
+            }
+        }
+        }catch (SQLException e){
+            e.printStackTrace();
+            System.out.println("Could not generate first level divisions from database");
         }
     }
 
-    public static void setCustomerByIndex(int customerIndex, Customers customer){
-        getAllCustomers().set(customerIndex, customer);
-    }
-    public static int getCustomerIndex(Customers customer){
-        for(Customers c : getAllCustomers()){
-            if(c.equals(customer)){
-                return getAllCustomers().indexOf(c);
-            }
+    /*
+    now the combobox displaying the countries is getting duplicating after the save button is clicked
 
+    update customer query has an issue
+
+     */
+
+
+    public void filterFirstLevelByCountry(ActionEvent event) {
+
+        String countrySelected = cfCustomerCountry.getSelectionModel().getSelectedItem();
+        System.out.println(countrySelected);
+        System.out.println("UK " + unitedKingdomFirstLevelDiv);
+        if (countrySelected != null) {
+            switch (countrySelected) {
+                case "U.S":
+                    ObservableList<String> usFLDName = FXCollections.observableArrayList();
+                    for (First_Level_Divisions fld : unitedStatesFirstLevelDiv) {
+                        usFLDName.add(fld.getDivision());
+                    }
+                    if (!usFLDName.isEmpty()) {
+                        cfCustomerFirstLevel.setItems(usFLDName);
+                    } else {
+                        System.out.println("United States has been selected as country," +
+                                "but unitedStatesFirstLevelDiv did not contain values");
+                    }
+                    break;
+                case "UK":
+                    ObservableList<String> ukFLDName = FXCollections.observableArrayList();
+                    for (First_Level_Divisions fld : unitedKingdomFirstLevelDiv) {
+                        ukFLDName.add(fld.getDivision());
+                    }
+                    if (!ukFLDName.isEmpty()) {
+                        System.out.println("uk not empty " + unitedKingdomFirstLevelDiv);
+                        cfCustomerFirstLevel.setItems(ukFLDName);
+                    } else {
+                        System.out.println("United Kingdom has been selected as country," +
+                                "but unitedKingdomFirstLevelDiv did not contain values");
+                    }
+                case "Canada":
+                    ObservableList<String> canadaFLDName = FXCollections.observableArrayList();
+                    for (First_Level_Divisions fld : canadaFirstLevelDiv) {
+                        canadaFLDName.add(fld.getDivision());
+                    }
+                    if (!canadaFLDName.isEmpty()) {
+                        cfCustomerFirstLevel.setItems(canadaFLDName);
+                    } else {
+                        System.out.println("Canada has been selected as country," +
+                                "but canadaFirstLevelDiv did not contain values");
+                    }
+            }
+        }else{
+            System.out.println("No country selected");
+        }
+    }
+    public int getDivisionIDByDivisionName(){
+        String division = cfCustomerFirstLevel.getSelectionModel().getSelectedItem();
+        try {
+            for (First_Level_Divisions div : First_Level_DivisionsDao.addDivisionToObservableList()) {
+                if(div.getDivision().equals(division)){
+                    return div.getCountryID();
+                }
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
         }
         return -1;
     }
+    public void closeSceneWindow() {
+        Stage stage = (Stage) cfCustomerName.getScene().getWindow();
+        CustomerMainController.setSelectedCustomerNull();
+        clearLists();
+        stage.close();
+    }
+    public void clearLists(){
+        unitedKingdomFirstLevelDiv.clear();
+        unitedStatesFirstLevelDiv.clear();
+        canadaFirstLevelDiv.clear();
+        customerCountries.clear();
+        cfCustomerName.setText("");
+        cfCustomerPostal.setText("");
+        cfCustomerNumber.setText("");
+        cfCustomerAddress.setText("");
+        cfCustomerCountry.setValue("");
+        cfCustomerFirstLevel.setValue("");
+    }
+    /*TODO
+    clear countries issue
 
-//    public void deleteCustomer(ActionEvent event) {
-//        //part
-//        Customers customerToDel = customerTableView.getSelectionModel().getSelectedItem();
-//        {
-//            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete this part?");
-//            Optional<ButtonType> buttonResult = alert.showAndWait();
-//
-//            if (buttonResult.get() == ButtonType.OK) {
-//
-//                inventoryPartsTable.setItems(allParts);
-//                indexPartUpdater();
-//
-//            } else {
-//                if (buttonResult.get() == ButtonType.CANCEL) {
-//                    inventoryPartsTable.setItems(allParts);
-//                    return;
-//                }
-//            }
-//        }
-//    }
+    we have a country list with countries that we fill the combo box with,
+    we can do this on initialize right so it will stay a combo box with countries
 
-    public void addCustomerLabel(ActionEvent event) throws IOException {
+
+    we need to set the lists upon each time we go into the form
+    and clear the list each time we submit or cancel
+
+    */
+
+    public void addCustomerClicked(ActionEvent event) throws IOException {
         Customers customerToAdd = new Customers();
-
         String customerName = cfCustomerName.getText();
-        int customerPostal = Integer.parseInt(cfCustomerPostal.getText());
-        long customerNumber = Long.parseLong(cfCustomerNumber.getText());
+        String customerPostal = cfCustomerPostal.getText();
+        String customerNumber = cfCustomerNumber.getText();
         String customerAddress = cfCustomerAddress.getText();
-
-        String countrySelected = cfCustomerCountry.getValue();
-        String firstLevelSelected = cfCustomerFirstLevel.getValue();
+        cfCustomerCountry.setPromptText("Country");
+        cfCustomerFirstLevel.setPromptText("First Level Div");
 
         customerToAdd.setCustomerName(customerName);
         customerToAdd.setPostalCode(customerPostal);
         customerToAdd.setPhoneNumber(customerNumber);
         customerToAdd.setAddress(customerAddress);
+        customerToAdd.setDivisionID(getDivisionIDByDivisionName());
 
-        //Function here to handle country and firstlevel division data to submit the data entered
-        //these will be collected using comboBoxes
-        //and translate it into data that is stored in the customer data field within the table
-
-        //when updating customer, customer data autopopulates the from
-        //the selected customer to update must be stored in a static variable, so when the
-        //form to update is opened grab the information from the static customer object & populate the fields
-
-        //all fields must be validated
-        //when submit clicked the customer has to be set with the update method to set the customer
-        //that was updated into the correct index
-
-        //if there is duplicating check that the table is set to the current observable list that is static in each method that
-        //accesses it at the end of the method
-
-        //when user selects a country from the combo box, the first-level-division
-        //is to be prepopulated based on the user selection of country, maybe use streams filter based on the user selected country
-        //customer_ID is disabled & filled with auto-gen prompt text
-
-        //when customer deleted a custom info prompt is sent to the ui that the user was deleted successfully
-
-
-        //user can add, update and delete appointments,
-        //a contact name is assinged to an appointment using a combobox
-        //pulled from the allcontact observable list?
-        //when appointment canceled the appointment Id will be displayed and type of appointment in the notification
-
-        //create add appointment new scene, with text boxes that collect the appointmentID, title, descrip, location, contact, type, start date & time with a start
-        //date picker and
-
-        //check other app to see how they gen the Appointment_ID, or if they just let the database auto-gen it
-        //when updating the appointment, the fields are auto-generated
-        //all original appointment info is displayed on the update form in local time
-        //so get the location of the user and create the timezone with the
-        //information of the country where the user is, and use time format to format where the user is, parse maybe?
-        //remember all this time information is displayed in the update form of the original appointment
-
-        //create tabs for appointments, one tab for week, one tab for month
-        //all the appointments within a 28 day period from the start of the month till the end of the month
-        //are displayed in the month tab
-        //all appointments that take place within each 7 days of each other are grouped into weeks
-        //day 0-7 grouped into week1, 7-14 in week two, 21-28 in week 4
-
-
-        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/TableMenu.fxml", Main.getMainStage(), 473, 990, "TableView");
+        if(modifyCustomer){
+            customerToAdd.setCustomerID(CustomerMainController.getSelectedCustomer().getCustomerID());
+            System.out.println("Adding modified customer back to database & to observable list");
+            try {
+                CustomersDao.updateCustomerInDatabase(customerToAdd);
+            }catch (SQLException e){
+                e.printStackTrace();
+                Alerter.warningAlert("Error updating customer");
+            }
+            int indexOfSelectedCustomer = CustomerMainController.getCustomerIndex(CustomerMainController.getSelectedCustomer());
+            CustomerMainController.setCustomerByIndex(indexOfSelectedCustomer, customerToAdd);
+            CustomerMainController.setSelectedCustomerNull();
+        }
+        else if(!modifyCustomer){
+            customerToAdd.setCustomerID(CustomersDao.idCount);
+            System.out.println("Adding new customer to database & to observable list");
+            try{
+                CustomersDao.insertCustomerIntoDatabase(customerToAdd);
+            }catch (SQLException e){
+                e.printStackTrace();
+                Alerter.warningAlert("Error adding customer");
+            }
+            CustomerMainController.addCustomerToObservableList(customerToAdd);
+        }
+        CustomerMainController.setSelectedCustomerNull();
+        clearLists();
+        closeSceneWindow();
     }
-
-    public void cancelButtonClicked(ActionEvent event) throws IOException {
-        cfCancel.getScene();
-        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/TableMenu.fxml", Main.getMainStage(), 473, 990, "TableView");
-    }
-
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        ObservableList<String> customerCountries = FXCollections.observableArrayList();
-        ObservableList<String> customerFirstLevelDiv = FXCollections.observableArrayList();
-        customerCountries.add("United States");
-        customerCountries.add("United Kingdom");
-        customerCountries.add("France");
-        customerCountries.add("Mexico");
-        customerCountries.add("Canada");
-
-        customerFirstLevelDiv.add("14142");
-        customerFirstLevelDiv.add("43422");
-        customerFirstLevelDiv.add("43439");
-        customerFirstLevelDiv.add("93339");
-        customerFirstLevelDiv.add("15349");
-
-
+        clearLists();
+        addCountriesToObservableList();
         cfCustomerCountry.setItems(customerCountries);
-        cfCustomerFirstLevel.setItems(customerFirstLevelDiv);
+        populateObservableFirstLevelDivs();
+        if(CustomerMainController.getSelectedCustomer()!=null){
+            Customers custTemp = CustomerMainController.getSelectedCustomer();
+            cfCustomerName.setText(custTemp.getCustomerName());
+            cfCustomerAddress.setText(custTemp.getAddress());
+            cfCustomerNumber.setText(custTemp.getPhoneNumber());
+            cfCustomerPostal.setText(custTemp.getPostalCode());
+        }
     }
 }

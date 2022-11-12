@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="customerMainBG" prefHeight="519.0" prefWidth="646.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.CustomerMainController">
+    <children>
+        <TableView fx:id="customerTableView" layoutX="13.0" layoutY="97.0" onMouseClicked="#clickOnCustomerToSetSelected" prefHeight="347.0" prefWidth="624.0">
+            <columns>
+                <TableColumn fx:id="custCustomerID" prefWidth="83.0" text="CustomerID" />
+                <TableColumn fx:id="custCustomerName" prefWidth="111.0" text="Name" />
+                <TableColumn fx:id="custAddress" prefWidth="123.0" text="Address" />
+                <TableColumn fx:id="custPostal" prefWidth="96.0" text="Postal" />
+                <TableColumn fx:id="custPhone" prefWidth="119.0" text="Phone" />
+            <TableColumn fx:id="custDivID" prefWidth="92.0" text="DivID" />
+            </columns>
+        </TableView>
+      <Label fx:id="customerLabel" layoutX="71.0" layoutY="41.0" prefHeight="30.0" prefWidth="148.0" text="Customers">
+         <font>
+            <Font size="28.0" />
+         </font></Label>
+      <Button fx:id="customerTableSwitchButton" layoutX="485.0" layoutY="46.0" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="30.0" prefWidth="97.0" text="Button" />
+      <ComboBox fx:id="customerTableSwitchComboBox" layoutX="303.0" layoutY="46.0" prefHeight="30.0" prefWidth="163.0" promptText="Tables" />
+      <Button fx:id="addCustomerButton" layoutX="269.0" layoutY="449.0" mnemonicParsing="false" onAction="#switchToAddCustomerForm" prefHeight="30.0" prefWidth="116.0" text="Add" />
+      <Button fx:id="modifyCustomerButton" layoutX="393.0" layoutY="449.0" mnemonicParsing="false" onAction="#modifyCustomer" prefHeight="30.0" prefWidth="116.0" text="Modify" />
+      <Button fx:id="deleteCustomerButton" layoutX="516.0" layoutY="449.0" mnemonicParsing="false" onAction="#deleteCustomer" prefHeight="30.0" prefWidth="116.0" text="Delete" />
+      <Label fx:id="customerDeletedText" layoutX="58.0" layoutY="455.0" prefHeight="18.0" prefWidth="104.0" />
+    </children>
+</AnchorPane>
