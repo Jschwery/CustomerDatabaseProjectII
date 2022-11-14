@@ -58,23 +58,13 @@ public class AppointmentsDao {
             ps.setInt(11, appointment.getUsersID());
             ps.setInt(12, appointment.getContactsID());
             ps.setInt(13, appointment.getAppointmentID());
-            try {
-                ps.execute();
+
+            if(ps.execute()) {
                 AppointmentFormController.isValidated = true;
-            //TODO fix this
-            } catch (SQLIntegrityConstraintViolationException e) {
-                if (UsersDao.getAllUsersObservableList().stream().noneMatch(s -> Objects.equals(s.getUser_ID(), appointment.getUsersID()))) {
-                    Alerter.warningAlert("User not found with the ID: " + appointment.getUsersID());
-                    AppointmentFormController.isValidated = false;
-                }
-                if (CustomerMainController.getAllCustomers().stream().noneMatch(s -> Objects.equals(s.getCustomerID(), appointment.getCustomerID()))) {
-                    Alerter.warningAlert("Customer does not exist with the ID: " + appointment.getCustomerID());
-                    AppointmentFormController.isValidated = false;
-                }
+                System.out.println("Successfully inserted appointment into database" +
+                        "\nTime: " + LocalTime.now());
             }
         }
-        System.out.println("Successfully inserted appointment into database" +
-                "\nTime: " + LocalTime.now());
     }
 
     public static void insertAppointmentIntoDB(Appointments appointment) throws SQLException {
@@ -98,11 +88,12 @@ public class AppointmentsDao {
             ps.setInt(14, appointment.getContactsID());
 
 //            try {
-                ps.execute();
-                appointmentCount++;
-                System.out.println("Successfully inserted appointment into database" +
-                        "\nTime: " + LocalTime.now());
-                AppointmentFormController.isValidated = true;
+                if(ps.execute()) {
+                    appointmentCount++;
+                    System.out.println("Successfully inserted appointment into database" +
+                            "\nTime: " + LocalTime.now());
+                    AppointmentFormController.isValidated = true;
+                }
 //            } catch (SQLIntegrityConstraintViolationException s) {
 //                if (UsersDao.getAllUsersObservableList().stream().anyMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))) {
 //                    Alerter.warningAlert("User with that ID already exists: " + appointment.getUsersID());

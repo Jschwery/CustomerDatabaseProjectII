@@ -177,31 +177,50 @@ public class AppointmentFormController implements Initializable {
      */
     static int fieldCode;
 
+    public void fieldValidator(Appointments scheduleAppointment){
+
+        if (Validator.intChecker(afAppointmentID.getText(), "Please enter number characters for AppointmentID text field!")) {
+            scheduleAppointment.setAppointmentID(Integer.parseInt(afAppointmentID.getText()));
+        }else{
+            afAppointmentID.setText("");
+        }
+        if (Validator.stringChecker(afTitle.getText(), "Please only enter alphabetical characters for Title field!")) {
+            scheduleAppointment.setTitle(afTitle.getText());
+        }else{
+            afTitle.setText("");
+        }
+        if (Validator.stringChecker(afDescription.getText(), "Please only enter alphabetical characters for Description field!")) {
+            scheduleAppointment.setDescription(afDescription.getText());
+        }else{
+            afDescription.setText("");
+        }
+        if (Validator.stringChecker(afLocation.getText(), "Please only enter alphabetical characters for Location field!")) {
+            scheduleAppointment.setLocation(afLocation.getText());
+        }else{
+            afLocation.setText("");
+        }
+        if (Validator.stringChecker(afType.getText(), "Please only enter alphabetical characters for Type field!")) {
+            scheduleAppointment.setType(afType.getText());
+        }else{
+            afType.setText("");
+        }
+        if (Validator.intChecker(afCustomerID.getText(), "Please only enter number characters for Description field!")) {
+            scheduleAppointment.setCustomerID(Integer.parseInt(afCustomerID.getText()));
+        }else{
+            afCustomerID.setText("");
+        }
+        if (Validator.intChecker(afUserID.getText(), "Please only enter number characters for UserID field!")) {
+            scheduleAppointment.setUsersID(Integer.parseInt(afUserID.getText()));
+        }else{
+            afUserID.setText("");
+        }
+    }
+
+
     public void addAppointmentClicked(ActionEvent event) throws SQLException {
         Appointments scheduleAppointment = new Appointments();
 
-            if (Validator.intChecker(afAppointmentID.getText(), "Please enter number characters for AppointmentID text field!")) {
-                scheduleAppointment.setAppointmentID(Integer.parseInt(afAppointmentID.getText()));
-            }
-            if (Validator.stringChecker(afTitle.getText(), "Please only enter alphabetical characters for Title field!")) {
-                scheduleAppointment.setTitle(afTitle.getText());
-            }
-            if (Validator.stringChecker(afDescription.getText(), "Please only enter alphabetical characters for Description field!")) {
-                scheduleAppointment.setTitle(afDescription.getText());
-            }
-            if (Validator.stringChecker(afLocation.getText(), "Please only enter alphabetical characters for Location field!")) {
-                scheduleAppointment.setLocation(afLocation.getText());
-            }
-            if (Validator.stringChecker(afType.getText(), "Please only enter alphabetical characters for Type field!")) {
-                scheduleAppointment.setType(afType.getText());
-            }
-            if (Validator.intChecker(afCustomerID.getText(), "Please only enter number characters for Description field!")) {
-                scheduleAppointment.setCustomerID(Integer.parseInt(afCustomerID.getText()));
-            }
-            if (Validator.intChecker(afUserID.getText(), "Please only enter number characters for UserID field!")) {
-                scheduleAppointment.setUsersID(Integer.parseInt(afUserID.getText()));
-            }
-
+        fieldValidator(scheduleAppointment);
         //userid comparison not finding user with the id from the textfield
         //customerid not found on loop
         DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
@@ -239,6 +258,7 @@ public class AppointmentFormController implements Initializable {
                     if (compareAppointmentToBusiness(scheduleAppointment)) {
                         insertAppointmentIntoMap(scheduleAppointment.getAppointmentID(), scheduleAppointment);
                         AppointmentsDao.updateAppointment(scheduleAppointment);
+
                         isModified = false;
                         if(isValidated){
                             closeSceneWindow();
