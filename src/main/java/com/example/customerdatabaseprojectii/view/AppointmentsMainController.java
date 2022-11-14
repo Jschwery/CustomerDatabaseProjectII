@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class AppointmentsMainController implements Initializable {
+public class AppointmentsMainController implements Initializable{
 
     @FXML
     Label appointmentTableLabel;
@@ -113,6 +113,9 @@ public class AppointmentsMainController implements Initializable {
     @FXML
     TableView<Appointments> aptAllTableView;
 
+    //use query to get this
+    //get appointments that are within the next week
+    //get appointments that are within the next month
 
 
 
@@ -196,6 +199,11 @@ public class AppointmentsMainController implements Initializable {
         }
     }
 
+    static void setItems(){
+
+    }
+
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
@@ -254,4 +262,7 @@ public class AppointmentsMainController implements Initializable {
         aptAllUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptAllContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
     }
+
+
+
 }
