@@ -2,18 +2,13 @@ package com.example.customerdatabaseprojectii.util;
 
 import com.example.customerdatabaseprojectii.daos.*;
 import com.example.customerdatabaseprojectii.entity.First_Level_Divisions;
+import com.example.customerdatabaseprojectii.view.AppointmentsMainController;
 
 import java.sql.SQLException;
 
 public class GenLists {
 
     public static void populateObservableListsFromDB(){
-        try{
-            AppointmentsDao.generateAppointmentList();
-        }catch(SQLException e){
-            e.printStackTrace();
-            System.out.println("Unable to generate Appointment Observable List");
-        }
         try{
             ContactsDao.addContactToObservableList();
         } catch (SQLException e) {

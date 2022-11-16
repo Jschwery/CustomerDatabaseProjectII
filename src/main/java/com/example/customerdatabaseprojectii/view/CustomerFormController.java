@@ -43,6 +43,7 @@ public class CustomerFormController implements Initializable {
     Button cfCancel;
 
 
+
     static boolean modifyCustomer = false;
     private static ObservableList<First_Level_Divisions> unitedStatesFirstLevelDiv = FXCollections.observableArrayList();
     private static ObservableList<First_Level_Divisions> unitedKingdomFirstLevelDiv = FXCollections.observableArrayList();
@@ -55,18 +56,6 @@ public class CustomerFormController implements Initializable {
         customerCountries.add("UK");
         customerCountries.add("Canada");
     }
-
-      /*
-    What is going on in the application
-
-    First: when uk is selected, it is getting canadas values
-
-    when the save button or cancel button is clicked we need to clear
-    the firstlevel divisions & the form textfields
-
-
-     */
-
 
     public void populateObservableFirstLevelDivs(){
         try {

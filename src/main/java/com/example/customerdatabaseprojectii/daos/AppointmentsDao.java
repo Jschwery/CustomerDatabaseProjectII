@@ -7,6 +7,7 @@ import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
 import com.example.customerdatabaseprojectii.view.AppointmentFormController;
+import com.example.customerdatabaseprojectii.view.AppointmentsMainController;
 import com.example.customerdatabaseprojectii.view.CustomerMainController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,15 +24,7 @@ public class AppointmentsDao {
             "Start, End, Create_Date, Created_By, Last_Update, Last_Updated_By, Customer_ID, User_ID, Contact_ID) " +
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final ObservableList<Appointments> observableAppointmentList = FXCollections.observableArrayList();
 
-    public static ObservableList<Appointments> getObservableAppointments() {
-        return observableAppointmentList;
-    }
-
-    public void addAppointmentToObservableList(Appointments app) {
-        observableAppointmentList.add(app);
-    }
 
 
     public static int appointmentCount = 0;
@@ -40,6 +33,15 @@ public class AppointmentsDao {
             "Location = ?, Type = ?, Start = ?, End = ?, Last_Update = ?, Last_Updated_By = ?, " +
             "Customer_ID = ?, User_ID = ?, Contact_ID = ? WHERE Appointment_ID = ?";
 
+
+    //
+
+    /**
+     * This method will check that the appointments foreign keys exist within their own lists and if they do
+     * then the query will be submitted for the update
+     * @param appointment appointment to update and submit to the database
+     * @throws SQLException
+     */
     public static void updateAppointment(Appointments appointment) throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(appointmentUpdateQuery, apptConnection);
@@ -49,8 +51,8 @@ public class AppointmentsDao {
             ps.setString(2, appointment.getDescription());
             ps.setString(3, appointment.getLocation());
             ps.setString(4, appointment.getType());
-            ps.setTimestamp(5, Timestamp.valueOf(appointment.getStartDateTime()));
-            ps.setTimestamp(6, Timestamp.valueOf(appointment.getEndDateTime()));
+            ps.setTimestamp(5, appointment.getStartDateTime());
+            ps.setTimestamp(6, appointment.getEndDateTime());
             ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
             ps.setString(8, UsersDao.getUserNameByID(appointment.getUsersID()));
             ps.setInt(9, appointment.getCustomerID());
@@ -69,27 +71,12 @@ public class AppointmentsDao {
                     System.out.println("Successfully inserted appointment into database" +
                             "\nTime: " + LocalTime.now());
                     AppointmentFormController.isValidated = true;
-
-
             } else {
                 AppointmentFormController.isValidated = false;
                 System.out.println("Not valid");
             }
         }
     }
-
-
-//            } catch (SQLIntegrityConstraintViolationException e) {
-//                if (UsersDao.getAllUsersObservableList().stream().noneMatch(s -> Objects.equals(s.getUser_ID(), appointment.getUsersID()))) {
-//                    Alerter.warningAlert("User not found with the ID: " + appointment.getUsersID());
-//                    AppointmentFormController.isValidated = false;
-//                }
-//                if (CustomerMainController.getAllCustomers().stream().noneMatch(s -> Objects.equals(s.getCustomerID(), appointment.getCustomerID()))) {
-//                    Alerter.warningAlert("Customer does not exist with the ID: " + appointment.getCustomerID());
-//                    AppointmentFormController.isValidated = false;
-//                }
-//            }
-
 
     public static void insertAppointmentIntoDB(Appointments appointment) throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
@@ -101,8 +88,8 @@ public class AppointmentsDao {
             ps.setString(3, appointment.getDescription());
             ps.setString(4, appointment.getLocation());
             ps.setString(5, appointment.getType());
-            ps.setTimestamp(6, Timestamp.valueOf(appointment.getStartDateTime()));
-            ps.setTimestamp(7, Timestamp.valueOf(appointment.getEndDateTime()));
+            ps.setTimestamp(6, appointment.getStartDateTime());
+            ps.setTimestamp(7, appointment.getEndDateTime());
             ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
             ps.setString(9, UsersDao.getUserNameByID(appointment.getUsersID()));
             ps.setTimestamp(10, Timestamp.valueOf(RelatedTime.getCurrentDateTime()));
@@ -110,7 +97,6 @@ public class AppointmentsDao {
             ps.setInt(12, appointment.getCustomerID());
             ps.setInt(13, appointment.getUsersID());
             ps.setInt(14, appointment.getContactsID());
-
 
             ps.execute();
             appointmentCount++;
@@ -122,10 +108,35 @@ public class AppointmentsDao {
                 AppointmentFormController.isValidated = false;
             }
         }
-
-        //an appointment can only be fit to one customer and one contact
     }
-    public static ObservableList<Appointments> generateAppointmentList() throws SQLException {
+    public static ObservableList<Appointments> returnAllObservableAppointments() throws SQLException {
+        Connection apptConnection = DbConnection.getConnection();
+        DbConnection.makePreparedStatement(appointmentsQuery, apptConnection);
+        PreparedStatement ps = DbConnection.getPreparedStatement();
+        ObservableList<Appointments> apps = FXCollections.observableArrayList();
+        if (ps != null) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Appointments apt = new Appointments();
+                apt.setAppointmentID(rs.getInt("Appointment_ID"));
+                apt.setTitle(rs.getString("Title"));
+                apt.setDescription(rs.getString("Description"));
+                apt.setLocation(rs.getString("Location"));
+                apt.setType(rs.getString("Type"));
+                apt.setStartDateTime(Timestamp.valueOf(rs.getTimestamp("Start").toLocalDateTime()));
+                apt.setEndDateTime(Timestamp.valueOf(rs.getTimestamp("End").toLocalDateTime()));
+                apt.setCustomerID(rs.getInt("Customer_ID"));
+                apt.setUsersID(rs.getInt("User_ID"));
+                apt.setContactsID(rs.getInt("Contact_ID"));
+
+                apps.add(apt);
+
+            }
+        }
+        return apps;
+    }
+
+    public static void addAppToObservableList() throws SQLException {
         Connection apptConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(appointmentsQuery, apptConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
@@ -138,15 +149,14 @@ public class AppointmentsDao {
                 apt.setDescription(rs.getString("Description"));
                 apt.setLocation(rs.getString("Location"));
                 apt.setType(rs.getString("Type"));
-                apt.setStartDateTime(rs.getTimestamp("Start").toLocalDateTime());
-                apt.setEndDateTime(rs.getTimestamp("End").toLocalDateTime());
+                apt.setStartDateTime(Timestamp.valueOf(rs.getTimestamp("Start").toLocalDateTime()));
+                apt.setEndDateTime(Timestamp.valueOf(rs.getTimestamp("End").toLocalDateTime()));
                 apt.setCustomerID(rs.getInt("Customer_ID"));
                 apt.setUsersID(rs.getInt("User_ID"));
                 apt.setContactsID(rs.getInt("Contact_ID"));
 
-                observableAppointmentList.add(apt);
+//                AppointmentsMainController.getObservableAppointments("all").add(apt);
             }
         }
-        return getObservableAppointments();
     }
 }

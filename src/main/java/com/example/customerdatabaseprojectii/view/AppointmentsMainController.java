@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -112,6 +113,26 @@ public class AppointmentsMainController implements Initializable{
     TableView<Appointments> aptMonthlyTableView;
     @FXML
     TableView<Appointments> aptAllTableView;
+    @FXML
+    Button wkAddAppointmentButton;
+    @FXML
+    Button wkUpdateAppointmentButton;
+    @FXML
+    Button wkDeleteAppointmentButton;
+    @FXML
+    Button mnthAddAppointmentButton;
+    @FXML
+    Button mnthUpdateAppointmentButton;
+    @FXML
+    Button mnthDeleteAppointmentButton;
+    @FXML
+    Button allAddAppointmentButton;
+    @FXML
+    Button allUpdateAppointmentButton;
+    @FXML
+    Button allDeleteAppointmentButton;
+
+
 
     //use query to get this
     //get appointments that are within the next week
@@ -134,6 +155,7 @@ public class AppointmentsMainController implements Initializable{
         }else if(appointmentsMonthlyTab.isSelected()){
             selectedAppointment = aptMonthlyTableView.getSelectionModel().getSelectedItem();
         }
+        System.out.println("Selected appointment: " + selectedAppointment);
     }
 
 
@@ -199,10 +221,58 @@ public class AppointmentsMainController implements Initializable{
         }
     }
 
-    static void setItems(){
+    public void checkUserLocation(){
+        if((System.getProperty("user.language").equals("fr") || LoginController.changeLang)){
+            appointmentsWeeklyTab.setText("Hebdomadaire");
+            appointmentsMonthlyTab.setText("Mensuel");
+            appointmentsAllTab.setText("Toute");
+            appointmentTableLabel.setText("Rendez-vous");
+            appointmentsSwitchTableButton.setText("Tableau de commutation");
+            appointmentsSwitchTableComboBox.setPromptText("Les tables");
 
+
+            aptWeekTitle.setText("Titre");
+            aptWeekDescription.setText("La description");
+            aptWeekLocation.setText("Emplacement");
+            aptWeekType.setText("Taper");
+            aptWeekStartDate.setText("Date de début");
+            aptWeekEndDate.setText("Date de fin");
+            aptWeekCustomerID.setText("Identifiant du client");
+            aptWeekUserID.setText("Identifiant d'utilisateur");
+            aptWeekContactID.setText("Identifiant de contact");
+            wkAddAppointmentButton.setText("Ajouter");
+            wkUpdateAppointmentButton.setText("Mettre à jour");
+            wkDeleteAppointmentButton.setText("Effacer");
+
+            aptMonthTitle.setText("Titre");
+            aptMonthDescription.setText("La description");
+            aptMonthLocation.setText("Emplacement");
+            aptMonthType.setText("Taper");
+            aptMonthStartDate.setText("Date de début");
+            aptMonthEndDate.setText("Date de fin");
+            aptMonthCustomerID.setText("Identifiant du client");
+            aptMonthUserID.setText("Identifiant d'utilisateur");
+            aptMonthContactID.setText("Identifiant de contact");
+            mnthAddAppointmentButton.setText("Ajouter");
+            mnthUpdateAppointmentButton.setText("Mettre à jour");
+            mnthDeleteAppointmentButton.setText("Effacer");
+
+            aptAllTitle.setText("Titre");
+            aptAllDescription.setText("La description");
+            aptAllLocation.setText("Emplacement");
+            aptAllType.setText("Taper");
+            aptAllStartDate.setText("Date de début");
+            aptAllEndDate.setText("Date de fin");
+            aptAllCustomerID.setText("Identifiant du client");
+            aptAllUserID.setText("Identifiant d'utilisateur");
+            aptAllContactID.setText("Identifiant de contact");
+            allAddAppointmentButton.setText("Ajouter");
+            allUpdateAppointmentButton.setText("Mettre à jour");
+            allDeleteAppointmentButton.setText("Effacer");
+
+
+        }
     }
-
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -211,15 +281,17 @@ public class AppointmentsMainController implements Initializable{
         tableComboList.add("Customers");
         tableComboList.add("Reports");
 
+        checkUserLocation();
         appointmentsSwitchTableComboBox.setItems(tableComboList);
+
 
         /*Lambda used to filter all the appointments in the observable list that are within the next 7 days, then collect
         * them back into a collection via a method reference and this returns an 'observableArrayList' */
-        aptWeeklyTableView.setItems(AppointmentsDao.getObservableAppointments().stream().filter(apt -> {
-            LocalDateTime ldt = RelatedTime.getCurrentDateTime();
-            return ldt.until(apt.getStartDateTime(), ChronoUnit.DAYS) <= 7;
-        }).collect(Collectors.toCollection(FXCollections::observableArrayList)));
-
+        try {
+            aptWeeklyTableView.setItems(AppointmentsDao.returnAllObservableAppointments());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         aptWeekID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptWeekTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptWeekDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -232,12 +304,11 @@ public class AppointmentsMainController implements Initializable{
         aptWeekContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
 
 
-        aptMonthlyTableView.setItems(AppointmentsDao.getObservableAppointments().stream().filter(apt -> {
-            LocalDateTime ldt = RelatedTime.getCurrentDateTime();
-            return ldt.until(apt.getStartDateTime(), ChronoUnit.MONTHS) <= 1 && ldt.until(apt.getStartDateTime(), ChronoUnit.DAYS) > 7;
-        }).collect(Collectors.toCollection(FXCollections::observableArrayList)));
-
-        aptMonthlyTableView.setItems(AppointmentsDao.getObservableAppointments());
+        try {
+            aptMonthlyTableView.setItems(AppointmentsDao.returnAllObservableAppointments());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         aptMonthID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptMonthTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptMonthDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -250,7 +321,11 @@ public class AppointmentsMainController implements Initializable{
         aptMonthContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
 
 
-        aptAllTableView.setItems(AppointmentsDao.getObservableAppointments());
+        try {
+            aptAllTableView.setItems(AppointmentsDao.returnAllObservableAppointments());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         aptAllID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptAllTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptAllDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -262,7 +337,4 @@ public class AppointmentsMainController implements Initializable{
         aptAllUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptAllContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
     }
-
-
-
 }

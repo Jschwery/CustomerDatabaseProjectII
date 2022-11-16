@@ -8,9 +8,13 @@ import java.util.Optional;
 public class Alerter {
 
     public static void confirmationAlert(String message) {
+        String userLang = System.getProperty("user.language");
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message);
         Optional<ButtonType> buttonResult = alert.showAndWait();
-
+        if(userLang.equals("fr")){
+            alert.setTitle("Confirmation");
+        }
         if (buttonResult.get() == ButtonType.OK) {
             System.out.println("Okay buttonClicked!");
         } else {
@@ -20,9 +24,13 @@ public class Alerter {
         }
     }
     public static void informationAlert(String message) {
+        String userLang = System.getProperty("user.language");
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         Optional<ButtonType> buttonResult = alert.showAndWait();
-
+        if(userLang.equals("fr")){
+            alert.setTitle("informations");
+        }
         if (buttonResult.get() == ButtonType.OK) {
             System.out.println("Okay buttonClicked!");
         } else {
@@ -32,9 +40,13 @@ public class Alerter {
         }
     }
     public static void warningAlert(String message) {
+        String userLang = System.getProperty("user.language");
+
         Alert alert = new Alert(Alert.AlertType.WARNING, message);
         Optional<ButtonType> buttonResult = alert.showAndWait();
-
+        if (userLang.equals("fr")) {
+            alert.setTitle("Attention");
+        }
         if (buttonResult.get() == ButtonType.OK) {
             System.out.println("Okay buttonClicked!");
         } else {
@@ -43,8 +55,5 @@ public class Alerter {
             }
         }
     }
-
-
-
-
 }
+

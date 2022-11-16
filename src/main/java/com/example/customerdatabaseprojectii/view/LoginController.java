@@ -82,11 +82,21 @@ public class LoginController implements Initializable {
         loginUser.setPassword(password);
         currentlyLoggedIn = loginUser;
         try {
-            if (UsersDao.verifyUserFromDB(loginUser)) {
+            if (UsersDao.verifyUserFromDB(loginUser)){
+                if(changeLang || Objects.equals(System.getProperty("user.language"), "fr")){
+                    Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
+                            Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(loginUser.getUsername())));
+                }else{
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
                             Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(loginUser.getUsername())));
+                }
             } else {
-                Alerter.informationAlert("Incorrect username or password!");
+                String userLang = System.getProperty("user.language");
+                if(Objects.equals(userLang, "fr") || frenchToggle.isSelected()){
+                    Alerter.informationAlert("identifiant ou mot de passe incorrect");
+                }else {
+                    Alerter.informationAlert("Incorrect username or password!");
+                }
             }
         } catch (Exception e) {
             if (UsersDao.verifyUserFromDB(loginUser)) {
@@ -98,6 +108,7 @@ public class LoginController implements Initializable {
             }
         }
     }
+    public static boolean changeLang = false;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         translateLabels();
@@ -106,6 +117,7 @@ public class LoginController implements Initializable {
         ResourceBundle frenchBundle = ResourceBundle.getBundle("Lang", frenchLocale);
         frenchToggle.setOnAction(action -> {
             if (frenchToggle.isSelected()) {
+                changeLang = true;
                 Locale.setDefault(frenchLocale);
                 frenchToggle.setText("English");
                 loginButton.setText(frenchBundle.getString("loginButtonText"));

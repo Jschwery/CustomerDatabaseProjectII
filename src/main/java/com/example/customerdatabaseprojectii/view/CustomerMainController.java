@@ -43,11 +43,13 @@ public class CustomerMainController implements Initializable {
     @FXML
     Label customerDeletedText;
     @FXML
-    Button addCustomerButton = new Button();
+    Button addCustomerButton;
     @FXML
-    Button modifyCustomerButton = new Button();
+    Button modifyCustomerButton;
     @FXML
-    Button deleteCustomerButton = new Button();
+    Button deleteCustomerButton;
+    @FXML
+    Button customerTableSwitchButton;
 
 
     private static Customers selectedCustomer = null;
@@ -86,7 +88,7 @@ public class CustomerMainController implements Initializable {
         int customerIDToDelete = getSelectedCustomer().getCustomerID();
         PreparedStatement deleteStatement = DbConnection.getConnection().prepareStatement(deleteRelatedAppointmentQuery);
         deleteStatement.setInt(1, customerIDToDelete);
-        for(Appointments app : AppointmentsDao.getObservableAppointments()){
+        for(Appointments app : AppointmentsDao.returnAllObservableAppointments()){
             if(app.getCustomerID() == customerIDToDelete){
                 deleteStatement.execute();
                 customerDeletedText.setText(String.format("Customer: '%s' has been deleted", customer.getCustomerName()));
@@ -219,11 +221,25 @@ public class CustomerMainController implements Initializable {
     if(getAllCustomers().size() > 1){
         return getAllCustomers().stream().max(Comparator.comparing(Customers::getCustomerID));
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        if(System.getProperty("user.language").equals("fr") || LoginController.changeLang){
+            custCustomerID.setText("Identifiant du client");
+            custCustomerName.setText("Nom");
+            custAddress.setText("Adresse");
+            custPostal.setText("Poste");
+            custPhone.setText("Téléphone");
+            addCustomerButton.setText("Ajouter");
+            modifyCustomerButton.setText("Modifier");
+            deleteCustomerButton.setText("Effacer");
+            customerTableSwitchButton.setText("Commutateur");
+            customerTableSwitchComboBox.setPromptText("Tableaux");
+            customerLabel.setText("Les clients");
+        }
+
         selectedCustomer = null;
         Optional<Customers> customer = customerIDCountSetter();
         if(customer.isPresent()){
