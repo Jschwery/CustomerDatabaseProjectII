@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Optional;
+
 public class DbConnection {
     private static final String protocol = "jdbc";
     private static final String vendor = ":mysql:";
@@ -54,5 +56,11 @@ public class DbConnection {
             System.out.println("Null reference to Prepared Statement");
         }
         return null;
+    }
+
+    public static Optional<PreparedStatement> dbStatementTemplate(String query) throws SQLException {
+        Connection contactsConnection = DbConnection.getConnection();
+        DbConnection.makePreparedStatement(query, contactsConnection);
+        return Optional.ofNullable(DbConnection.getPreparedStatement());
     }
 }

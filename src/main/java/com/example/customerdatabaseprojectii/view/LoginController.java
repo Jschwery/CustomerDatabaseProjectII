@@ -1,8 +1,10 @@
 package com.example.customerdatabaseprojectii.view;
 
 import com.example.customerdatabaseprojectii.Main;
+import com.example.customerdatabaseprojectii.daos.CustomersDao;
 import com.example.customerdatabaseprojectii.daos.UsersDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.entity.Customers;
 import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import javafx.event.ActionEvent;

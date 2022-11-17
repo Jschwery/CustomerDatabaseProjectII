@@ -11,15 +11,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UsersDao {
+public class UsersDao implements Dao<Users> {
 
     private static final String usersQuery = "SELECT * FROM users";
 
 
     private static final String insertUserQuery = "Insert INTO users (User_Name, Password) " +
             "VALUES (?,?)";
+    private static final String updateUserQuery = "UPDATE users SET User_Name = ?, Password = ? WHERE User_ID = ?";
+    private static final String deleteUserQuery = "DELETE FROM users WHERE User_ID = ?";
 
-    public static String getUserNameByID(int userID) throws SQLException {
+    public String getUserNameByID(int userID) throws SQLException {
         Connection usersConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(usersQuery, usersConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
@@ -31,7 +33,6 @@ public class UsersDao {
                 tempUser.setPassword(rs.getString("Password"));
                 tempUser.setUser_ID(rs.getInt("User_ID"));
 
-
                 if (tempUser.getUser_ID() == userID) {
                     return tempUser.getUsername();
                 }
@@ -40,7 +41,7 @@ public class UsersDao {
         return "no user found";
     }
 
-    public static boolean verifyUserFromDB(Users user) throws SQLException {
+    public boolean verifyUserFromDB(Users user) throws SQLException {
         Connection usersConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(usersQuery, usersConnection);
         PreparedStatement ps = DbConnection.getPreparedStatement();
@@ -50,8 +51,6 @@ public class UsersDao {
                 Users tempUser = new Users();
                 tempUser.setUsername(rs.getString("User_Name"));
                 tempUser.setPassword(rs.getString("Password"));
-
-
                 if (user.getUsername().equals(tempUser.getUsername()) && user.getPassword().equals(tempUser.getPassword())) {
                     System.out.printf("User found: %s%n", user);
                     return true;
@@ -62,17 +61,21 @@ public class UsersDao {
         return false;
     }
 
+    @Override
+    public String dbInsert(Users user) throws SQLException {
+            PreparedStatement ps = DbConnection.dbStatementTemplate(insertUserQuery).orElse(null);
+            if (ps != null) {
+                ps.setString(1, user.getUsername());
+                ps.setString(2, user.getPassword());
+                int rowAffected = ps.executeUpdate();
+               return String.format("%d number of rows were affected with the update", rowAffected);
+            }
+            return "null";
+        }
+    @Override
+    public ObservableList<Users> getAllFromDB() throws SQLException {
 
-    /**
-     *
-     * @return Returns an Observable list of users that are extracted from the Database and
-     *  sets each User field with types correlating to those in the database
-     * @throws SQLException
-     */
-    public static ObservableList<Users> getAllUsersObservableList() throws SQLException {
-        Connection tempUsersConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(usersQuery, tempUsersConnection);
-        PreparedStatement tempPs = DbConnection.getPreparedStatement();
+        PreparedStatement tempPs = DbConnection.dbStatementTemplate(usersQuery).orElse(null);
         ObservableList<Users> observableUsersList = FXCollections.observableArrayList();
         if (tempPs != null) {
             ResultSet rs = tempPs.executeQuery();
@@ -88,25 +91,30 @@ public class UsersDao {
         return observableUsersList;
     }
 
-    /**
-     *
-     * @param user
-     * @throws SQLException
-     */
-    public static void insertUserLoginIntoDB(Users user){
-        try {
-        Connection connection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(insertUserQuery, connection);
-        PreparedStatement ps = DbConnection.getPreparedStatement();
-        if (ps != null) {
+    @Override
+    public String updateDB(Users user) throws SQLException {
+
+        PreparedStatement ps = DbConnection.dbStatementTemplate(updateUserQuery).orElse(null);
+
+        if(ps!= null){
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
-            int rowAffected = ps.executeUpdate();
-            System.out.printf("%d number of rows were affected with the update", rowAffected);
-            }
-        }catch (SQLException e){
-            System.out.println("Unable to add user to database");
-            Alerter.warningAlert("Username already in use!");
+            ps.setInt(3, user.getUser_ID());
+            ps.executeUpdate();
+            return String.format("User with %d has been updated\nUsername: %s\nPassword: %s", user.getUser_ID(), user.getUsername(), user.getPassword());
+
+
         }
+        return "null";
+    }
+
+    @Override
+    public String deleteFromDB(Users user) throws SQLException {
+        PreparedStatement ps = DbConnection.dbStatementTemplate(deleteUserQuery).orElse(null);
+        if(ps!=null){
+            ps.setInt(1, user.getUser_ID());
+            return String.format("%d users deleted", ps.executeUpdate());
+        }
+        return "null";
     }
 }

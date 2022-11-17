@@ -1,0 +1,73 @@
+After creating all the Daos
+
+need to set up the new scenes first, then write the functions for the scenes
+
+when loading a new scene
+
+create a consumer<Appointments> to be sent over to the controller method "initializedata"
+and fill in what is going to happen with the appointment object passed in the accept, method
+
+so the method below will take place when the add button is selected
+--create parent node and load the location
+--create a class type of the class that is the controller of the fxml scene you are switching to
+--then we can get the controller of that class and pass in the consumer, and customer
+
+remember that we are passing the consumer to the other controller class,
+and that the consumer is of has the type customer or appointment, so the class/method that accepts
+the consumer only needs access to the customer/appointment methods
+and the consumer with be initialized within the initialize data method of the other controller
+
+
+@FXML with the loaders we can set the location of the fxml, and then
+    void addAppointment() throws IOException {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("../Views/AppointmentDetails.fxml"));
+        Parent newRoot = loader.load();
+
+        AppointmentDetails controller = loader.getController();
+        Consumer<Appointment> onComplete = result -> {
+            if(isConflict(result)){
+                Alerts.information("Unable to create appointment.\nCustomer has a scheduling conflict.\nPlease try rescheduling.");
+                System.out.println("Appointment has a conflict canceling appointment creation.");
+                return;
+            }
+            result.setCreatedBy(user.getUsername());
+            result.setLastUpdateBy(user.getUsername());
+            result.setUserId(user.getId());
+            result.setUser(user.getUsername());
+            if(appointmentDao.insert(result)) {
+                appointments.add(result);
+            }
+        };
+        controller.initializeData(null, customers, onComplete);
+
+        Stage newStage = new Stage();
+        newStage.setScene(new Scene(newRoot));
+        newStage.setTitle("Calendar: Add Appointment");
+        newStage.setResizable(false);
+        newStage.initStyle(StageStyle.DECORATED);
+
+        newStage.show();
+    }
+
+    displaying the customer list when the mainappointment controller is first scene is opened
+
+    for the onaction for the tabs at the top
+    we get the name of the tab if its equal to weekly
+    display the allappointments.filter(start is less than now plus 7 days)
+
+    if monthly then display greater than 7 days but less than 30 days
+
+    else display the all appointments
+
+
+    when the main controller is called we need to
+
+
+
+
+
+
+
+
+

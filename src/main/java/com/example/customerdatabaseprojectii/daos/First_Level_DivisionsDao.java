@@ -10,14 +10,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class First_Level_DivisionsDao {
+public class First_Level_DivisionsDao{
 
     private static final String frstLvlDvsnQuery = "SELECT * FROM first_level_divisions";
 
-    public static ObservableList<First_Level_Divisions> addDivisionToObservableList() throws SQLException {
-        Connection frstLvlDvsnConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(frstLvlDvsnQuery, frstLvlDvsnConnection);
-        PreparedStatement ps = DbConnection.getPreparedStatement();
+    public ObservableList<First_Level_Divisions> getAll() throws SQLException {
+        PreparedStatement ps = DbConnection.dbStatementTemplate(frstLvlDvsnQuery).orElse(null);
         ObservableList<First_Level_Divisions> observableFrstLvlDvsnList = FXCollections.observableArrayList();
         if (ps != null) {
             ResultSet rs = ps.executeQuery();

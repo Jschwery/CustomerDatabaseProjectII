@@ -220,6 +220,17 @@ public class AppointmentsMainController implements Initializable{
             Alerter.informationAlert(String.format("Could not find the table: %s. Please try again later!", appointmentsSwitchTableComboBox.getValue()));
         }
     }
+    /*
+    TODO
+    get the initializations done for the appointment main appointment controller & main
+        -- display
+
+
+
+
+     */
+
+
 
     public void checkUserLocation(){
         if((System.getProperty("user.language").equals("fr") || LoginController.changeLang)){
@@ -274,6 +285,7 @@ public class AppointmentsMainController implements Initializable{
         }
     }
 
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
@@ -284,14 +296,6 @@ public class AppointmentsMainController implements Initializable{
         checkUserLocation();
         appointmentsSwitchTableComboBox.setItems(tableComboList);
 
-
-        /*Lambda used to filter all the appointments in the observable list that are within the next 7 days, then collect
-        * them back into a collection via a method reference and this returns an 'observableArrayList' */
-        try {
-            aptWeeklyTableView.setItems(AppointmentsDao.returnAllObservableAppointments());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         aptWeekID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptWeekTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptWeekDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -304,11 +308,6 @@ public class AppointmentsMainController implements Initializable{
         aptWeekContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
 
 
-        try {
-            aptMonthlyTableView.setItems(AppointmentsDao.returnAllObservableAppointments());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         aptMonthID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptMonthTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptMonthDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -321,11 +320,6 @@ public class AppointmentsMainController implements Initializable{
         aptMonthContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
 
 
-        try {
-            aptAllTableView.setItems(AppointmentsDao.returnAllObservableAppointments());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         aptAllID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptAllTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptAllDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
