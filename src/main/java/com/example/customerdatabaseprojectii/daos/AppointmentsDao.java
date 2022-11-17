@@ -59,23 +59,12 @@ public class AppointmentsDao implements Dao<Appointments> {
 
             //if the user does not already have an appointment & the time of the appointment is not already taken
             //allow insertion
-            if (ud.getAllFromDB().stream().noneMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))) {
-                AppointmentFormController.isValidated = true;
+            if (ud.getAllFromDB().stream().noneMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))&& ) {
                 int rowsUpdated = ps.executeUpdate();
                 appointmentCount++;
-                System.out.println("Successfully inserted appointment into database" +
-                        "\nTime: " + LocalTime.now());
-                AppointmentFormController.isValidated = true;
-
-
+                System.out.printf("%d rows successfully inserted appointment into database" +
+                        "\nTime: " + LocalTime.now(), rowsUpdated);
             }
-            int rowsUpdated = ps.executeUpdate();
-            appointmentCount++;
-            System.out.println("Successfully inserted appointment into database" +
-                    "\nTime: " + LocalTime.now());
-            AppointmentFormController.isValidated = true;
-
-                return String.format("%d rows inserted into database", rowsUpdated);
         }
         return "";
     }
