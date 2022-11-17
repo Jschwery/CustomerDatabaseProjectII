@@ -20,6 +20,7 @@ import java.util.Optional;
 
 public class AppointmentsDao implements Dao<Appointments> {
     ContactsDao cd = new ContactsDao();
+    UsersDao ud = new UsersDao();
     private static final String appointmentsQuery = "SELECT * FROM appointments";
     private static final String insertAppointmenteQuery = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type, " +
             "Start, End, Create_Date, Created_By, Last_Update, Last_Updated_By, Customer_ID, User_ID, Contact_ID) " +
@@ -49,14 +50,16 @@ public class AppointmentsDao implements Dao<Appointments> {
             ps.setTimestamp(6, appointment.getStartDateTime());
             ps.setTimestamp(7, appointment.getEndDateTime());
             ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(9, UsersDao.getUserNameByID(appointment.getUsersID()));
+            ps.setString(9, ud.getUserNameByID(appointment.getUsersID()));
             ps.setTimestamp(10, Timestamp.valueOf(RelatedTime.getCurrentDateTime()));
-            ps.setString(11, UsersDao.getUserNameByID(appointment.getUsersID()));
+            ps.setString(11, ud.getUserNameByID(appointment.getUsersID()));
             ps.setInt(12, appointment.getCustomerID());
             ps.setInt(13, appointment.getUsersID());
             ps.setInt(14, appointment.getContactsID());
 
-            if (UsersDao.getAllUsersObservableList().stream().noneMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))) {
+            //if the user does not already have an appointment & the time of the appointment is not already taken
+            //allow insertion
+            if (ud.getAllFromDB().stream().noneMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))) {
                 AppointmentFormController.isValidated = true;
                 int rowsUpdated = ps.executeUpdate();
                 appointmentCount++;
@@ -117,14 +120,14 @@ public class AppointmentsDao implements Dao<Appointments> {
                 ps.setTimestamp(5, appointment.getStartDateTime());
                 ps.setTimestamp(6, appointment.getEndDateTime());
                 ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-                ps.setString(8, UsersDao.getUserNameByID(appointment.getUsersID()));
+                ps.setString(8, ud.getUserNameByID(appointment.getUsersID()));
                 ps.setInt(9, appointment.getCustomerID());
                 ps.setInt(10, appointment.getUsersID());
                 ps.setInt(11, appointment.getContactsID());
                 ps.setInt(12, appointment.getAppointmentID());
                 System.out.println("Appointment: "+ appointment);
                 System.out.println(appointment.getCustomerID());
-                if (UsersDao.getAllUsersObservableList().stream().
+                if (ud.getAllFromDB().stream().
                         anyMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID())) &&
                         CustomerMainController.getAllCustomers().stream().
                                 anyMatch(m -> Objects.equals(m.getCustomerID(), appointment.getCustomerID())) &&

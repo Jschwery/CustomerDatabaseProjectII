@@ -32,6 +32,26 @@ public class ContactsDao implements Dao<Contacts>{
 
     public ContactsDao() throws SQLException {}
 
+
+
+    public int returnContactIDbyName(String name) throws SQLException {
+        PreparedStatement ps = DbConnection.dbStatementTemplate(contactQuery).orElse(null);
+        if(ps != null) {
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                Contacts contact = new Contacts();
+                contact.setContactID(rs.getInt("Contact_ID"));
+                contact.setContactName(rs.getString("Contact_Name"));
+
+                if(Objects.equals(contact.getContactName().toUpperCase(), name.toUpperCase())){
+                    return contact.getContactID();
+                }
+            }
+        }
+        return -1;
+    }
+
+
     private static int getNumberOfContacts() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(contactQuery).orElse(null);
         if (ps != null) {

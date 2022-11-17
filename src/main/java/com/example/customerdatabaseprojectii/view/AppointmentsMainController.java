@@ -3,19 +3,24 @@ package com.example.customerdatabaseprojectii.view;
 import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -26,9 +31,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class AppointmentsMainController implements Initializable{
+public class AppointmentsMainController{
 
     @FXML
     Label appointmentTableLabel;
@@ -131,21 +137,16 @@ public class AppointmentsMainController implements Initializable{
     Button allUpdateAppointmentButton;
     @FXML
     Button allDeleteAppointmentButton;
+    AppointmentsDao ad = new AppointmentsDao();
+    static Users currentUser = LoginController.getCurrentlyLoggedInUser();
+    ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList();
+    FilteredList<Appointments> appointmentsFilteredByTime = new FilteredList<>(appointmentsList);
 
 
-
-    //use query to get this
-    //get appointments that are within the next week
-    //get appointments that are within the next month
-
-
-
-    public void customerButtonClicked(ActionEvent event) {
-
-    }
 
     protected static Appointments selectedAppointment = null;
 
+    public AppointmentsMainController() throws SQLException {}
 
     public void setSelectedAppointment(MouseEvent event){
         if(appointmentsAllTab.isSelected()){
@@ -163,25 +164,53 @@ public class AppointmentsMainController implements Initializable{
         System.out.println("appointment deleted");
     }
 
-    public void addAppointmentForm(ActionEvent event) throws IOException {
-        if (Objects.equals(selectedAppointment, null)) {
-            AppointmentFormController.isModified = false;
-            Main.genNewStageAndScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml", 568, 340, "Appointment Form");
-        } else {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are trying to add a new appointment, while one is selected!\nClick 'OK' to deselect the customer, or cancel to escape.");
-            Optional<ButtonType> buttonResult = alert.showAndWait();
+    //we have a user, a customer, and a contact
+    //if
 
-            if (buttonResult.get() == ButtonType.OK) {
-                selectedAppointment = null;
-            } else {
-                if (buttonResult.get() == ButtonType.CANCEL) {
-                    System.out.println("Appointment is still selected");
-                }
-            }
+
+    /**
+     *
+     * @param event when the add appointment button is clicked the scenes will switch and
+     *              the formInit method will be called with the parameters set
+     * @throws IOException
+     */
+    public void addAppointmentForm(ActionEvent event) throws IOException, SQLException {
+        if (Objects.equals(selectedAppointment, null)) {
+
+            AppointmentFormController.isModified = false;
+            FXMLLoader fxL = new FXMLLoader();
+            fxL.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentFormController.java"));
+            Parent newRoot = fxL.load();
+
+
+            AppointmentFormController formController = fxL.getController();
+            Consumer<Appointments> addAppointment = appointment -> {
+                try {AppointmentsDao ad = new AppointmentsDao();} catch (SQLException e) {e.printStackTrace();}
+                appointment.setCreatedBy(currentUser.getUsername());
+                appointment.setLastUpdatedBy(currentUser.getUsername());
+                appointment.setUsersID(currentUser.getUser_ID());
+                try {ad.dbInsert(appointment);} catch (SQLException e) {e.printStackTrace();}
+
+
+            };
+            AppointmentFormController.initData(null, customers, onComplete);
+
+            Stage newStage = new Stage();
+            newStage.setScene(new Scene(newRoot));
+            newStage.setTitle("Calendar: Add Appointment");
+            newStage.setResizable(false);
+            newStage.initStyle(StageStyle.DECORATED);
+
+            newStage.show();
+
         }
     }
     public void updateAppointmentForm(ActionEvent event) throws IOException {
         if(selectedAppointment!= null){
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource());
+            Parent newRoot = loader.load();
+
             AppointmentFormController.isModified = true;
             Main.genNewStageAndScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml", 568, 340, "Customer Form");
         }
@@ -195,7 +224,7 @@ public class AppointmentsMainController implements Initializable{
             switch (appointmentsSwitchTableComboBox.getValue()) {
                 case "Customers":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers");
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers", false);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -203,14 +232,14 @@ public class AppointmentsMainController implements Initializable{
                     break;
                 case "Appointments":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments");
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "Reports":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports");
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -220,17 +249,6 @@ public class AppointmentsMainController implements Initializable{
             Alerter.informationAlert(String.format("Could not find the table: %s. Please try again later!", appointmentsSwitchTableComboBox.getValue()));
         }
     }
-    /*
-    TODO
-    get the initializations done for the appointment main appointment controller & main
-        -- display
-
-
-
-
-     */
-
-
 
     public void checkUserLocation(){
         if((System.getProperty("user.language").equals("fr") || LoginController.changeLang)){
@@ -240,7 +258,6 @@ public class AppointmentsMainController implements Initializable{
             appointmentTableLabel.setText("Rendez-vous");
             appointmentsSwitchTableButton.setText("Tableau de commutation");
             appointmentsSwitchTableComboBox.setPromptText("Les tables");
-
 
             aptWeekTitle.setText("Titre");
             aptWeekDescription.setText("La description");
@@ -280,22 +297,9 @@ public class AppointmentsMainController implements Initializable{
             allAddAppointmentButton.setText("Ajouter");
             allUpdateAppointmentButton.setText("Mettre à jour");
             allDeleteAppointmentButton.setText("Effacer");
-
-
         }
     }
-
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        ObservableList<String> tableComboList = FXCollections.observableArrayList();
-        tableComboList.add("Appointments");
-        tableComboList.add("Customers");
-        tableComboList.add("Reports");
-
-        checkUserLocation();
-        appointmentsSwitchTableComboBox.setItems(tableComboList);
-
+    public void setColumns(){
         aptWeekID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptWeekTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptWeekDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -306,7 +310,6 @@ public class AppointmentsMainController implements Initializable{
         aptWeekCustomerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         aptWeekUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptWeekContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
-
 
         aptMonthID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptMonthTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -319,7 +322,6 @@ public class AppointmentsMainController implements Initializable{
         aptMonthUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptMonthContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
 
-
         aptAllID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptAllTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptAllDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -330,5 +332,18 @@ public class AppointmentsMainController implements Initializable{
         aptAllCustomerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         aptAllUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptAllContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
+    }
+
+    @FXML
+    public void initialize() {
+        ObservableList<String> tableComboList = FXCollections.observableArrayList();
+        tableComboList.add("Appointments");
+        tableComboList.add("Customers");
+        tableComboList.add("Reports");
+
+        checkUserLocation();
+        setColumns();
+        appointmentsSwitchTableComboBox.setItems(tableComboList);
+
     }
 }

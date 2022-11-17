@@ -42,6 +42,7 @@ public class LoginController implements Initializable {
     public static Users getCurrentlyLoggedInUser(){
         return currentlyLoggedIn;
     }
+    UsersDao ud = new UsersDao();
 
     public void translateLabels() {
         String userLang = System.getProperty("user.language");
@@ -64,12 +65,12 @@ public class LoginController implements Initializable {
 
     public void anotherButtonClickTest(ActionEvent event) throws IOException {
         Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/TableMenu.fxml",
-                Main.getMainStage(), 450, 385, "Welcome + ");
+                Main.getMainStage(), 450, 385, "Welcome", false);
     }
 
     public void createAccountLinkClicked(ActionEvent event) throws IOException {
         Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CreateUser.fxml",
-                Main.getMainStage(), 450, 385, "Welcome + ");
+                Main.getMainStage(), 450, 385, "Welcome", false);
     }
 
     public void setTimeLabel() {
@@ -84,13 +85,13 @@ public class LoginController implements Initializable {
         loginUser.setPassword(password);
         currentlyLoggedIn = loginUser;
         try {
-            if (UsersDao.verifyUserFromDB(loginUser)){
+            if (ud.verifyUserFromDB(loginUser)){
                 if(changeLang || Objects.equals(System.getProperty("user.language"), "fr")){
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
-                            Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(loginUser.getUsername())));
+                            Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(loginUser.getUsername())), false);
                 }else{
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
-                            Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(loginUser.getUsername())));
+                            Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(loginUser.getUsername())), false);
                 }
             } else {
                 String userLang = System.getProperty("user.language");
@@ -101,9 +102,9 @@ public class LoginController implements Initializable {
                 }
             }
         } catch (Exception e) {
-            if (UsersDao.verifyUserFromDB(loginUser)) {
+            if (ud.verifyUserFromDB(loginUser)) {
                 Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
-                        Main.getMainStage(), 450, 385, "Welcome!");
+                        Main.getMainStage(), 450, 385, "Welcome!", false);
                 e.printStackTrace();
             } else {
                 Alerter.informationAlert("Incorrect username or password!");

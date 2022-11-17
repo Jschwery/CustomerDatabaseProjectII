@@ -2,7 +2,6 @@ package com.example.customerdatabaseprojectii;
 
 import com.example.customerdatabaseprojectii.util.DbConnection;
 //import com.example.customerdatabaseprojectii.util.GenLists;
-import com.example.customerdatabaseprojectii.util.GenLists;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -21,29 +20,18 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         mainStage = stage;
         Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml",
-                stage,495, 485, "Login");
+                stage,495, 485, "Login", false);
     }
     public static void main(String[] args) throws SQLException {
         DbConnection.makeConnection();
-        GenLists.populateObservableListsFromDB();
         launch(args);
         DbConnection.closeConnection();
     }
     public static Stage getMainStage(){
         return mainStage;
     }
-    public static void genNewStageAndScene(String url, int minHeight, int minWidth, String title) throws IOException {
-        URL path = new File(url).toURI().toURL();
-        Parent node = FXMLLoader.load(path);
-        Scene scene = new Scene(node);
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.setTitle(title);
-        stage.setMinHeight(minHeight);
-        stage.setMinWidth(minWidth);
-        stage.show();
-    }
-    public static void changeScene(String url, Stage stage, int minHeight, int minWidth, String title) throws IOException {
+
+    public static void changeScene(String url, Stage stage, int minHeight, int minWidth, String title, boolean setResize) throws IOException {
         URL path =  new File(url).toURI().toURL();
         Parent node = FXMLLoader.load(path);
         Scene scene = new Scene(node);
@@ -51,6 +39,8 @@ public class Main extends Application {
         stage.setTitle(title);
         stage.setMinHeight(minHeight);
         stage.setMinWidth(minWidth);
+        stage.setResizable(setResize);
+
         stage.show();
     }
 }

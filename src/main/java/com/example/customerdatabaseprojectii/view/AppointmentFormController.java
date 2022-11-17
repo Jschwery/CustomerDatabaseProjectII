@@ -1,9 +1,8 @@
 package com.example.customerdatabaseprojectii.view;
 
-import com.example.customerdatabaseprojectii.Main;
-import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.daos.ContactsDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
 import com.example.customerdatabaseprojectii.util.Validator;
@@ -18,17 +17,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
-public class AppointmentFormController implements Initializable {
+public class AppointmentFormController{
 
     @FXML
     TextField afTitle;
@@ -55,29 +52,41 @@ public class AppointmentFormController implements Initializable {
     @FXML
     Label appointmentVarTitle;
 
+    public void initializeData(ObservableList<Customer> customers, Appointments appointment, Consumer<Appointment> onComplete){
+        this.onComplete = onComplete;
+        this.customers.addAll(customers);
+
+        loadContacts();
+        loadStartEndTimes();
+        setNewAppointmentTimes();
+        loadAppointment(appointment);
+    }
+
+    @FXML
+    void initialize(){
+
+    }
+
     public static boolean isModified = false;
     public static boolean isValidated = false;
     ContactsDao cd = new ContactsDao();
 
-    //
-
-
     public static Map<Integer, Appointments> usersIDToAppointment = new HashMap<>();
     static DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
 
-    public AppointmentFormController() throws SQLException {
-    }
-
+    public AppointmentFormController() throws SQLException {}
 
     public void populateContactList() throws SQLException {
-        afContact.setItems(cd.getAllFromDB().);
+        ObservableList<String> contactNames = FXCollections.observableArrayList();
+        for(Contacts contact : cd.getAllFromDB()){
+            contactNames.add(contact.getContactName());}
+        afContact.setItems(contactNames);
     }
 
     public void closeSceneWindow() {
         Stage stage = (Stage) afContact.getScene().getWindow();
         stage.close();
     }
-
 
     public ObservableList<String> setTimeComboBoxes() {
         DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
@@ -128,12 +137,11 @@ public class AppointmentFormController implements Initializable {
             Alerter.warningAlert("Please select a start date for the appointment!");
             return false;
         }
-
         System.out.println("Appointment fields validated");
         return true;
     }
 
-    public void insertAppointmentIntoMap(Integer id, Appointments appointment) {
+    public static void insertAppointmentIntoMap(Integer id, Appointments appointment) {
         if (!isAppointmentTimeTaken(LocalTime.parse(appointment.getStartDateTime().
                         toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)),
                 LocalTime.parse(appointment.getEndDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
@@ -144,7 +152,7 @@ public class AppointmentFormController implements Initializable {
         }
     }
 
-    public boolean isAppointmentTimeTaken(LocalTime appointmentStart, LocalTime appointmentEnd) {
+    public static boolean isAppointmentTimeTaken(LocalTime appointmentStart, LocalTime appointmentEnd) {
         for (Map.Entry<Integer, Appointments> entry : usersIDToAppointment.entrySet()) {
             Appointments appointments = entry.getValue();
             if (appointmentStart.isAfter
@@ -162,6 +170,7 @@ public class AppointmentFormController implements Initializable {
     }
 
     public boolean fieldValidator(Appointments scheduleAppointment) throws SQLException {
+        ContactsDao cd = new ContactsDao();
 
         if (Validator.intChecker(afAppointmentID.getText(), "Please enter number characters for AppointmentID text field!")) {
             scheduleAppointment.setAppointmentID(Integer.parseInt(afAppointmentID.getText()));
@@ -198,14 +207,13 @@ public class AppointmentFormController implements Initializable {
         } else {
             return false;
         }
-        if (Validator.intChecker(String.valueOf(ContactsDao.returnContactIDbyName(afContact.getValue())), "Issue obtaining contactID")) {
-            scheduleAppointment.setContactsID(ContactsDao.returnContactIDbyName(afContact.getValue()));
+        if (Validator.intChecker(String.valueOf(cd.returnContactIDbyName(afContact.getValue())), "Issue obtaining contactID")) {
+            scheduleAppointment.setContactsID(cd.returnContactIDbyName(afContact.getValue()));
         } else {
             return false;
         }
         return true;
     }
-    //TODO make the combobox fill with the users local time
 
     public void addAppointmentClicked(ActionEvent event) throws SQLException {
         Appointments appointmentstemp = AppointmentsMainController.selectedAppointment;
@@ -224,8 +232,6 @@ public class AppointmentFormController implements Initializable {
         } catch (NullPointerException e) {
             System.out.println("Date or time selection is null");
         }
-
-
     }
 
 
@@ -297,8 +303,7 @@ public class AppointmentFormController implements Initializable {
         isValidated = false;
         return false;
     }
-
-    }
 }
+
 
 
