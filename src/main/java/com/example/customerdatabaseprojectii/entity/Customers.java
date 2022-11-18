@@ -1,5 +1,9 @@
 package com.example.customerdatabaseprojectii.entity;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 public class Customers {
 
     private int customerID;
@@ -8,6 +12,10 @@ public class Customers {
     private String postalCode;
     private String phoneNumber;
     private int divisionID;
+    private Timestamp createDateTime;
+    private String createdBy;
+    private Timestamp lastUpdate;
+    private String lastUpdatedBy;
 
     @Override
     public String toString() {

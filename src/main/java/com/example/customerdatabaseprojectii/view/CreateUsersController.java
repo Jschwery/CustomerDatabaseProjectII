@@ -29,6 +29,7 @@ public class CreateUsersController {
     TextField passwordTextField;
     @FXML
     PasswordField reenterPasswordTextField;
+    UsersDao ud = new UsersDao();
 
 
     public void closeSceneWindow() {
@@ -64,7 +65,7 @@ public class CreateUsersController {
     }
     public void cancelButtonClicked(ActionEvent event) {
         try {
-            Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml", Main.getMainStage(), 495, 485, "Login");
+            Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml", Main.getMainStage(), 495, 485, "Login", false);
         } catch (Exception e){
             e.printStackTrace();
             System.out.println("Could not switch back to login");
@@ -95,17 +96,17 @@ public class CreateUsersController {
             user.setUsername(username);
             user.setPassword(password);
             try {
-                if (!UsersDao.verifyUserFromDB((user))) {
-                    UsersDao.insertUserLoginIntoDB(user);
+                if (!ud.verifyUserFromDB((user))) {
+                    ud.dbInsert(user);
                     System.out.println("User successfully submitted to database!");
-                    Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml", Main.getMainStage(), 495, 485, "Login");
+                    Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml", Main.getMainStage(), 495, 485, "Login", false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Unable to add user to database");
                 Alerter.warningAlert(String.format("The username: '%s' is taken!", username));
             }
-            if (UsersDao.verifyUserFromDB(user)) {
+            if (ud.verifyUserFromDB(user)) {
                 System.out.println("User successfully added to the database!");
             } else {
                 System.out.println("User was not added to the database!");

@@ -156,8 +156,13 @@ public class AppointmentMainController {
 
     }
 
-    public void deleteAppointment(ActionEvent event){
-
+    public void deleteAppointment(ActionEvent event) throws SQLException {
+        if(selectedAppointment != null){
+            ad.deleteFromDB(selectedAppointment);
+            appointmentsList.remove(selectedAppointment);
+        }else {
+            Alerter.informationAlert("No appointment selected to delete");
+        }
     }
 
     /**

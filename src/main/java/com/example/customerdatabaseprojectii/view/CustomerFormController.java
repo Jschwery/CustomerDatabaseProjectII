@@ -21,11 +21,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class CustomerFormController implements Initializable {
+public class CustomerFormController{
     @FXML
     TextField cfCustomerName;
     @FXML
@@ -84,12 +85,18 @@ public class CustomerFormController implements Initializable {
         }
     }
 
-    public void customerFormInit(Customers selectedCustomer, Consumer<Customers> customerConsumer){
-    this.customersConsumer = customerConsumer;
-    this.customer = selectedCustomer;
+    public void customerFormInit(Customers selectedCustomer, Consumer<Customers> customerConsumer) {
+        this.customersConsumer = customerConsumer;
+        this.customer = selectedCustomer;
 
-
+        if (modifyCustomer && CustomerMainController.getSelectedCustomer() != null) {
+            cfCustomerName.setText(customer.getCustomerName());
+            cfCustomerAddress.setText(customer.getAddress());
+            cfCustomerNumber.setText(customer.getPhoneNumber());
+            cfCustomerPostal.setText(customer.getPostalCode());
+        }
     }
+
 
 
     public void filterFirstLevelByCountry(ActionEvent event) {
@@ -139,19 +146,21 @@ public class CustomerFormController implements Initializable {
             System.out.println("No country selected");
         }
     }
-    public int getDivisionIDByDivisionName(){
-        String division = cfCustomerFirstLevel.getSelectionModel().getSelectedItem();
+    public int getDivisionID(String divisionName) {
+        First_Level_DivisionsDao fldd = new First_Level_DivisionsDao();
         try {
-            for (First_Level_Divisions div : divisions.getAll()) {
-                if(div.getDivision().equals(division)){
-                    return div.getCountryID();
+            for (First_Level_Divisions div : fldd.getAll()) {
+                if (Objects.equals(div.getDivision().toUpperCase(), divisionName.toUpperCase())) {
+                    return div.getDivisionID();
                 }
             }
-        }catch (SQLException e){
-            e.printStackTrace();
+        } catch (SQLException sq) {
+            sq.printStackTrace();
         }
         return -1;
     }
+
+
     public void closeSceneWindow() {
         Stage stage = (Stage) cfCustomerName.getScene().getWindow();
         CustomerMainController.setSelectedCustomerNull();
@@ -172,61 +181,25 @@ public class CustomerFormController implements Initializable {
     }
 
     public void addCustomerClicked(ActionEvent event) throws IOException {
-        Customers customerToAdd = new Customers();
-        String customerName = cfCustomerName.getText();
-        String customerPostal = cfCustomerPostal.getText();
-        String customerNumber = cfCustomerNumber.getText();
-        String customerAddress = cfCustomerAddress.getText();
-        cfCustomerCountry.setPromptText("Country");
-        cfCustomerFirstLevel.setPromptText("First Level Div");
+        customer.setCustomerID(Integer.parseInt(cfCustomerID.getText()));
+        customer.setCustomerName(cfCustomerName.getText());
+        customer.setAddress(cfCustomerAddress.getText());
+        customer.setPhoneNumber(cfCustomerNumber.getText());
+        customer.setPostalCode(cfCustomerPostal.getText());
+        customer.setDivisionID(getDivisionID(cfCustomerFirstLevel.getValue()));
 
-        customerToAdd.setCustomerName(customerName);
-        customerToAdd.setPostalCode(customerPostal);
-        customerToAdd.setPhoneNumber(customerNumber);
-        customerToAdd.setAddress(customerAddress);
-        customerToAdd.setDivisionID(getDivisionIDByDivisionName());
-
-        if(modifyCustomer){
-            customerToAdd.setCustomerID(CustomerMainController.getSelectedCustomer().getCustomerID());
-            System.out.println("Adding modified customer back to database & to observable list");
-            try {
-                cd.updateDB(customerToAdd);
-            }catch (SQLException e){
-                e.printStackTrace();
-                Alerter.warningAlert("Error updating customer");
-            }
-            int indexOfSelectedCustomer = CustomerMainController.getCustomerIndex(CustomerMainController.getSelectedCustomer());
-            CustomerMainController.setCustomerByIndex(indexOfSelectedCustomer, customerToAdd);
-            CustomerMainController.setSelectedCustomerNull();
-        }
-        else {
-            customerToAdd.setCustomerID(CustomersDao.idCount);
-            System.out.println("Adding new customer to database & to observable list");
-            try{
-                CustomersDao.insertCustomerIntoDatabase(customerToAdd);
-            }catch (SQLException e){
-                e.printStackTrace();
-                Alerter.warningAlert("Error adding customer");
-            }
-            CustomerMainController.addCustomerToObservableList(customerToAdd);
-        }
+        customersConsumer.accept(customer);
         CustomerMainController.setSelectedCustomerNull();
         clearLists();
+        modifyCustomer = false;
         closeSceneWindow();
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    @FXML
+    public void initialize() {
         clearLists();
         addCountriesToObservableList();
         cfCustomerCountry.setItems(customerCountries);
         populateObservableFirstLevelDivs();
-        if(CustomerMainController.getSelectedCustomer()!=null){
-            Customers custTemp = CustomerMainController.getSelectedCustomer();
-            cfCustomerName.setText(custTemp.getCustomerName());
-            cfCustomerAddress.setText(custTemp.getAddress());
-            cfCustomerNumber.setText(custTemp.getPhoneNumber());
-            cfCustomerPostal.setText(custTemp.getPostalCode());
-        }
     }
 }

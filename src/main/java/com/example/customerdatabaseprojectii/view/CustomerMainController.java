@@ -254,9 +254,6 @@ public class CustomerMainController implements Initializable {
 
     }
 
-
-
-
     public void switchTablesClicked(ActionEvent event) throws IOException {
         try {
             switch (customerTableSwitchComboBox.getValue()) {
@@ -333,42 +330,6 @@ public class CustomerMainController implements Initializable {
         custPhone.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         custDivID.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
 
-
-
-        //all fields must be validated
-        //when submit clicked the customer has to be set with the update method to set the customer
-        //that was updated into the correct index
-
-        //if there is duplicating check that the table is set to the current observable list that is static in each method that
-        //accesses it at the end of the method
-
-        //when user selects a country from the combo box, the first-level-division
-        //is to be prepopulated based on the user selection of country, maybe use streams filter based on the user selected country
-        //customer_ID is disabled & filled with auto-gen prompt text
-
-        //when customer deleted a custom info prompt is sent to the ui that the user was deleted successfully
-
-
-        //user can add, update and delete appointments,
-        //a contact name is assinged to an appointment using a combobox
-        //pulled from the allcontact observable list?
-        //when appointment canceled the appointment Id will be displayed and type of appointment in the notification
-
-        //create add appointment new scene, with text boxes that collect the appointmentID, title, descrip, location, contact, type, start date & time with a start
-        //date picker and
-
-        //check other app to see how they gen the Appointment_ID, or if they just let the database auto-gen it
-        //when updating the appointment, the fields are auto-generated
-        //all original appointment info is displayed on the update form in local time
-        //so get the location of the user and create the timezone with the
-        //information of the country where the user is, and use time format to format where the user is, parse maybe?
-        //remember all this time information is displayed in the update form of the original appointment
-
-        //create tabs for appointments, one tab for week, one tab for month
-        //all the appointments within a 28 day period from the start of the month till the end of the month
-        //are displayed in the month tab
-        //all appointments that take place within each 7 days of each other are grouped into weeks
-        //day 0-7 grouped into week1, 7-14 in week two, 21-28 in week 4
 
 
 
