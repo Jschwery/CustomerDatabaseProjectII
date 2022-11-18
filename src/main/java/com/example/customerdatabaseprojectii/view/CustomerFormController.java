@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class CustomerFormController implements Initializable {
     @FXML
@@ -42,14 +43,15 @@ public class CustomerFormController implements Initializable {
     @FXML
     Button cfCancel;
 
-
-
     static boolean modifyCustomer = false;
     private static ObservableList<First_Level_Divisions> unitedStatesFirstLevelDiv = FXCollections.observableArrayList();
     private static ObservableList<First_Level_Divisions> unitedKingdomFirstLevelDiv = FXCollections.observableArrayList();
     private static ObservableList<First_Level_Divisions> canadaFirstLevelDiv = FXCollections.observableArrayList();
     private static ObservableList<String> customerCountries = FXCollections.observableArrayList();
-
+    First_Level_DivisionsDao divisions = new First_Level_DivisionsDao();
+    CustomersDao cd = new CustomersDao();
+    Consumer<Customers> customersConsumer;
+    Customers customer;
 
     public void addCountriesToObservableList(){
         customerCountries.add("U.S");
@@ -57,10 +59,15 @@ public class CustomerFormController implements Initializable {
         customerCountries.add("Canada");
     }
 
+
+    //we make an interface that is accepts a integer and returns void
+    //then we have a method from the other class that has a method that takes the
+
+
+
     public void populateObservableFirstLevelDivs(){
-        try {
-        ObservableList<First_Level_Divisions> firstLevels = First_Level_DivisionsDao.addDivisionToObservableList();
-        for(First_Level_Divisions div : firstLevels){
+      try{
+        for(First_Level_Divisions div : divisions.getAll()){
             if(div.getCountryID() == 1) {
                 unitedStatesFirstLevelDiv.add(div);
             }
@@ -77,12 +84,12 @@ public class CustomerFormController implements Initializable {
         }
     }
 
-    /*
-    now the combobox displaying the countries is getting duplicating after the save button is clicked
+    public void customerFormInit(Customers selectedCustomer, Consumer<Customers> customerConsumer){
+    this.customersConsumer = customerConsumer;
+    this.customer = selectedCustomer;
 
-    update customer query has an issue
 
-     */
+    }
 
 
     public void filterFirstLevelByCountry(ActionEvent event) {
@@ -135,7 +142,7 @@ public class CustomerFormController implements Initializable {
     public int getDivisionIDByDivisionName(){
         String division = cfCustomerFirstLevel.getSelectionModel().getSelectedItem();
         try {
-            for (First_Level_Divisions div : First_Level_DivisionsDao.addDivisionToObservableList()) {
+            for (First_Level_Divisions div : divisions.getAll()) {
                 if(div.getDivision().equals(division)){
                     return div.getCountryID();
                 }
@@ -163,17 +170,6 @@ public class CustomerFormController implements Initializable {
         cfCustomerCountry.setValue("");
         cfCustomerFirstLevel.setValue("");
     }
-    /*TODO
-    clear countries issue
-
-    we have a country list with countries that we fill the combo box with,
-    we can do this on initialize right so it will stay a combo box with countries
-
-
-    we need to set the lists upon each time we go into the form
-    and clear the list each time we submit or cancel
-
-    */
 
     public void addCustomerClicked(ActionEvent event) throws IOException {
         Customers customerToAdd = new Customers();
@@ -194,7 +190,7 @@ public class CustomerFormController implements Initializable {
             customerToAdd.setCustomerID(CustomerMainController.getSelectedCustomer().getCustomerID());
             System.out.println("Adding modified customer back to database & to observable list");
             try {
-                CustomersDao.updateCustomerInDatabase(customerToAdd);
+                cd.updateDB(customerToAdd);
             }catch (SQLException e){
                 e.printStackTrace();
                 Alerter.warningAlert("Error updating customer");
@@ -203,7 +199,7 @@ public class CustomerFormController implements Initializable {
             CustomerMainController.setCustomerByIndex(indexOfSelectedCustomer, customerToAdd);
             CustomerMainController.setSelectedCustomerNull();
         }
-        else if(!modifyCustomer){
+        else {
             customerToAdd.setCustomerID(CustomersDao.idCount);
             System.out.println("Adding new customer to database & to observable list");
             try{

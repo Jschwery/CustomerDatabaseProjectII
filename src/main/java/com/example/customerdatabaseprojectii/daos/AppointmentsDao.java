@@ -1,13 +1,8 @@
 package com.example.customerdatabaseprojectii.daos;
 
 import com.example.customerdatabaseprojectii.entity.Appointments;
-import com.example.customerdatabaseprojectii.entity.Customers;
-import com.example.customerdatabaseprojectii.entity.Users;
-import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
-import com.example.customerdatabaseprojectii.view.AppointmentFormController;
-import com.example.customerdatabaseprojectii.view.AppointmentsMainController;
 import com.example.customerdatabaseprojectii.view.CustomerMainController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,7 +11,6 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
-import java.util.Optional;
 
 public class AppointmentsDao implements Dao<Appointments> {
     ContactsDao cd = new ContactsDao();
@@ -125,10 +119,8 @@ public class AppointmentsDao implements Dao<Appointments> {
                     int rowsUpdated = ps.executeUpdate();
                     System.out.println("Successfully inserted appointment into database" +
                             "\nTime: " + LocalTime.now());
-                    AppointmentFormController.isValidated = true;
                     return String.format("%d rows updated", rowsUpdated);
                 } else {
-                    AppointmentFormController.isValidated = false;
                     System.out.println("Not valid");
                 }
             }

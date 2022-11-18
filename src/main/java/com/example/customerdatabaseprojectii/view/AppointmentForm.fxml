@@ -39,7 +39,7 @@
       <Label layoutX="312.0" layoutY="303.0" text="Contact" />
       <Label layoutX="24.0" layoutY="367.0" text="Customer ID" />
       <TextField fx:id="afAppointmentID" disable="true" layoutX="21.0" layoutY="70.0" prefHeight="25.0" prefWidth="170.0" promptText="Auto-Generated" />
-      <Label layoutX="22.0" layoutY="53.0" prefHeight="17.0" prefWidth="86.0" text="Appointment ID" />
+      <Label layoutX="22.0" layoutY="53.0" prefHeight="18.0" prefWidth="95.0" text="Appointment ID" />
       <Label layoutX="311.0" layoutY="244.0" prefHeight="17.0" prefWidth="123.0" text="Time" />
       <DatePicker fx:id="afDatePickerEnd" layoutX="310.0" layoutY="192.0" prefHeight="26.0" prefWidth="195.0" promptText="End Date" />
       <Label layoutX="314.0" layoutY="174.0" text="End" />

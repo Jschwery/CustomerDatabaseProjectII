@@ -10,11 +10,9 @@ import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -22,22 +20,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Pair;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class AppointmentsMainController{
+public class AppointmentMainController {
 
     @FXML
     Label appointmentTableLabel;
@@ -148,11 +140,9 @@ public class AppointmentsMainController{
     public static Map<Integer, Appointments> customerIDToAppointment = new HashMap<>();
     ObservableList<Customers> customersObservableList = cd.getAllFromDB();
 
-
-
     protected static Appointments selectedAppointment = null;
 
-    public AppointmentsMainController() throws SQLException {}
+    public AppointmentMainController() throws SQLException {}
 
     public void setSelectedAppointment(MouseEvent event){
         if(appointmentsAllTab.isSelected()){
@@ -166,15 +156,9 @@ public class AppointmentsMainController{
 
     }
 
-    //initialize the map by iterating through all the appointments
-    //and setting the customerIDToAppointment
     public void deleteAppointment(ActionEvent event){
-        System.out.println("appointment deleted");
+
     }
-
-    //we have a user, a customer, and a contact
-    //if
-
 
     /**
      *
@@ -182,7 +166,7 @@ public class AppointmentsMainController{
      *              the formInit method will be called with the parameters set
      * @throws IOException
      */
-    public void addAppointmentForm(ActionEvent event) throws IOException, SQLException {
+    public void addAppointmentForm(ActionEvent event) throws IOException{
         if (Objects.equals(selectedAppointment, null)) {
 
             AppointmentFormController.isModified = false;
@@ -195,13 +179,17 @@ public class AppointmentsMainController{
                 appointment.setCreatedBy(currentUser.getUsername());
                 appointment.setLastUpdatedBy(currentUser.getUsername());
                 appointment.setUsersID(currentUser.getUser_ID());
-                try {ad.dbInsert(appointment);} catch (SQLException e) {e.printStackTrace();}
+                try {String s = ad.dbInsert(appointment);
+                    System.out.println(s);} catch (SQLException e) {e.printStackTrace();}
                 if(appointmentAddedSuccess){
                     appointmentsList.add(appointment);
                 }
             };
-            formController.appointmentInit(customersObservableList, selectedAppointment, addAppointment);
-
+            try {
+                formController.appointmentInit(customersObservableList, selectedAppointment, addAppointment);
+            }catch (SQLException s){
+                s.printStackTrace();
+            }
             Stage appointmentFormStage = new Stage();
             appointmentFormStage.setScene(new Scene(node));
             appointmentFormStage.setResizable(false);
@@ -214,33 +202,64 @@ public class AppointmentsMainController{
             selectedAppointment = null;
         }
     }
-    public void updateAppointmentForm(ActionEvent event) throws IOException {
-        if(selectedAppointment!= null){
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource());
-            Parent newRoot = loader.load();
 
+    public int getIndexOfAppointment(Appointments appointment){
+        return appointmentsList.indexOf(appointment);
+    }
+
+
+    public void updateAppointmentForm(ActionEvent event) throws IOException{
+        if (selectedAppointment != null) {
+            FXMLLoader fxL = new FXMLLoader();
+            fxL.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml"));
+            Parent node = fxL.load();
+            AppointmentFormController afc = fxL.getController();
             AppointmentFormController.isModified = true;
-        }
-        else{
-            Alerter.informationAlert("Please select an appointment to modify!");
+            Consumer<Appointments> updateAppointment = appointment -> {
+                appointment.setCreatedBy(currentUser.getUsername());
+                appointment.setLastUpdatedBy(currentUser.getUsername());
+                appointment.setUsersID(currentUser.getUser_ID());
+                if (selectedAppointment != null) {
+                    try {
+                        ad.updateDB(appointment);
+                        appointmentsList.set(getIndexOfAppointment(appointment), appointment);
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                }
+            };
+            try {
+                afc.appointmentInit(customersObservableList, selectedAppointment, updateAppointment);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            Stage appointmentFormStage = new Stage();
+            appointmentFormStage.setScene(new Scene(node));
+            appointmentFormStage.setResizable(false);
+            appointmentFormStage.initStyle(StageStyle.DECORATED);
+            appointmentFormStage.show();
+        } else {
+            Alerter.warningAlert("Please select a appointment!");
         }
     }
+
     //if the appointment is within the next seven days
-    public void setTableFilteredAppointments(ActionEvent event){
+    public void setTableFilteredAppointments(){
         if(appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsAllTab.getText(), "Weekly")){
             ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all-> all.getStartDateTime().toLocalDateTime().isAfter(RelatedTime.getCurrentDateTime()) &&
                     all.getEndDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusWeeks(1)) && all.getEndDateTime().toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).collect(Collectors.toCollection(FXCollections::observableArrayList));
                     aptWeeklyTableView.setItems(weeklyList);
+                    return;
         }if(appointmentsMonthlyTab.isSelected() && Objects.equals(appointmentsMonthlyTab.getText(), "Monthly")){
             ObservableList<Appointments> monthlyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().isAfter(RelatedTime.getCurrentDateTime().plusWeeks(1)) &&
                     all.getStartDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1)) && all.getEndDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1)) &&
                     all.getEndDateTime().toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).collect(Collectors.toCollection(FXCollections::observableArrayList));
                     aptMonthlyTableView.setItems(monthlyList);
+                    return;
         }
-            //todo
-
-
+        if(appointmentsAllTab.isSelected()){
+            aptAllTableView.setItems(appointmentsList);
+        }
     }
 
     public void switchTablesClicked(ActionEvent event) throws IOException {
@@ -360,6 +379,7 @@ public class AppointmentsMainController{
 
     @FXML
     public void initialize() {
+        setTableFilteredAppointments();
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
 
         tableComboList.add("Appointments");

@@ -11,15 +11,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class CustomerMainController implements Initializable {
     @FXML
@@ -53,7 +60,10 @@ public class CustomerMainController implements Initializable {
 
 
     private static Customers selectedCustomer = null;
+    AppointmentsDao ad = new AppointmentsDao();
     private static final String deleteRelatedAppointmentQuery = "DELETE FROM appointments WHERE Appointment_ID = ?";
+
+    public CustomerMainController() throws SQLException {}
 
     public static void setSelectedCustomerNull(){
         selectedCustomer = null;
@@ -84,14 +94,14 @@ public class CustomerMainController implements Initializable {
     }
 
 
-    public void deleteRelatedAppointments(Customers customer) throws SQLException {
+    public void deleteRelatedAppointments() throws SQLException {
         int customerIDToDelete = getSelectedCustomer().getCustomerID();
         PreparedStatement deleteStatement = DbConnection.getConnection().prepareStatement(deleteRelatedAppointmentQuery);
         deleteStatement.setInt(1, customerIDToDelete);
-        for(Appointments app : AppointmentsDao.returnAllObservableAppointments()){
+        for(Appointments app :  ad.getAllFromDB()){
             if(app.getCustomerID() == customerIDToDelete){
                 deleteStatement.execute();
-                customerDeletedText.setText(String.format("Customer: '%s' has been deleted", customer.getCustomerName()));
+                customerDeletedText.setText(String.format("Customer: '%s' has been deleted", getSelectedCustomer().getCustomerName()));
             }
         }
     }
@@ -102,7 +112,7 @@ public class CustomerMainController implements Initializable {
         deleteStatement.setInt(1, customer.getCustomerID());
 
         try {
-           deleteRelatedAppointments(customer);
+           deleteRelatedAppointments();
        }catch (SQLException e){
            e.printStackTrace();
            System.out.printf("Unable to remove appointments relating to the customer: %s%n", customer);
@@ -176,21 +186,83 @@ public class CustomerMainController implements Initializable {
             }
         }
     }
-    public void modifyCustomer(ActionEvent event) throws IOException {
-        if(!Objects.equals(getSelectedCustomer().getCustomerName(), "")) {
-            CustomerFormController.modifyCustomer = true;
-            Main.genNewStageAndScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml", 340, 568, "Customer Form");
+    Consumer<Customers> customerConsumer = customer ->{
+        CustomersDao cd = new CustomersDao();
+
+        if(CustomerFormController.modifyCustomer){
+            try {
+                String s = cd.updateDB(customer);
+                System.out.println(s);
+                getAllCustomers().set(CustomerMainController.getCustomerIndex(customer),customer);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }else{
-            Alerter.informationAlert("Please select a customer to modify.");
+            try {
+                String s = cd.dbInsert(customer);
+                System.out.println(s);
+                getAllCustomers().add(customer);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    public void addCustomer(ActionEvent event) throws IOException {
+        if (Objects.equals(getSelectedCustomer(), null)) {
+            CustomerFormController.modifyCustomer = false;
+
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml"));
+            Parent node = loader.load();
+            CustomerFormController afc = loader.getController();
+            afc.customerFormInit(selectedCustomer, customerConsumer);
+
+            Stage customerFormStage = new Stage();
+            customerFormStage.setScene(new Scene(node));
+            customerFormStage.setResizable(false);
+            customerFormStage.initStyle(StageStyle.DECORATED);
+
+            customerFormStage.show();
+        } else {
+            Alerter.warningAlert("You cannot add a new customer with one selected, unselecting customer.");
+            selectedCustomer = null;
         }
     }
+
+    public void modifyCustomer(ActionEvent event) throws IOException {
+        if (!Objects.equals(getSelectedCustomer().getCustomerName(), "")) {
+            CustomerFormController.modifyCustomer = true;
+
+            FXMLLoader loader = new FXMLLoader();
+
+            loader.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml"));
+            Parent node = loader.load();
+            CustomerFormController afc = loader.getController();
+
+            afc.customerFormInit(selectedCustomer, customerConsumer);
+
+            Stage customerFormStage = new Stage();
+            customerFormStage.setScene(new Scene(node));
+            customerFormStage.setResizable(false);
+            customerFormStage.initStyle(StageStyle.DECORATED);
+
+            customerFormStage.show();
+        } else {
+            Alerter.warningAlert("You are trying to add an customer that already exists, unselecting customer");
+            selectedCustomer = null;
+        }
+
+    }
+
+
+
 
     public void switchTablesClicked(ActionEvent event) throws IOException {
         try {
             switch (customerTableSwitchComboBox.getValue()) {
                 case "Customers":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers");
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers", false);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -198,14 +270,14 @@ public class CustomerMainController implements Initializable {
                     break;
                 case "Appointments":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments");
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "Reports":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports");
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

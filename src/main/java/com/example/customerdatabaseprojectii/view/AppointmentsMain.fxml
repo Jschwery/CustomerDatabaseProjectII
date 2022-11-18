@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="468.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.AppointmentsMainController">
+<AnchorPane prefHeight="468.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.AppointmentMainController">
    <children>
       <Label fx:id="appointmentTableLabel" layoutX="221.0" layoutY="42.0" prefHeight="35.0" prefWidth="180.0" text="Appointments">
          <font>
@@ -43,9 +43,9 @@
                               <TableColumn fx:id="aptWeekContactID" prefWidth="96.0" text="ContactID" />
                           </columns>
                         </TableView>
-                        <Button fx:id="wkUpdateAppointmentButton" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
-                        <Button fx:id="wkDeleteAppointmentButton" layoutX="622.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
-                        <Button fx:id="wkAddAppointmentButton" layoutX="378.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
+                        <Button fx:id="wkUpdateAppointmentButton" layoutX="621.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
+                        <Button fx:id="wkDeleteAppointmentButton" layoutX="743.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
+                        <Button fx:id="wkAddAppointmentButton" layoutX="499.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
                      </children></AnchorPane>
             </content>
           </Tab>
@@ -67,9 +67,9 @@
                               <TableColumn fx:id="aptMonthContactID" prefWidth="79.0" text="ContactID" />
                            </columns>
                         </TableView>
-                        <Button fx:id="mnthUpdateAppointmentButton" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
-                        <Button fx:id="mnthDeleteAppointmentButton" layoutX="622.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
-                        <Button fx:id="mnthAddAppointmentButton" layoutX="378.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
+                        <Button fx:id="mnthUpdateAppointmentButton" layoutX="621.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
+                        <Button fx:id="mnthDeleteAppointmentButton" layoutX="743.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
+                        <Button fx:id="mnthAddAppointmentButton" layoutX="499.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
                      </children></AnchorPane>
             </content>
           </Tab>
@@ -91,9 +91,9 @@
                               <TableColumn fx:id="aptAllContactID" prefWidth="81.0" text="ContactID" />
                            </columns>
                         </TableView>
-                        <Button fx:id="allUpdateAppointmentButton" layoutX="607.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
-                        <Button fx:id="allDeleteAppointmentButton" layoutX="729.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
-                        <Button fx:id="allAddAppointmentButton" layoutX="485.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
+                        <Button fx:id="allUpdateAppointmentButton" layoutX="621.0" layoutY="250.0" mnemonicParsing="false" onAction="#updateAppointmentForm" prefHeight="23.0" prefWidth="115.0" text="Update" />
+                        <Button fx:id="allDeleteAppointmentButton" layoutX="743.0" layoutY="250.0" mnemonicParsing="false" onAction="#deleteAppointment" prefHeight="25.0" prefWidth="115.0" text="Delete" />
+                        <Button fx:id="allAddAppointmentButton" layoutX="499.0" layoutY="250.0" mnemonicParsing="false" onAction="#addAppointmentForm" prefHeight="25.0" prefWidth="115.0" text="Add" />
                      </children></AnchorPane>
                </content>
             </Tab>
