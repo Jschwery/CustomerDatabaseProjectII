@@ -13,17 +13,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class ContactsDao implements Dao<Contacts>{
-    private static int contactIDCount = 0;
-    static {
-        try {
-            contactIDCount = getNumberOfContacts() + 1;
-            if(contactIDCount <= 0){
-                throw new RuntimeException("Contact ID cannot be less than or equal to zero");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
     private static final String contactQuery = "SELECT * FROM contacts";
     private static final String insertContactQuery = "INSERT INTO contacts (Contact_ID, Contact_Name, Email)" +
             "VALUES (?,?,?)";
@@ -31,8 +21,6 @@ public class ContactsDao implements Dao<Contacts>{
     private static final String deleteContactQuery = "DELETE FROM contacts WHERE Contact_ID = ?";
 
     public ContactsDao() throws SQLException {}
-
-
 
     public int returnContactIDbyName(String name) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(contactQuery).orElse(null);
@@ -71,12 +59,15 @@ public class ContactsDao implements Dao<Contacts>{
     @Override
     public String dbInsert(Contacts contact) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(insertContactQuery).orElse(null);
-        ps.setInt(1, contact.getContactID());
-        ps.setString(2, contact.getContactName());
-        ps.setString(3, contact.getEmail());
-
-        int rowsUpdated = ps.executeUpdate();
-        return String.format("Rows updated: %d\n", rowsUpdated);
+        if(ps != null) {
+            ps.setInt(1, getNumberOfContacts() + 1);
+            ps.setString(2, contact.getContactName());
+            ps.setString(3, contact.getEmail());
+            int rowsUpdated = ps.executeUpdate();
+            return String.format("Rows updated: %d\n", rowsUpdated);
+        }
+        System.out.println("Unsuccessfully inserted contact into database");
+        return "null";
     }
 
     @Override
@@ -109,6 +100,7 @@ public class ContactsDao implements Dao<Contacts>{
             return String.format("Rows updated: %d\n", rowsUpdated);
         }
         else {
+            System.out.println("Unsuccessfully updated contact to database");
             return "null";
         }
     }
@@ -122,6 +114,7 @@ public class ContactsDao implements Dao<Contacts>{
             int rowsDeleted = ps.executeUpdate();
             return String.format("%d rows deleted", rowsDeleted);
         }
+        System.out.println("Unsuccessfully deleted contact from database");
         return "null";
     }
 }

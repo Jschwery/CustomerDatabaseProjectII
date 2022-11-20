@@ -1,10 +1,7 @@
 package com.example.customerdatabaseprojectii.view;
 
 import com.example.customerdatabaseprojectii.Main;
-import com.example.customerdatabaseprojectii.daos.CustomersDao;
 import com.example.customerdatabaseprojectii.daos.UsersDao;
-import com.example.customerdatabaseprojectii.entity.Appointments;
-import com.example.customerdatabaseprojectii.entity.Customers;
 import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import javafx.event.ActionEvent;
@@ -15,7 +12,6 @@ import javafx.scene.control.*;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -39,6 +35,7 @@ public class LoginController implements Initializable {
     ToggleButton frenchToggle;
 
     private static Users currentlyLoggedIn = null;
+    public static boolean changeLang = false;
     public static Users getCurrentlyLoggedInUser(){
         return currentlyLoggedIn;
     }
@@ -62,11 +59,11 @@ public class LoginController implements Initializable {
             e.printStackTrace();
         }
     }
-
-    public void anotherButtonClickTest(ActionEvent event) throws IOException {
-        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/TableMenu.fxml",
-                Main.getMainStage(), 450, 385, "Welcome", false);
+    public Optional<Users> findUserByUsername(String userName) throws SQLException {
+        return ud.getAllFromDB().stream().filter(u -> Objects.equals(u.getUsername().toUpperCase(), userName.toUpperCase())).findFirst();
     }
+
+
 
     public void createAccountLinkClicked(ActionEvent event) throws IOException {
         Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CreateUser.fxml",
@@ -79,19 +76,17 @@ public class LoginController implements Initializable {
     }
     public void ButtonClick(ActionEvent event) throws SQLException, IOException {
         String username = usernameTextEntry.getText();
-        String password = passwordTextEntry.getText();
-        Users loginUser = new Users();
-        loginUser.setUsername(username);
-        loginUser.setPassword(password);
-        currentlyLoggedIn = loginUser;
+        System.out.println("Loggedin user = " + findUserByUsername(username).orElse(null));
+
+        currentlyLoggedIn = findUserByUsername(username).orElse(null);
         try {
-            if (ud.verifyUserFromDB(loginUser)){
+            if (ud.verifyUserFromDB(currentlyLoggedIn)){
                 if(changeLang || Objects.equals(System.getProperty("user.language"), "fr")){
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
-                            Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(loginUser.getUsername())), false);
+                            Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(currentlyLoggedIn.getUsername())), false);
                 }else{
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
-                            Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(loginUser.getUsername())), false);
+                            Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(currentlyLoggedIn.getUsername())), false);
                 }
             } else {
                 String userLang = System.getProperty("user.language");
@@ -102,7 +97,7 @@ public class LoginController implements Initializable {
                 }
             }
         } catch (Exception e) {
-            if (ud.verifyUserFromDB(loginUser)) {
+            if (ud.verifyUserFromDB(currentlyLoggedIn)) {
                 Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
                         Main.getMainStage(), 450, 385, "Welcome!", false);
                 e.printStackTrace();
@@ -111,7 +106,6 @@ public class LoginController implements Initializable {
             }
         }
     }
-    public static boolean changeLang = false;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         translateLabels();

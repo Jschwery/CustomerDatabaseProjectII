@@ -11,18 +11,9 @@ import java.sql.*;
 
 public class CustomersDao implements Dao<Customers> {
 
-    public static int idCount = 0;
+    public CustomersDao(){}
 
-    static {
-        try {
-            idCount = getNumberOfCustomer()+1;
-            if(idCount >= 0){
-                throw new RuntimeException("Customer id cannot be below or equal to zero");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     private static final String customersQuery = "SELECT * FROM customers";
     private static final String updateCustomerQuery = "UPDATE customers SET Customer_ID = ?, Customer_Name = ?, Address = ?, " +
@@ -33,27 +24,8 @@ public class CustomersDao implements Dao<Customers> {
             "VALUES (?,?,?,?,?,?,?,?,?,?)";
     private static final String customerDeleteQuery = "DELETE FROM customer WHERE Customer_ID = ?";
 
-    public static void insertCustomerIntoDatabase(Customers customer) throws SQLException {
-       PreparedStatement statement = DbConnection.dbStatementTemplate(customersQuery).orElse(null);
 
-        if(statement!= null) {
-            statement.setInt(1, idCount);
-            statement.setString(2, customer.getCustomerName());
-            statement.setString(3, customer.getAddress());
-            statement.setString(4, customer.getPostalCode());
-            statement.setString(5, customer.getPhoneNumber());
-            statement.setDate(6, Date.valueOf(RelatedTime.getLocalDate()));
-            statement.setString(7, "Admin");
-            statement.setTimestamp(8, Timestamp.valueOf(RelatedTime.getCurrentDateTime()));
-            statement.setString(9, LoginController.getCurrentlyLoggedInUser().getUsername());
-            statement.setInt(10, customer.getDivisionID());
-
-            statement.execute();
-            idCount++;
-        }
-    }
-
-    public static int getNumberOfCustomer() throws SQLException {
+    public int getNumberOfCustomer() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(customersQuery).orElse(null);
         ObservableList<Customers> customers = FXCollections.observableArrayList();
         if (ps != null) {
@@ -73,7 +45,7 @@ public class CustomersDao implements Dao<Customers> {
         PreparedStatement statement = DbConnection.dbStatementTemplate(customerInsertQuery).orElse(null);
 
         if (statement != null) {
-            statement.setInt(1, idCount);
+            statement.setInt(1, getNumberOfCustomer() + 1);
             statement.setString(2, customer.getCustomerName());
             statement.setString(3, customer.getAddress());
             statement.setString(4, customer.getPostalCode());
@@ -85,10 +57,9 @@ public class CustomersDao implements Dao<Customers> {
             statement.setInt(10, customer.getDivisionID());
 
             int numberOfCustomerInserted = statement.executeUpdate();
-            idCount++;
             return String.format("%d customers inserted", numberOfCustomerInserted);
         }
-        return "null";
+        return "";
     }
 
     @Override
@@ -129,7 +100,8 @@ public class CustomersDao implements Dao<Customers> {
 
             return String.format("%d customers updated", statement.executeUpdate());
         }
-        return "null";
+        System.out.println("Unsuccessfully inserted customer to database");
+        return "";
     }
     @Override
     public String deleteFromDB(Customers customer) throws SQLException {
@@ -139,6 +111,7 @@ public class CustomersDao implements Dao<Customers> {
 
             return String.format("%d customers deleted", ps.executeUpdate());
         }
-        return "null";
+        System.out.println("Unsuccessfully deleted customer from database");
+        return "";
     }
 }

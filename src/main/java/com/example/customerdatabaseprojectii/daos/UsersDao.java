@@ -38,6 +38,7 @@ public class UsersDao implements Dao<Users> {
                 }
             }
         }
+        System.out.printf("No user found with the ID: %d\n", userID);
         return "no user found";
     }
 
@@ -51,9 +52,13 @@ public class UsersDao implements Dao<Users> {
                 Users tempUser = new Users();
                 tempUser.setUsername(rs.getString("User_Name"));
                 tempUser.setPassword(rs.getString("Password"));
-                if (user.getUsername().equals(tempUser.getUsername()) && user.getPassword().equals(tempUser.getPassword())) {
-                    System.out.printf("User found: %s%n", user);
-                    return true;
+                try {
+                    if (user.getUsername().equals(tempUser.getUsername()) && user.getPassword().equals(tempUser.getPassword())) {
+                        System.out.printf("User found: %s%n", user);
+                        return true;
+                    }
+                }catch (NullPointerException e){
+                    return false;
                 }
             }
         }
@@ -70,6 +75,7 @@ public class UsersDao implements Dao<Users> {
                 int rowAffected = ps.executeUpdate();
                return String.format("%d number of rows were affected with the update", rowAffected);
             }
+            System.out.println("Unsuccessfully inserted user into database");
             return "null";
         }
     @Override
@@ -102,9 +108,8 @@ public class UsersDao implements Dao<Users> {
             ps.setInt(3, user.getUser_ID());
             ps.executeUpdate();
             return String.format("User with %d has been updated\nUsername: %s\nPassword: %s", user.getUser_ID(), user.getUsername(), user.getPassword());
-
-
         }
+        System.out.println("Unsuccessfully updated User to database");
         return "null";
     }
 
@@ -115,6 +120,7 @@ public class UsersDao implements Dao<Users> {
             ps.setInt(1, user.getUser_ID());
             return String.format("%d users deleted", ps.executeUpdate());
         }
+        System.out.println("Unsuccessfully deleted User from database");
         return "null";
     }
 }

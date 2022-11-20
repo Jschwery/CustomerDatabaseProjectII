@@ -45,10 +45,10 @@ public class CustomerFormController{
     Button cfCancel;
 
     static boolean modifyCustomer = false;
-    private static ObservableList<First_Level_Divisions> unitedStatesFirstLevelDiv = FXCollections.observableArrayList();
-    private static ObservableList<First_Level_Divisions> unitedKingdomFirstLevelDiv = FXCollections.observableArrayList();
-    private static ObservableList<First_Level_Divisions> canadaFirstLevelDiv = FXCollections.observableArrayList();
-    private static ObservableList<String> customerCountries = FXCollections.observableArrayList();
+    private static final ObservableList<First_Level_Divisions> unitedStatesFirstLevelDiv = FXCollections.observableArrayList();
+    private static final ObservableList<First_Level_Divisions> unitedKingdomFirstLevelDiv = FXCollections.observableArrayList();
+    private static final ObservableList<First_Level_Divisions> canadaFirstLevelDiv = FXCollections.observableArrayList();
+    private static final ObservableList<String> customerCountries = FXCollections.observableArrayList();
     First_Level_DivisionsDao divisions = new First_Level_DivisionsDao();
     CustomersDao cd = new CustomersDao();
     Consumer<Customers> customersConsumer;
@@ -59,12 +59,6 @@ public class CustomerFormController{
         customerCountries.add("UK");
         customerCountries.add("Canada");
     }
-
-
-    //we make an interface that is accepts a integer and returns void
-    //then we have a method from the other class that has a method that takes the
-
-
 
     public void populateObservableFirstLevelDivs(){
       try{
@@ -96,8 +90,6 @@ public class CustomerFormController{
             cfCustomerPostal.setText(customer.getPostalCode());
         }
     }
-
-
 
     public void filterFirstLevelByCountry(ActionEvent event) {
 

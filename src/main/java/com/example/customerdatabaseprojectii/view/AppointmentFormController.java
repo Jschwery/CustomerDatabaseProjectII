@@ -1,6 +1,8 @@
 package com.example.customerdatabaseprojectii.view;
 
+import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.daos.ContactsDao;
+import com.example.customerdatabaseprojectii.daos.CustomersDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.entity.Customers;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AppointmentFormController {
 
@@ -54,45 +57,67 @@ public class AppointmentFormController {
     ComboBox<String> afContact;
     @FXML
     Label appointmentVarTitle;
+    @FXML
+    ComboBox<String> afSelectCustomer;
 
-    ObservableList<Customers> customersObservableList = FXCollections.observableArrayList();
     Consumer<Appointments> appointmentHandler;
+    Supplier<ObservableList<String>> customersSupplier;
+    ObservableList<Contacts> contactsObservableList;
     Appointments appointment;
     public static boolean isModified = false;
-    ContactsDao cd = new ContactsDao();
+    ContactsDao contactsDao = new ContactsDao();
+    ObservableList<Customers> observableListOfCustomers;
     static DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
-
     @FXML
     void initialize(){
         setTimeComboBoxes();
     }
 
-    public void appointmentInit(ObservableList<Customers> customerList, Appointments appointment, Consumer<Appointments> appointmentHandler) throws SQLException {
+    public void appointmentInit(ObservableList<Contacts> contactsObservableList, Appointments appointment,
+                                Consumer<Appointments> appointmentHandler, Supplier<ObservableList<String>> customersSupplier,
+                                ObservableList<Customers> customersList) throws SQLException {
         this.appointmentHandler = appointmentHandler;
-        this.customersObservableList = customerList;
+        this.contactsObservableList = contactsObservableList;
         this.appointment = appointment;
+        this.customersSupplier = customersSupplier;
+        this.observableListOfCustomers = customersList;
         if(appointment == null){
             this.appointment = new Appointments();
         }
-
-        populateContactList();
+        afSelectCustomer.setItems(customersSupplier.get());
         afStartTimePicker.setItems(setTimeComboBoxes());
         afEndTimePicker.setItems(setTimeComboBoxes());
+        populateContactList();
 
         if(isModified) {
             assert appointment != null;
             fillAppointmentData(appointment);
         }
+        if(!isModified){
+            AppointmentsDao ad = new AppointmentsDao();
+            afAppointmentID.setText(String.valueOf(ad.getAllFromDB().size() + 1));
+            afUserID.setPromptText(String.format("Your ID: %d", LoginController.getCurrentlyLoggedInUser().getUser_ID()));
+        }
     }
 
     public String getContactNameByID(int contactID) throws SQLException {
-        Optional<Contacts> contact = cd.getAllFromDB().stream().filter(c -> Objects.equals(c.getContactID(), contactID)).findFirst();
+        Optional<Contacts> contact = contactsObservableList.stream().filter(c -> Objects.equals(c.getContactID(), contactID)).findFirst();
         if(contact.isPresent()){
             return contact.get().getContactName();
         }
+        System.out.println("No contact found with the entered ID");
         return "";
     }
 
+    public String getCustomerNameByID(int customerID) throws SQLException {
+        Optional<Customers> customers = observableListOfCustomers.stream().filter(c -> Objects.equals(c.getCustomerID(), customerID)).findFirst();
+
+        if(customers.isPresent()){
+            return customers.get().getCustomerName();
+        }
+        System.out.println("No customer found with the entered id");
+        return "";
+    }
     /**
      *
      * @param event when the add button is clicked
@@ -102,18 +127,20 @@ public class AppointmentFormController {
      * @throws SQLException
      */
     public void getAppointmentDataAndSubmit(ActionEvent event) throws SQLException {
-
-        DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
-        LocalDate localAppointmentDateEnd = afDatePickerEnd.getValue();
-        LocalDate localAppointmentDateStart = afDatePickerStart.getValue();
-        LocalTime localEndTime = RelatedTime.formattedTimeParser(hourAndMinuteFormat, afEndTimePicker.getValue());
-        LocalTime localStartTime = RelatedTime.formattedTimeParser(hourAndMinuteFormat, afStartTimePicker.getValue());
-        LocalDateTime localDateTimeStartAppointment = LocalDateTime.of(localAppointmentDateStart, localStartTime);
-        LocalDateTime localDateTimeEndAppointment = LocalDateTime.of(localAppointmentDateEnd, localEndTime);
-        appointment.setStartDateTime(Timestamp.valueOf(localDateTimeStartAppointment));
-        appointment.setEndDateTime(Timestamp.valueOf(localDateTimeEndAppointment));
-        fieldValidatorNull();
-        if(fieldValidator(appointment) && AppointmentMainController.appointmentAddedSuccess && compareAppointmentToBusiness(appointment)){
+        try {
+            DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
+            LocalDate localAppointmentDateEnd = afDatePickerEnd.getValue();
+            LocalDate localAppointmentDateStart = afDatePickerStart.getValue();
+            LocalTime localEndTime = RelatedTime.formattedTimeParser(hourAndMinuteFormat, afEndTimePicker.getValue());
+            LocalTime localStartTime = RelatedTime.formattedTimeParser(hourAndMinuteFormat, afStartTimePicker.getValue());
+            LocalDateTime localDateTimeStartAppointment = LocalDateTime.of(localAppointmentDateStart, localStartTime);
+            LocalDateTime localDateTimeEndAppointment = LocalDateTime.of(localAppointmentDateEnd, localEndTime);
+            appointment.setStartDateTime(Timestamp.valueOf(localDateTimeStartAppointment));
+            appointment.setEndDateTime(Timestamp.valueOf(localDateTimeEndAppointment));
+        }catch (NullPointerException e){
+            Alerter.warningAlert("Please fill in all the fields!");
+        }
+        if(fieldValidator(appointment) && compareAppointmentToBusiness(appointment)){
             appointmentHandler.accept(appointment);
             if(isModified){//checks if the customer already had an appointment and will update the map with the new appointment, if so.
                 for (Map.Entry<Integer, Appointments> entry : AppointmentMainController.customerIDToAppointment.entrySet()) {
@@ -124,12 +151,26 @@ public class AppointmentFormController {
             }else{
                 insertAppointmentIntoMap(appointment.getCustomerID(), appointment);
             }
-            insertAppointmentIntoMap(appointment.getCustomerID(), appointment);
             resetBoxes();
             isModified = false;
             Stage stage = (Stage) afType.getScene().getWindow();
             stage.close();
         }
+    }
+
+    public int findCustomerIDByName(String customerName){
+        CustomersDao cd = new CustomersDao();
+        try {
+            for (Customers customer : cd.getAllFromDB()){
+                if(Objects.equals(customerName.toUpperCase(), customerName.toUpperCase())){
+                    return customer.getCustomerID();
+                }
+            }
+        }catch (SQLException s){
+            s.printStackTrace();
+        }
+        System.out.println("No customer found with the name entered");
+        return -1;
     }
 
     public void fillAppointmentData(Appointments appointment) throws SQLException {
@@ -141,7 +182,7 @@ public class AppointmentFormController {
         afEndTimePicker.setValue(appointment.getEndDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat));
         afType.setText(appointment.getType());
         afUserID.setText(String.valueOf(appointment.getUsersID()));
-        afCustomerID.setText(String.valueOf(appointment.getCustomerID()));
+        afSelectCustomer.setValue(getCustomerNameByID(appointment.getCustomerID()));
         afLocation.setText(appointment.getLocation());
         afDescription.setText(appointment.getDescription());
         afContact.setValue(getContactNameByID(appointment.getContactsID()));
@@ -149,20 +190,13 @@ public class AppointmentFormController {
         afTitle.setText(appointment.getTitle());
     }
 
-
-
     public AppointmentFormController() throws SQLException {}
 
     public void populateContactList() throws SQLException {
         ObservableList<String> contactNames = FXCollections.observableArrayList();
-        for(Contacts contact : cd.getAllFromDB()){
+        for(Contacts contact : contactsDao.getAllFromDB()){
             contactNames.add(contact.getContactName());}
         afContact.setItems(contactNames);
-    }
-
-    public void closeSceneWindow() {
-        Stage stage = (Stage) afContact.getScene().getWindow();
-        stage.close();
     }
 
     public ObservableList<String> setTimeComboBoxes() {
@@ -194,8 +228,8 @@ public class AppointmentFormController {
             Alerter.warningAlert("Please fill in the Type field!");
             return;
         }
-        if (afCustomerID.getText() == null) {
-            Alerter.warningAlert("Please fill in the CustomerID field!");
+        if (afSelectCustomer.getValue() == null) {
+            Alerter.warningAlert("Please Select a customer field!");
             return;
         }
         if (afUserID.getText() == null) {
@@ -277,8 +311,8 @@ public class AppointmentFormController {
         } else {
             return false;
         }
-        if (Validator.intChecker(afCustomerID.getText(), "Please only enter number characters for Description field!")) {
-            scheduleAppointment.setCustomerID(Integer.parseInt(afCustomerID.getText()));
+        if (Validator.intChecker(String.valueOf(findCustomerIDByName(afSelectCustomer.getValue())), "Please only enter number characters for Description field!")) {
+            scheduleAppointment.setCustomerID(findCustomerIDByName(afSelectCustomer.getValue()));
         } else {
             return false;
         }
@@ -299,15 +333,19 @@ public class AppointmentFormController {
         afDescription.clear();
         afLocation.clear();
         afType.clear();
-        afCustomerID.clear();
+        afSelectCustomer.setValue(null);
         afUserID.clear();
         afDatePickerEnd.setValue(null);
         afDatePickerStart.setValue(null);
         afStartTimePicker.setValue(null);//maybe""?
         afEndTimePicker.setValue(null);
-        afCustomerID.clear();
         afUserID.clear();
         afContact.setValue(null);
+    }
+
+    public void cancelButtonClicked(ActionEvent event){
+        Stage stage = (Stage) afTitle.getScene().getWindow();
+        stage.close();
     }
 
     public boolean compareAppointmentToBusiness(Appointments appointments) {
@@ -353,6 +391,7 @@ public class AppointmentFormController {
         if (estLocalTimeStart.isAfter(businessOpenTime) && estLocalTimeStart.isBefore(businessCloseTime)) {
             return checkWithinBusinessWeek > startBusinessWeek && checkWithinBusinessWeek < endBusinessWeek;
         }
+        System.out.println("Didn't pass the business test");
         return false;
     }
 }

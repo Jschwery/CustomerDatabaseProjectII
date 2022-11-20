@@ -1,9 +1,12 @@
 package com.example.customerdatabaseprojectii.daos;
 
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
+import com.example.customerdatabaseprojectii.view.AppointmentFormController;
 import com.example.customerdatabaseprojectii.view.CustomerMainController;
+import com.example.customerdatabaseprojectii.view.LoginController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -15,12 +18,11 @@ import java.util.Objects;
 public class AppointmentsDao implements Dao<Appointments> {
     ContactsDao cd = new ContactsDao();
     UsersDao ud = new UsersDao();
+    AppointmentFormController afc = new AppointmentFormController();
     private static final String appointmentsQuery = "SELECT * FROM appointments";
     private static final String insertAppointmenteQuery = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type, " +
             "Start, End, Create_Date, Created_By, Last_Update, Last_Updated_By, Customer_ID, User_ID, Contact_ID) " +
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-    public static int appointmentCount = 0;
 
     private static final String appointmentUpdateQuery = "UPDATE appointments SET Title = ?, Description = ?, " +
             "Location = ?, Type = ?, Start = ?, End = ?, Last_Update = ?, Last_Updated_By = ?, " +
@@ -29,12 +31,10 @@ public class AppointmentsDao implements Dao<Appointments> {
 
     public AppointmentsDao() throws SQLException {}
 
-
     @Override
     public String dbInsert(Appointments appointment) throws SQLException {
-        Connection apptConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(insertAppointmenteQuery, apptConnection);
-        PreparedStatement ps = DbConnection.getPreparedStatement();
+
+        PreparedStatement ps = DbConnection.dbStatementTemplate(insertAppointmenteQuery).orElse(null);
         if (ps != null) {
             ps.setInt(1, appointment.getAppointmentID());
             ps.setString(2, appointment.getTitle());
@@ -53,21 +53,24 @@ public class AppointmentsDao implements Dao<Appointments> {
 
             //if the user does not already have an appointment & the time of the appointment is not already taken
             //allow insertion
-            if (ud.getAllFromDB().stream().noneMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID()))&& ) {
+            if (afc.compareAppointmentToBusiness(appointment) && getAllFromDB().stream().
+                    filter(app -> Objects.equals(app.getUsersID(), LoginController.
+                            getCurrentlyLoggedInUser().getUser_ID())).noneMatch(obj -> true) ||
+                    getAllFromDB().stream().filter(a -> Objects.equals(a.getUsersID(), appointment.getUsersID())).noneMatch(obj->true)) {
+
                 int rowsUpdated = ps.executeUpdate();
-                appointmentCount++;
                 System.out.printf("%d rows successfully inserted appointment into database" +
                         "\nTime: " + LocalTime.now(), rowsUpdated);
+
             }
         }
+        Alerter.informationAlert(String.format("User already has an appointment scheduled\nStart: %b\nEnd: %b ", appointment.getStartDateTime(), appointment.getEndDateTime()));
         return "";
     }
 
     @Override
     public ObservableList<Appointments> getAllFromDB() throws SQLException {
-        Connection apptConnection = DbConnection.getConnection();
-        DbConnection.makePreparedStatement(appointmentsQuery, apptConnection);
-        PreparedStatement ps = DbConnection.getPreparedStatement();
+        PreparedStatement ps = DbConnection.dbStatementTemplate(appointmentsQuery).orElse(null);
         ObservableList<Appointments> apps = FXCollections.observableArrayList();
         if (ps != null) {
             ResultSet rs = ps.executeQuery();
@@ -92,9 +95,8 @@ public class AppointmentsDao implements Dao<Appointments> {
 
     @Override
     public String updateDB(Appointments appointment) throws SQLException {
-            Connection apptConnection = DbConnection.getConnection();
-            DbConnection.makePreparedStatement(appointmentUpdateQuery, apptConnection);
-            PreparedStatement ps = DbConnection.getPreparedStatement();
+            CustomerMainController mc = new CustomerMainController();
+            PreparedStatement ps = DbConnection.dbStatementTemplate(appointmentUpdateQuery).orElse(null);
             if (ps != null) {
                 ps.setString(1, appointment.getTitle());
                 ps.setString(2, appointment.getDescription());
@@ -112,7 +114,7 @@ public class AppointmentsDao implements Dao<Appointments> {
                 System.out.println(appointment.getCustomerID());
                 if (ud.getAllFromDB().stream().
                         anyMatch(m -> Objects.equals(m.getUser_ID(), appointment.getUsersID())) &&
-                        CustomerMainController.getAllCustomers().stream().
+                        mc.getAllCustomers().stream().
                                 anyMatch(m -> Objects.equals(m.getCustomerID(), appointment.getCustomerID())) &&
                         cd.getAllFromDB().stream().
                                 anyMatch(m -> Objects.equals(m.getContactID(), appointment.getContactsID()))) {
@@ -124,6 +126,7 @@ public class AppointmentsDao implements Dao<Appointments> {
                     System.out.println("Not valid");
                 }
             }
+            System.out.println("Unsuccessfully updated appointment to database");
             return "";
     }
 

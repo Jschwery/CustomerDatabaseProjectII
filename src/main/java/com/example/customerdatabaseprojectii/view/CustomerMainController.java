@@ -21,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -61,13 +62,11 @@ public class CustomerMainController implements Initializable {
 
     private static Customers selectedCustomer = null;
     AppointmentsDao ad = new AppointmentsDao();
+    CustomersDao cd = new CustomersDao();
     private static final String deleteRelatedAppointmentQuery = "DELETE FROM appointments WHERE Appointment_ID = ?";
 
     public CustomerMainController() throws SQLException {}
 
-    public static void setSelectedCustomerNull(){
-        selectedCustomer = null;
-    }
     public static Customers getSelectedCustomer() {
         if(selectedCustomer!=null) {
             return selectedCustomer;
@@ -85,12 +84,20 @@ public class CustomerMainController implements Initializable {
         }
     }
 
-    private static final ObservableList<Customers> allCustomersObservableList = FXCollections.observableArrayList();
-    public static ObservableList<Customers> getAllCustomers() {
+    private final ObservableList<Customers> allCustomersObservableList = cd.getAllFromDB();
+    public ObservableList<Customers> getAllCustomers() {
         return allCustomersObservableList;
     }
-    public static void addCustomerToObservableList(Customers customer) {
+    public void addCustomerToObservableList(Customers customer) {
         allCustomersObservableList.add(customer);
+    }
+
+    public void setCustomersList() throws SQLException {
+        CustomersDao cd = new CustomersDao();
+        getAllCustomers().addAll(cd.getAllFromDB());
+    }
+    public static void setSelectedCustomerNull(){
+        CustomerMainController.selectedCustomer = null;
     }
 
 
@@ -121,25 +128,6 @@ public class CustomerMainController implements Initializable {
         deleteStatement.execute();
     }
 
-    public void switchToAddCustomerForm(ActionEvent event) throws IOException {
-        CustomerFormController.modifyCustomer = false;
-        if (Objects.equals(getSelectedCustomer().getCustomerName(), "") || Objects.equals(getSelectedCustomer(), null)) {
-            Main.genNewStageAndScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml", 340, 568, "Customer Form");
-        } else {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are trying to add a new customer, with one selected!\nClick 'OK' to deselect the customer, or cancel to escape.");
-            Optional<ButtonType> buttonResult = alert.showAndWait();
-
-            if (buttonResult.get() == ButtonType.OK) {
-                setSelectedCustomerNull();
-            } else {
-                if (buttonResult.get() == ButtonType.CANCEL) {
-                    System.out.println("Customer is still selected");
-                }
-            }
-        }
-    }
-
-
 
     public void setCustomerSelected(){
     try {
@@ -152,15 +140,12 @@ public class CustomerMainController implements Initializable {
         setCustomerSelected();
     }
 
-    public static void setCustomerByIndex(int customerIndex, Customers customer) {
-    getAllCustomers().set(customerIndex, customer);
-    }
 
-    public static Customers getCustomerByIndex(int customerIndex){
+    public Customers getCustomerByIndex(int customerIndex){
         return getAllCustomers().get(customerIndex);
     }
 
-    public static int getCustomerIndex(Customers customer) {
+    public int getCustomerIndex(Customers customer) {
         for (Customers c : getAllCustomers()) {
             if (c.equals(customer)) {
                 return getAllCustomers().indexOf(c);
@@ -192,16 +177,18 @@ public class CustomerMainController implements Initializable {
         if(CustomerFormController.modifyCustomer){
             try {
                 String s = cd.updateDB(customer);
-                System.out.println(s);
-                getAllCustomers().set(CustomerMainController.getCustomerIndex(customer),customer);
+                if(!Objects.equals(s, "")){
+                    getAllCustomers().set(getCustomerIndex(customer),customer);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }else{
             try {
                 String s = cd.dbInsert(customer);
-                System.out.println(s);
-                getAllCustomers().add(customer);
+                if(!Objects.equals(s, "")){
+                    getAllCustomers().add(customer);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -210,9 +197,9 @@ public class CustomerMainController implements Initializable {
     public void addCustomer(ActionEvent event) throws IOException {
         if (Objects.equals(getSelectedCustomer(), null)) {
             CustomerFormController.modifyCustomer = false;
-
+            URL path =  new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml"));
+            loader.setLocation(path);
             Parent node = loader.load();
             CustomerFormController afc = loader.getController();
             afc.customerFormInit(selectedCustomer, customerConsumer);
@@ -232,10 +219,9 @@ public class CustomerMainController implements Initializable {
     public void modifyCustomer(ActionEvent event) throws IOException {
         if (!Objects.equals(getSelectedCustomer().getCustomerName(), "")) {
             CustomerFormController.modifyCustomer = true;
-
+            URL path =  new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
             FXMLLoader loader = new FXMLLoader();
-
-            loader.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml"));
+            loader.setLocation(path);
             Parent node = loader.load();
             CustomerFormController afc = loader.getController();
 
@@ -259,7 +245,7 @@ public class CustomerMainController implements Initializable {
             switch (customerTableSwitchComboBox.getValue()) {
                 case "Customers":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 519, 646, "Customers", false);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -267,14 +253,14 @@ public class CustomerMainController implements Initializable {
                     break;
                 case "Appointments":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 468, 893, "Appointments", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "Reports":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 558, 791, "Reports", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -285,16 +271,17 @@ public class CustomerMainController implements Initializable {
         }
     }
 
-
-    public static Optional<Customers> customerIDCountSetter(){
-    if(getAllCustomers().size() > 1){
-        return getAllCustomers().stream().max(Comparator.comparing(Customers::getCustomerID));
-        }
-        return Optional.empty();
-    }
+//
+//    public static Optional<Customers> customerIDCountSetter(){
+//    if(getAllCustomers().size() > 1){
+//        return getAllCustomers().stream().max(Comparator.comparing(Customers::getCustomerID));
+//        }
+//        return Optional.empty();
+//    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         if(System.getProperty("user.language").equals("fr") || LoginController.changeLang){
             custCustomerID.setText("Identifiant du client");
             custCustomerName.setText("Nom");
@@ -307,31 +294,22 @@ public class CustomerMainController implements Initializable {
             customerTableSwitchButton.setText("Commutateur");
             customerTableSwitchComboBox.setPromptText("Tableaux");
             customerLabel.setText("Les clients");
+            customerTableSwitchButton.setMinWidth(134);
         }
 
         selectedCustomer = null;
-        Optional<Customers> customer = customerIDCountSetter();
-        if(customer.isPresent()){
-            CustomersDao.idCount = customer.get().getCustomerID() + 1;
-        }
-
-
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
         tableComboList.add("Appointments");
         tableComboList.add("Customers");
         tableComboList.add("Reports");
         customerTableSwitchComboBox.setItems(tableComboList);
         customerTableView.setItems(getAllCustomers());
-        System.out.println(getAllCustomers());
         custCustomerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         custCustomerName.setCellValueFactory(new PropertyValueFactory<>("customerName"));
         custAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
         custPostal.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
         custPhone.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         custDivID.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
-
-
-
 
     }
 }

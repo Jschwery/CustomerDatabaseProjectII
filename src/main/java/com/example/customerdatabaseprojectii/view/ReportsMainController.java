@@ -32,7 +32,7 @@ public class ReportsMainController implements Initializable {
             switch (reportsTableSwitchComboBox.getValue()) {
                 case "Customers":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 519, 646, "Customers", false);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -40,14 +40,14 @@ public class ReportsMainController implements Initializable {
                     break;
                 case "Appointments":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 468, 893, "Appointments", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "Reports":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 558, 791, "Reports", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

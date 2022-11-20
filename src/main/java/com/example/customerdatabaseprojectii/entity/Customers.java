@@ -12,10 +12,7 @@ public class Customers {
     private String postalCode;
     private String phoneNumber;
     private int divisionID;
-    private Timestamp createDateTime;
-    private String createdBy;
-    private Timestamp lastUpdate;
-    private String lastUpdatedBy;
+
 
     @Override
     public String toString() {

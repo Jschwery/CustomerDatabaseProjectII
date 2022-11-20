@@ -64,8 +64,8 @@ public class CountriesDao implements Dao<Countries>{
         PreparedStatement ps = DbConnection.dbStatementTemplate(deleteCountryQuery).orElse(null);
         if(ps != null) {
             ps.setInt(1, country.getCountryID());
-            return String.format("%d countries deleted");
-
+            int numCountriesDeleted = ps.executeUpdate();
+            return String.format("%d countries deleted", numCountriesDeleted);
         }
         return null;
     }

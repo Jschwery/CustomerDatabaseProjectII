@@ -2,8 +2,10 @@ package com.example.customerdatabaseprojectii.view;
 
 import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
+import com.example.customerdatabaseprojectii.daos.ContactsDao;
 import com.example.customerdatabaseprojectii.daos.CustomersDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
+import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.entity.Customers;
 import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
@@ -13,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -21,16 +24,22 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class AppointmentMainController {
+public class AppointmentMainController implements Initializable {
 
+    public static Map<Integer, Appointments> customerIDToAppointment = new HashMap<>();
+    protected static Appointments selectedAppointment = null;
+    static Users currentUser = LoginController.getCurrentlyLoggedInUser();
     @FXML
     Label appointmentTableLabel;
     @FXML
@@ -134,66 +143,81 @@ public class AppointmentMainController {
     Button allDeleteAppointmentButton;
     AppointmentsDao ad = new AppointmentsDao();
     CustomersDao cd = new CustomersDao();
-    static Users currentUser = LoginController.getCurrentlyLoggedInUser();
+    ContactsDao contactsDao = new ContactsDao();
     ObservableList<Appointments> appointmentsList = FXCollections.observableArrayList();
-    public static boolean appointmentAddedSuccess = false;
-    public static Map<Integer, Appointments> customerIDToAppointment = new HashMap<>();
     ObservableList<Customers> customersObservableList = cd.getAllFromDB();
+    ObservableList<Contacts> contactsObservableList = contactsDao.getAllFromDB();
 
-    protected static Appointments selectedAppointment = null;
+    public AppointmentMainController() throws SQLException {
+    }
 
-    public AppointmentMainController() throws SQLException {}
+    public int getIndexOfAppointment(Appointments appointment) {
+        return appointmentsList.indexOf(appointment);
+    }
 
-    public void setSelectedAppointment(MouseEvent event){
-        if(appointmentsAllTab.isSelected()){
+    public void setSelectedAppointment(MouseEvent event) {
+        if (appointmentsAllTab.isSelected()) {
             selectedAppointment = aptAllTableView.getSelectionModel().getSelectedItem();
-        }else if(appointmentsWeeklyTab.isSelected()){
+        } else if (appointmentsWeeklyTab.isSelected()) {
             selectedAppointment = aptWeeklyTableView.getSelectionModel().getSelectedItem();
-        }else if(appointmentsMonthlyTab.isSelected()){
+        } else if (appointmentsMonthlyTab.isSelected()) {
             selectedAppointment = aptMonthlyTableView.getSelectionModel().getSelectedItem();
         }
-        System.out.println("Selected appointment: " + selectedAppointment);
-
     }
 
     public void deleteAppointment(ActionEvent event) throws SQLException {
-        if(selectedAppointment != null){
+        if (selectedAppointment != null) {
             ad.deleteFromDB(selectedAppointment);
             appointmentsList.remove(selectedAppointment);
-        }else {
+        } else {
             Alerter.informationAlert("No appointment selected to delete");
         }
     }
 
     /**
-     *
      * @param event when the add appointment button is clicked the scenes will switch and
      *              the formInit method will be called with the parameters set
      * @throws IOException
      */
-    public void addAppointmentForm(ActionEvent event) throws IOException{
+    public void addAppointmentForm(ActionEvent event) throws IOException {
         if (Objects.equals(selectedAppointment, null)) {
-
+            URL path = new File("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml").toURI().toURL();
             AppointmentFormController.isModified = false;
             FXMLLoader fxL = new FXMLLoader();
-            fxL.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentFormController.java"));
+            fxL.setLocation(path);
             Parent node = fxL.load();
-
             AppointmentFormController formController = fxL.getController();
             Consumer<Appointments> addAppointment = appointment -> {
                 appointment.setCreatedBy(currentUser.getUsername());
                 appointment.setLastUpdatedBy(currentUser.getUsername());
                 appointment.setUsersID(currentUser.getUser_ID());
-                try {String s = ad.dbInsert(appointment);
-                    System.out.println(s);} catch (SQLException e) {e.printStackTrace();}
-                if(appointmentAddedSuccess){
-                    appointmentsList.add(appointment);
+                try {
+                    String s = ad.dbInsert(appointment);
+                    System.out.println(s);
+                    if (!Objects.equals(s, "")) {
+                        appointmentsList.add(appointment);
+                    }
+                } catch (SQLException s) {
+                    s.printStackTrace();
                 }
             };
+            Supplier<ObservableList<String>> customerNameSupplier = () -> {
+                try {
+                    CustomersDao cDao = new CustomersDao();
+                    ObservableList<String> customerList = FXCollections.observableArrayList();
+                    for (Customers c : cDao.getAllFromDB()) {
+                        customerList.add(c.getCustomerName());
+                    }
+                    return customerList;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            };
             try {
-                formController.appointmentInit(customersObservableList, selectedAppointment, addAppointment);
-            }catch (SQLException s){
-                s.printStackTrace();
+                formController.appointmentInit(contactsObservableList, selectedAppointment, addAppointment, customerNameSupplier, customersObservableList);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
             Stage appointmentFormStage = new Stage();
             appointmentFormStage.setScene(new Scene(node));
@@ -201,22 +225,17 @@ public class AppointmentMainController {
             appointmentFormStage.initStyle(StageStyle.DECORATED);
 
             appointmentFormStage.show();
-        }
-        else {
+        } else {
             Alerter.warningAlert("You are trying to add an appointment that already exists, unselecting appointment");
             selectedAppointment = null;
         }
     }
 
-    public int getIndexOfAppointment(Appointments appointment){
-        return appointmentsList.indexOf(appointment);
-    }
-
-
-    public void updateAppointmentForm(ActionEvent event) throws IOException{
+    public void updateAppointmentForm(ActionEvent event) throws IOException {
         if (selectedAppointment != null) {
+            URL path = new File("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml").toURI().toURL();
             FXMLLoader fxL = new FXMLLoader();
-            fxL.setLocation(new URL("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml"));
+            fxL.setLocation(path);
             Parent node = fxL.load();
             AppointmentFormController afc = fxL.getController();
             AppointmentFormController.isModified = true;
@@ -234,9 +253,21 @@ public class AppointmentMainController {
                 }
             };
             try {
-                afc.appointmentInit(customersObservableList, selectedAppointment, updateAppointment);
-            } catch (SQLException e) {
-                e.printStackTrace();
+                afc.appointmentInit(contactsObservableList, selectedAppointment, updateAppointment, () -> {
+                    try {
+                        CustomersDao cDao = new CustomersDao();
+                        ObservableList<String> customerList = FXCollections.observableArrayList();
+                        for (Customers c : cDao.getAllFromDB()) {
+                            customerList.add(c.getCustomerName());
+                        }
+                        return customerList;
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }, customersObservableList);
+            } catch (SQLException s) {
+                s.printStackTrace();
             }
             Stage appointmentFormStage = new Stage();
             appointmentFormStage.setScene(new Scene(node));
@@ -249,22 +280,29 @@ public class AppointmentMainController {
     }
 
     //if the appointment is within the next seven days
-    public void setTableFilteredAppointments(){
-        if(appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsAllTab.getText(), "Weekly")){
-            ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all-> all.getStartDateTime().toLocalDateTime().isAfter(RelatedTime.getCurrentDateTime()) &&
-                    all.getEndDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusWeeks(1)) && all.getEndDateTime().toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).collect(Collectors.toCollection(FXCollections::observableArrayList));
-                    aptWeeklyTableView.setItems(weeklyList);
-                    return;
-        }if(appointmentsMonthlyTab.isSelected() && Objects.equals(appointmentsMonthlyTab.getText(), "Monthly")){
-            ObservableList<Appointments> monthlyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().isAfter(RelatedTime.getCurrentDateTime().plusWeeks(1)) &&
-                    all.getStartDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1)) && all.getEndDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1)) &&
-                    all.getEndDateTime().toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).collect(Collectors.toCollection(FXCollections::observableArrayList));
-                    aptMonthlyTableView.setItems(monthlyList);
-                    return;
+    public void setTableFilteredAppointments() throws SQLException {
+        appointmentsList.setAll(ad.getAllFromDB());
+
+        if (appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsWeeklyTab.getText(), "Weekly")) {
+            ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().
+                            isAfter(RelatedTime.getCurrentDateTime()) && all.getEndDateTime().toLocalDateTime().
+                            isBefore(RelatedTime.getCurrentDateTime().plusWeeks(1)) && all.getEndDateTime().
+                            toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).
+                    collect(Collectors.toCollection(FXCollections::observableArrayList));
+            aptWeeklyTableView.setItems(weeklyList);
+            return;
         }
-        if(appointmentsAllTab.isSelected()){
-            aptAllTableView.setItems(appointmentsList);
+        if (appointmentsMonthlyTab.isSelected() && Objects.equals(appointmentsMonthlyTab.getText(), "Monthly")) {
+            ObservableList<Appointments> monthlyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().
+                            isAfter(RelatedTime.getCurrentDateTime().plusWeeks(1)) &&
+                            all.getStartDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1))
+                            && all.getEndDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1))
+                            && all.getEndDateTime().toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).
+                    collect(Collectors.toCollection(FXCollections::observableArrayList));
+            aptMonthlyTableView.setItems(monthlyList);
+            return;
         }
+        aptAllTableView.setItems(appointmentsList);
     }
 
     public void switchTablesClicked(ActionEvent event) throws IOException {
@@ -272,7 +310,7 @@ public class AppointmentMainController {
             switch (appointmentsSwitchTableComboBox.getValue()) {
                 case "Customers":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 750, 750, "Customers", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CustomerMain.fxml", Main.getMainStage(), 519, 646, "Customers", false);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -280,14 +318,14 @@ public class AppointmentMainController {
                     break;
                 case "Appointments":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 750, 750, "Appointments", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentsMain.fxml", Main.getMainStage(), 468, 893, "Appointments", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
                 case "Reports":
                     try {
-                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 750, 750, "Reports", false);
+                        Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/ReportsMain.fxml", Main.getMainStage(), 558, 791, "Reports", false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -298,8 +336,8 @@ public class AppointmentMainController {
         }
     }
 
-    public void checkUserLocation(){
-        if((System.getProperty("user.language").equals("fr") || LoginController.changeLang)){
+    public void checkUserLocation() {
+        if ((System.getProperty("user.language").equals("fr") || LoginController.changeLang)) {
             appointmentsWeeklyTab.setText("Hebdomadaire");
             appointmentsMonthlyTab.setText("Mensuel");
             appointmentsAllTab.setText("Toute");
@@ -345,9 +383,14 @@ public class AppointmentMainController {
             allAddAppointmentButton.setText("Ajouter");
             allUpdateAppointmentButton.setText("Mettre à jour");
             allDeleteAppointmentButton.setText("Effacer");
+
+            appointmentsSwitchTableButton.setPrefWidth(195);
+            appointmentsSwitchTableButton.setLayoutX(675);
+            appointmentsSwitchTableComboBox.setLayoutX(525);
         }
     }
-    public void setColumns(){
+
+    public void setColumns() {
         aptWeekID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptWeekTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptWeekDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -382,9 +425,13 @@ public class AppointmentMainController {
         aptAllContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
     }
 
-    @FXML
-    public void initialize() {
-        setTableFilteredAppointments();
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        try {
+            setTableFilteredAppointments();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
 
         tableComboList.add("Appointments");
@@ -394,6 +441,5 @@ public class AppointmentMainController {
         checkUserLocation();
         setColumns();
         appointmentsSwitchTableComboBox.setItems(tableComboList);
-
     }
 }

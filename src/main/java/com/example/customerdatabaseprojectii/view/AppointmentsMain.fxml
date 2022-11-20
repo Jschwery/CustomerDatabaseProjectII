@@ -18,14 +18,14 @@
          </font>
       </Label>
       <ComboBox fx:id="appointmentsSwitchTableComboBox" layoutX="593.0" layoutY="46.0" prefHeight="31.0" prefWidth="150.0" promptText="Tables" />
-      <Button fx:id="appointmentsSwitchTableButton" layoutX="757.0" layoutY="46.0" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="27.0" prefWidth="115.0" text="Switch Table">
+      <Button fx:id="appointmentsSwitchTableButton" layoutX="757.0" layoutY="46.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="27.0" prefWidth="115.0" text="Switch Table">
          <font>
             <Font size="15.0" />
          </font>
       </Button>
       <TabPane fx:id="appointmentsTabPane" layoutX="14.0" layoutY="91.0" prefHeight="305.0" prefWidth="858.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-          <Tab fx:id="appointmentsWeeklyTab" text="Weekly">
+          <Tab fx:id="appointmentsWeeklyTab" onSelectionChanged="#setTableFilteredAppointments" text="Weekly">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="276.0" prefWidth="769.0">
                      <children>
@@ -49,7 +49,7 @@
                      </children></AnchorPane>
             </content>
           </Tab>
-          <Tab fx:id="appointmentsMonthlyTab" text="Monthly">
+          <Tab fx:id="appointmentsMonthlyTab" onSelectionChanged="#setTableFilteredAppointments" text="Monthly">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -73,7 +73,7 @@
                      </children></AnchorPane>
             </content>
           </Tab>
-            <Tab fx:id="appointmentsAllTab" text="All">
+            <Tab fx:id="appointmentsAllTab" onSelectionChanged="#setTableFilteredAppointments" text="All">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="348.0" prefWidth="731.0">
                      <children>
