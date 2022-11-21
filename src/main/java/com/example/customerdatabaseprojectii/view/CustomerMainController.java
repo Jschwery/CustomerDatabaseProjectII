@@ -67,22 +67,23 @@ public class CustomerMainController implements Initializable {
 
     public CustomerMainController() throws SQLException {}
 
-    public static Customers getSelectedCustomer() {
-        if(selectedCustomer!=null) {
-            return selectedCustomer;
-        }else{
-            Customers customerDefault = new Customers();
-            customerDefault.setDivisionID(0);
-            customerDefault.setCustomerID(0);
-            customerDefault.setCustomerName("");
-            customerDefault.setPostalCode("");
-            customerDefault.setPhoneNumber("");
-            customerDefault.setAddress("");
+//    public static Customers getSelectedCustomer() {
+//        if(selectedCustomer!=null) {
+//            return selectedCustomer;
+//        }else{
+//            Customers customerDefault = new Customers();
+//            customerDefault.setDivisionID(0);
+//            customerDefault.setCustomerID(0);
+//            customerDefault.setCustomerName("");
+//            customerDefault.setPostalCode("");
+//            customerDefault.setPhoneNumber("");
+//            customerDefault.setAddress("");
+//
+//            System.out.println("Selected Customer is null, returning default customer");
+//            return customerDefault;
+//        }
+//    }
 
-            System.out.println("Selected Customer is null, returning default customer");
-            return customerDefault;
-        }
-    }
 
     private final ObservableList<Customers> allCustomersObservableList = cd.getAllFromDB();
     public ObservableList<Customers> getAllCustomers() {
@@ -90,6 +91,9 @@ public class CustomerMainController implements Initializable {
     }
     public void addCustomerToObservableList(Customers customer) {
         allCustomersObservableList.add(customer);
+    }
+    public static Optional<Customers> getSelectedCustomer(){
+        return Optional.ofNullable(selectedCustomer);
     }
 
     public void setCustomersList() throws SQLException {
@@ -102,13 +106,16 @@ public class CustomerMainController implements Initializable {
 
 
     public void deleteRelatedAppointments() throws SQLException {
-        int customerIDToDelete = getSelectedCustomer().getCustomerID();
-        PreparedStatement deleteStatement = DbConnection.getConnection().prepareStatement(deleteRelatedAppointmentQuery);
-        deleteStatement.setInt(1, customerIDToDelete);
-        for(Appointments app :  ad.getAllFromDB()){
-            if(app.getCustomerID() == customerIDToDelete){
-                deleteStatement.execute();
-                customerDeletedText.setText(String.format("Customer: '%s' has been deleted", getSelectedCustomer().getCustomerName()));
+        if (getSelectedCustomer().isPresent()) {
+            int customerIDToDelete = getSelectedCustomer().get().getCustomerID();
+            PreparedStatement deleteStatement = DbConnection.getConnection().prepareStatement(deleteRelatedAppointmentQuery);
+            deleteStatement.setInt(1, customerIDToDelete);
+
+            for (Appointments app : ad.getAllFromDB()) {
+                if (app.getCustomerID() == customerIDToDelete && getSelectedCustomer().isPresent()) {
+                    deleteStatement.execute();
+                    customerDeletedText.setText(String.format("Customer: '%s' has been deleted", getSelectedCustomer().get().getCustomerName()));
+                }
             }
         }
     }
@@ -194,8 +201,8 @@ public class CustomerMainController implements Initializable {
             }
         }
     };
-    public void addCustomer(ActionEvent event) throws IOException {
-        if (Objects.equals(getSelectedCustomer(), null)) {
+    public void addCustomer(ActionEvent event) throws IOException, SQLException {
+        if (getSelectedCustomer().isEmpty()) {
             CustomerFormController.modifyCustomer = false;
             URL path =  new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
             FXMLLoader loader = new FXMLLoader();
@@ -215,9 +222,19 @@ public class CustomerMainController implements Initializable {
             selectedCustomer = null;
         }
     }
+    //TODO customers divid needs to be configured for displaying the divs or the firstlevel divisions
+    //the customer add & delete form customerID need to be populated
+    //if the user is a new user it will be the result of getting a customerDao getting all of them, and adding one,
+    //and the updating will be getting the selected customer id and setting the text to that
 
-    public void modifyCustomer(ActionEvent event) throws IOException {
-        if (!Objects.equals(getSelectedCustomer().getCustomerName(), "")) {
+    //then we need to figure out why the uk first level divs are displaying canadas first levels
+    //when canada is selected
+
+
+
+
+    public void modifyCustomer(ActionEvent event) throws IOException, SQLException {
+        if (getSelectedCustomer().isPresent()) {
             CustomerFormController.modifyCustomer = true;
             URL path =  new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
             FXMLLoader loader = new FXMLLoader();
@@ -237,7 +254,6 @@ public class CustomerMainController implements Initializable {
             Alerter.warningAlert("You are trying to add an customer that already exists, unselecting customer");
             selectedCustomer = null;
         }
-
     }
 
     public void switchTablesClicked(ActionEvent event) throws IOException {
@@ -270,14 +286,6 @@ public class CustomerMainController implements Initializable {
             Alerter.informationAlert(String.format("Could not find the table: %s. Please try again later!", customerTableSwitchComboBox.getValue()));
         }
     }
-
-//
-//    public static Optional<Customers> customerIDCountSetter(){
-//    if(getAllCustomers().size() > 1){
-//        return getAllCustomers().stream().max(Comparator.comparing(Customers::getCustomerID));
-//        }
-//        return Optional.empty();
-//    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

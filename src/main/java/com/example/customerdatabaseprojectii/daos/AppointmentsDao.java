@@ -11,9 +11,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Optional;
 
 public class AppointmentsDao implements Dao<Appointments> {
     ContactsDao cd = new ContactsDao();
@@ -64,11 +65,21 @@ public class AppointmentsDao implements Dao<Appointments> {
 
             }
         }
-        Alerter.informationAlert(String.format("User already has an appointment scheduled\nStart: %b\nEnd: %b ", appointment.getStartDateTime(), appointment.getEndDateTime()));
+        Optional<Appointments> findAppointment = getAllFromDB().stream().filter(app -> Objects.equals(app.getUsersID(), appointment.getUsersID())).findFirst();
+        DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
+        ZoneId userZone = RelatedTime.getUserTimeZone();
+        if(findAppointment.isPresent()) {
+            LocalDateTime toDisplayStart = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getStartDateTime());
+            LocalDateTime toDisplayEnd = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getEndDateTime());
+            LocalTime start = LocalTime.parse(toDisplayStart.toLocalTime().toString(), hourAndMinuteFormat);
+            LocalDate startDate = toDisplayStart.toLocalDate();
+            System.out.println(startDate);
+            LocalTime end = LocalTime.parse(toDisplayEnd.toLocalTime().toString(), hourAndMinuteFormat);
+            Alerter.informationAlert(String.format("User already has an appointment scheduled:\n%s\n\nStart: %s\nEnd: %s ",startDate, start, end));
+        }
         return "";
     }
 
-    @Override
     public ObservableList<Appointments> getAllFromDB() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(appointmentsQuery).orElse(null);
         ObservableList<Appointments> apps = FXCollections.observableArrayList();

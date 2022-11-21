@@ -59,6 +59,10 @@ public class CustomerFormController{
         customerCountries.add("UK");
         customerCountries.add("Canada");
     }
+    public int getCustomerIDCount() throws SQLException {
+        return cd.getAllFromDB().size() + 1;
+    }
+
 
     public void populateObservableFirstLevelDivs(){
       try{
@@ -79,16 +83,20 @@ public class CustomerFormController{
         }
     }
 
-    public void customerFormInit(Customers selectedCustomer, Consumer<Customers> customerConsumer) {
+    public void customerFormInit(Customers selectedCustomer, Consumer<Customers> customerConsumer) throws SQLException {
         this.customersConsumer = customerConsumer;
         this.customer = selectedCustomer;
 
-        if (modifyCustomer && CustomerMainController.getSelectedCustomer() != null) {
+        if (modifyCustomer && CustomerMainController.getSelectedCustomer().isPresent()) {
+            cfCustomerID.setText(String.valueOf(CustomerMainController.getSelectedCustomer().get().getCustomerID()));
             cfCustomerName.setText(customer.getCustomerName());
             cfCustomerAddress.setText(customer.getAddress());
             cfCustomerNumber.setText(customer.getPhoneNumber());
             cfCustomerPostal.setText(customer.getPostalCode());
+        }else{
+            cfCustomerID.setText(String.valueOf(getCustomerIDCount()));
         }
+
     }
 
     public void filterFirstLevelByCountry(ActionEvent event) {
@@ -152,7 +160,6 @@ public class CustomerFormController{
         return -1;
     }
 
-
     public void closeSceneWindow() {
         Stage stage = (Stage) cfCustomerName.getScene().getWindow();
         CustomerMainController.setSelectedCustomerNull();
@@ -173,6 +180,7 @@ public class CustomerFormController{
     }
 
     public void addCustomerClicked(ActionEvent event) throws IOException {
+        customer = new Customers();
         customer.setCustomerID(Integer.parseInt(cfCustomerID.getText()));
         customer.setCustomerName(cfCustomerName.getText());
         customer.setAddress(cfCustomerAddress.getText());
@@ -180,6 +188,7 @@ public class CustomerFormController{
         customer.setPostalCode(cfCustomerPostal.getText());
         customer.setDivisionID(getDivisionID(cfCustomerFirstLevel.getValue()));
 
+        System.out.println(customer);
         customersConsumer.accept(customer);
         CustomerMainController.setSelectedCustomerNull();
         clearLists();

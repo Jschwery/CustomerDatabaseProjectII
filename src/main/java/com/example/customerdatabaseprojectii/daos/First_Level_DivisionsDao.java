@@ -21,9 +21,9 @@ public class First_Level_DivisionsDao{
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 First_Level_Divisions div = new First_Level_Divisions();
-                div.setCountryID(rs.getInt("Division_ID"));
-                div.setDivision(rs.getString("Division"));
                 div.setCountryID(rs.getInt("Country_ID"));
+                div.setDivision(rs.getString("Division"));
+                div.setDivisionID(rs.getInt("Division_ID"));
 
                 observableFrstLvlDvsnList.add(div);
             }

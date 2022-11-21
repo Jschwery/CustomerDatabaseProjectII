@@ -1,6 +1,7 @@
 package com.example.customerdatabaseprojectii.util;
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAmount;
@@ -68,7 +69,15 @@ public class RelatedTime {
         return userCountry;
     }
 
-    public static ZonedDateTime getTimeForSpecificZone(String zone) {
+    //
+    public static LocalDateTime changeTimeBusinessToUserLocal(String Zone, Timestamp timeFromDB){
+        LocalDateTime ofEasternTime = timeFromDB.toLocalDateTime();
+        ZonedDateTime zdtOfUser = ZonedDateTime.of(ofEasternTime, ZoneId.of(Zone));
+        return zdtOfUser.toLocalDateTime();
+    }
+
+
+    public static ZonedDateTime getTimeNowForSpecificZone(String zone) {
         return ZonedDateTime.of(getCurrentDateTime(), ZoneId.of(zone));
     }
 
