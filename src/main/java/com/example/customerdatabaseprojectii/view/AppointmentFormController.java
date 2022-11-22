@@ -1,5 +1,6 @@
 package com.example.customerdatabaseprojectii.view;
 
+import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.daos.ContactsDao;
 import com.example.customerdatabaseprojectii.daos.CustomersDao;
@@ -19,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
@@ -126,7 +128,7 @@ public class AppointmentFormController {
      *              and to the observable list
      * @throws SQLException
      */
-    public void getAppointmentDataAndSubmit(ActionEvent event) throws SQLException {
+    public void getAppointmentDataAndSubmit(ActionEvent event) throws SQLException, IOException {
         try {
             DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
             LocalDate localAppointmentDateEnd = afDatePickerEnd.getValue();
@@ -151,6 +153,7 @@ public class AppointmentFormController {
             }else{
                 insertAppointmentIntoMap(appointment.getCustomerID(), appointment);
             }
+            Main.playSound("src/main/resources/selectrewardsound.wav");
             resetBoxes();
             isModified = false;
             Stage stage = (Stage) afType.getScene().getWindow();
@@ -211,49 +214,6 @@ public class AppointmentFormController {
         return availableAppointmentTimeSlots;
     }
 
-    public void fieldValidatorNull() {
-        if (afAppointmentID.getText() == null) {
-            Alerter.warningAlert("Please fill in the Appointment ID field!");
-            return;
-        }
-        if (afDescription.getText() == null) {
-            Alerter.warningAlert("Please fill in the Description field!");
-            return;
-        }
-        if (afLocation.getText() == null) {
-            Alerter.warningAlert("Please fill in the Location field!");
-            return;
-        }
-        if (afType.getText() == null) {
-            Alerter.warningAlert("Please fill in the Type field!");
-            return;
-        }
-        if (afSelectCustomer.getValue() == null) {
-            Alerter.warningAlert("Please Select a customer field!");
-            return;
-        }
-        if (afUserID.getText() == null) {
-            Alerter.warningAlert("Please fill in the UserID field!");
-            return;
-        }
-        if (afStartTimePicker.getSelectionModel().getSelectedItem() == null) {
-            Alerter.warningAlert("Please select a start time for the appointment!");
-            return;
-        }
-        if (afEndTimePicker.getSelectionModel().getSelectedItem() == null) {
-            Alerter.warningAlert("Please select a end time for the appointment!");
-            return;
-        }
-        if (afDatePickerStart.getValue() == null) {
-            Alerter.warningAlert("Please select a start date for the appointment!");
-            return;
-        }
-        if(afDatePickerStart.getValue() == null) {
-            Alerter.warningAlert("Please select a end date for the appointment!");
-            return;
-        }
-        System.out.println("Appointment fields validated");
-    }
     //customerID mapped to an appointment
     public static void insertAppointmentIntoMap(Integer id, Appointments appointment) {
         if (!isAppointmentTimeTaken(LocalTime.parse(appointment.getStartDateTime().

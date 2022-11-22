@@ -165,10 +165,11 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
-    public void deleteAppointment(ActionEvent event) throws SQLException {
+    public void deleteAppointment(ActionEvent event) throws SQLException, IOException {
         if (selectedAppointment != null) {
             ad.deleteFromDB(selectedAppointment);
             appointmentsList.remove(selectedAppointment);
+            Main.playSound("src/main/resources/errorSound.wav");
         } else {
             Alerter.informationAlert("No appointment selected to delete");
         }

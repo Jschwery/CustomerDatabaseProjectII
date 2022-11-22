@@ -19,8 +19,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class CreateUsersController {
     @FXML
@@ -31,15 +30,33 @@ public class CreateUsersController {
     PasswordField reenterPasswordTextField;
     UsersDao ud = new UsersDao();
 
+    private static final Map<Integer, File> userIdToFileMap = new HashMap<>();
+    public static Map<Integer, File> getUserIdToFileMap(){
+        return userIdToFileMap;
+    }
+    //we are going to start by looping through all the
+    //this is getting all the users in the database and finding the user that
+    public void addUserIDToFileMap(Integer userID, File file) throws SQLException {
+        Optional<Users> userFoundByID = ud.getAllFromDB().stream().filter(k -> Objects.equals(k.getUser_ID(), userID)).findFirst();
+        if(userFoundByID.isPresent()){
+            userIdToFileMap.put(userID, file);
+        }else{
+            System.out.println("No User found with the entered ID");
+        }
+    }
 
-    public void closeSceneWindow() {
-        Stage stage = (Stage) passwordTextField.getScene().getWindow();
-        stage.close();
+    public static void scanUserLogDirectory(){
+        File directory = new File("userLogInfo");
+        File[] directoryFileListing = directory.listFiles();
+
+        if(directoryFileListing != null){
+            for(File file : directoryFileListing){
+                System.out.println(file);
+            }
+        }
+
     }
-    public int getRandomNumber(int min, int max) {
-        Random random = new Random();
-        return random.nextInt(max - min) + min;
-    }
+
     public boolean accountSubmitEvaluator(String uName, String pWord, String rePWord) {
         if (uName == null || pWord == null || rePWord == null) {
             Alerter.informationAlert("Please check that the fields are all filled in!");
@@ -74,8 +91,19 @@ public class CreateUsersController {
     public void storeCreationDate(Users user) throws IOException {
         LocalDate attemptDate = LocalDateTime.now().toLocalDate();
         Timestamp attemptTimestamp = Timestamp.valueOf(LocalDateTime.now());
-        File file = new File(String.format("userLogInfo/%s_%d%d.txt", user.getUsername(), getRandomNumber(1, 100), getRandomNumber(1,100)));
-
+        File file = new File(String.format("userLogInfo/%s.txt", user.getUsername()));
+        try {
+            ud.getAllFromDB().forEach(k-> {
+                try {
+                    addUserIDToFileMap(k.getUser_ID(), new File(String.format("userLogInfo/%s.txt", user.getUsername())));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            });
+            addUserIDToFileMap(user.getUser_ID(), file);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
         if(!file.exists()) {
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             bw.write(user + "\nCREATED ON: "+attemptDate + "\nTime Created: " + attemptTimestamp);

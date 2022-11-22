@@ -55,6 +55,9 @@
             <artifactId>javafx-graphics</artifactId>
             <version>17.0.0.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-media -->
+
+
     </dependencies>
 
     <build>

@@ -2,6 +2,8 @@ package com.example.customerdatabaseprojectii.util;
 
 import javafx.scene.control.Alert;
 
+import java.util.regex.Pattern;
+
 public class Validator {
 
     /**
@@ -14,7 +16,7 @@ public class Validator {
             Integer.parseInt(checkForInt);
             return true;
         } catch (NumberFormatException e) {
-            System.out.println("An int was not entered");
+            System.out.println("An integer value was not entered in the expected value range");
             Alert alert = new Alert(Alert.AlertType.INFORMATION, textToDisplay);
             alert.showAndWait();
             return false;

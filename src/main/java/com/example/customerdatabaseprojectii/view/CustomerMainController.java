@@ -89,9 +89,6 @@ public class CustomerMainController implements Initializable {
     public ObservableList<Customers> getAllCustomers() {
         return allCustomersObservableList;
     }
-    public void addCustomerToObservableList(Customers customer) {
-        allCustomersObservableList.add(customer);
-    }
     public static Optional<Customers> getSelectedCustomer(){
         return Optional.ofNullable(selectedCustomer);
     }
@@ -160,7 +157,7 @@ public class CustomerMainController implements Initializable {
         }
         return -1;
     }
-    public void deleteCustomer(ActionEvent event) throws SQLException {
+    public void deleteCustomer(ActionEvent event) throws SQLException, IOException {
         Customers customerToDel = customerTableView.getSelectionModel().getSelectedItem();
 
         {
@@ -170,6 +167,7 @@ public class CustomerMainController implements Initializable {
             if (buttonResult.get() == ButtonType.OK) {
             deleteCustomerFromAllCustomers(customerToDel);
             customerTableView.setItems(getAllCustomers());
+            Main.playSound("src/main/resources/errorSound.wav");
 
             } else {
                 if (buttonResult.get() == ButtonType.CANCEL) {
@@ -222,16 +220,6 @@ public class CustomerMainController implements Initializable {
             selectedCustomer = null;
         }
     }
-    //TODO customers divid needs to be configured for displaying the divs or the firstlevel divisions
-    //the customer add & delete form customerID need to be populated
-    //if the user is a new user it will be the result of getting a customerDao getting all of them, and adding one,
-    //and the updating will be getting the selected customer id and setting the text to that
-
-    //then we need to figure out why the uk first level divs are displaying canadas first levels
-    //when canada is selected
-
-
-
 
     public void modifyCustomer(ActionEvent event) throws IOException, SQLException {
         if (getSelectedCustomer().isPresent()) {
@@ -289,6 +277,13 @@ public class CustomerMainController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        //TODO if user has appointment within next 15 minutes prompt notification and play sound
+
+        try {
+            Main.playSound("src/main/resources/notification.wav");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if(System.getProperty("user.language").equals("fr") || LoginController.changeLang){
             custCustomerID.setText("Identifiant du client");

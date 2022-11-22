@@ -1,5 +1,6 @@
 package com.example.customerdatabaseprojectii.view;
 
+import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.CustomersDao;
 import com.example.customerdatabaseprojectii.daos.First_Level_DivisionsDao;
 import com.example.customerdatabaseprojectii.entity.Customers;
@@ -126,8 +127,6 @@ public class CustomerFormController{
     public void filterFirstLevelByCountry(ActionEvent event) {
 
         String countrySelected = cfCustomerCountry.getSelectionModel().getSelectedItem();
-        System.out.println(countrySelected);
-        System.out.println("UK " + unitedKingdomFirstLevelDiv);
         if (countrySelected != null) {
             switch (countrySelected) {
                 case "U.S":
@@ -148,7 +147,6 @@ public class CustomerFormController{
                         ukFLDName.add(fld.getDivision());
                     }
                     if (!ukFLDName.isEmpty()) {
-                        System.out.println("uk not empty " + unitedKingdomFirstLevelDiv);
                         cfCustomerFirstLevel.setItems(ukFLDName);
                     } else {
                         System.out.println("United Kingdom has been selected as country," +
@@ -211,16 +209,16 @@ public class CustomerFormController{
         }else{
             return false;
         }
-        if(Validator.stringChecker(cfCustomerName.getText(), "Please only enter alphabetical characters for CustomerName field!")){
+        if(Validator.stringChecker(cfCustomerName.getText(), "Please only enter alphabetical characters for Customer Name field!")){
             customer.setCustomerName(cfCustomerName.getText());
         }else{
             return false;
         }
-        if(Validator.stringChecker(cfCustomerAddress.getText(), "Please only enter alphabetical characters for CustomerAddress text field!")){
+        if(Validator.stringChecker(cfCustomerAddress.getText(), "Please only enter alphabetical characters for Customer Address text field!")){
             customer.setAddress(cfCustomerAddress.getText());
         }else{
             return false;
-        }if(Validator.intChecker(cfCustomerPostal.getText(), "Please only enter numerical characters for Postal text field!")){
+        }if(Validator.intChecker(cfCustomerPostal.getText(), "An Integer value was not entered in the expected value range for Postal Code text field!")){
             customer.setPostalCode(cfCustomerPostal.getText());
         }else{
             return false;
@@ -229,18 +227,21 @@ public class CustomerFormController{
     }
 
     public void addCustomerClicked(ActionEvent event) throws IOException {
-        customer = new Customers();
+        if(Objects.equals(customer, null)){
+            customer = new Customers();
+        }
 
-        validateFields();
-        customer.setPhoneNumber(cfCustomerNumber.getText());
-        customer.setDivisionID(getDivisionID(cfCustomerFirstLevel.getValue()));
+        if(validateFields()) {
+            customer.setPhoneNumber(cfCustomerNumber.getText());
+            customer.setDivisionID(getDivisionID(cfCustomerFirstLevel.getValue()));
 
-        System.out.println(customer);
-        customersConsumer.accept(customer);
-        CustomerMainController.setSelectedCustomerNull();
-        clearLists();
-        modifyCustomer = false;
-        closeSceneWindow();
+            customersConsumer.accept(customer);
+            Main.playSound("src/main/resources/selectrewardsound.wav");
+            CustomerMainController.setSelectedCustomerNull();
+            clearLists();
+            modifyCustomer = false;
+            closeSceneWindow();
+        }
     }
 
     @FXML

@@ -1,3 +1,0 @@
-Users{username='jojo', password='123'}
-CREATED ON: 2022-11-08
-Time Created: 2022-11-08 06:52:48.8722826
