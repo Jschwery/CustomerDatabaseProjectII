@@ -1,30 +1,24 @@
 package com.example.customerdatabaseprojectii.view;
 
-import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.CustomersDao;
 import com.example.customerdatabaseprojectii.daos.First_Level_DivisionsDao;
 import com.example.customerdatabaseprojectii.entity.Customers;
 import com.example.customerdatabaseprojectii.entity.First_Level_Divisions;
-import com.example.customerdatabaseprojectii.util.Alerter;
+import com.example.customerdatabaseprojectii.util.Validator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class CustomerFormController{
     @FXML
@@ -63,6 +57,35 @@ public class CustomerFormController{
         return cd.getAllFromDB().size() + 1;
     }
 
+    public String findCountryIDByDivID(int divID) throws SQLException {
+        String country;
+        if(divID >= 1 && divID <= 54){
+            country = "U.S";
+        }else if(divID >= 55 && divID <= 72 ){
+            country = "Canada";
+        }else{
+            country = "UK";
+        }
+        return country;
+    }
+    public ObservableList<First_Level_Divisions> findFirstLevelsByDivID(int divID) {
+        if (divID >= 1 && divID <= 54) {
+            return unitedStatesFirstLevelDiv;
+        } else if (divID >= 55 && divID <= 72) {
+            return canadaFirstLevelDiv;
+        } else {
+            return unitedKingdomFirstLevelDiv;
+        }
+    }
+
+    public String findFirstLevelDiv(int divID) throws SQLException {
+
+        Optional<First_Level_Divisions> matchDiv = divisions.getAll().stream().filter(div -> div.getDivisionID() == divID).findFirst();
+        if (matchDiv.isPresent()) {
+            return matchDiv.get().getDivision();
+        }
+    return "";
+    }
 
     public void populateObservableFirstLevelDivs(){
       try{
@@ -70,11 +93,11 @@ public class CustomerFormController{
             if(div.getCountryID() == 1) {
                 unitedStatesFirstLevelDiv.add(div);
             }
-            else if(div.getCountryID() == 3){
-                canadaFirstLevelDiv.add(div);
-            }
             else if(div.getCountryID() == 2){
                 unitedKingdomFirstLevelDiv.add(div);
+            }
+            else if(div.getCountryID() == 3){
+                canadaFirstLevelDiv.add(div);
             }
         }
         }catch (SQLException e){
@@ -93,10 +116,11 @@ public class CustomerFormController{
             cfCustomerAddress.setText(customer.getAddress());
             cfCustomerNumber.setText(customer.getPhoneNumber());
             cfCustomerPostal.setText(customer.getPostalCode());
+            cfCustomerCountry.setValue(findCountryIDByDivID(customer.getDivisionID()));
+            cfCustomerFirstLevel.setValue(findFirstLevelDiv(customer.getDivisionID()));
         }else{
             cfCustomerID.setText(String.valueOf(getCustomerIDCount()));
         }
-
     }
 
     public void filterFirstLevelByCountry(ActionEvent event) {
@@ -130,6 +154,7 @@ public class CustomerFormController{
                         System.out.println("United Kingdom has been selected as country," +
                                 "but unitedKingdomFirstLevelDiv did not contain values");
                     }
+                    break;
                 case "Canada":
                     ObservableList<String> canadaFLDName = FXCollections.observableArrayList();
                     for (First_Level_Divisions fld : canadaFirstLevelDiv) {
@@ -141,6 +166,7 @@ public class CustomerFormController{
                         System.out.println("Canada has been selected as country," +
                                 "but canadaFirstLevelDiv did not contain values");
                     }
+                    break;
             }
         }else{
             System.out.println("No country selected");
@@ -179,13 +205,34 @@ public class CustomerFormController{
         cfCustomerFirstLevel.setValue("");
     }
 
+    public boolean validateFields(){
+        if(Validator.intChecker(cfCustomerID.getText(), "Please only enter number characters for CustomerID text field!")){
+            customer.setCustomerID(Integer.parseInt(cfCustomerID.getText()));
+        }else{
+            return false;
+        }
+        if(Validator.stringChecker(cfCustomerName.getText(), "Please only enter alphabetical characters for CustomerName field!")){
+            customer.setCustomerName(cfCustomerName.getText());
+        }else{
+            return false;
+        }
+        if(Validator.stringChecker(cfCustomerAddress.getText(), "Please only enter alphabetical characters for CustomerAddress text field!")){
+            customer.setAddress(cfCustomerAddress.getText());
+        }else{
+            return false;
+        }if(Validator.intChecker(cfCustomerPostal.getText(), "Please only enter numerical characters for Postal text field!")){
+            customer.setPostalCode(cfCustomerPostal.getText());
+        }else{
+            return false;
+        }
+        return true;
+    }
+
     public void addCustomerClicked(ActionEvent event) throws IOException {
         customer = new Customers();
-        customer.setCustomerID(Integer.parseInt(cfCustomerID.getText()));
-        customer.setCustomerName(cfCustomerName.getText());
-        customer.setAddress(cfCustomerAddress.getText());
+
+        validateFields();
         customer.setPhoneNumber(cfCustomerNumber.getText());
-        customer.setPostalCode(cfCustomerPostal.getText());
         customer.setDivisionID(getDivisionID(cfCustomerFirstLevel.getValue()));
 
         System.out.println(customer);
@@ -197,10 +244,19 @@ public class CustomerFormController{
     }
 
     @FXML
-    public void initialize() {
+    public void initialize() throws SQLException {
         clearLists();
         addCountriesToObservableList();
-        cfCustomerCountry.setItems(customerCountries);
         populateObservableFirstLevelDivs();
+
+        cfCustomerCountry.setItems(customerCountries);
+        if(CustomerMainController.getSelectedCustomer().isPresent()) {
+            ObservableList<String> fldNames = FXCollections.observableArrayList();
+            ObservableList<First_Level_Divisions> divs = findFirstLevelsByDivID(CustomerMainController.getSelectedCustomer().get().getDivisionID());
+            for(First_Level_Divisions fld : divs) {
+                fldNames.add(fld.getDivision());
+            }
+            cfCustomerFirstLevel.setItems(fldNames);
+        }
     }
 }

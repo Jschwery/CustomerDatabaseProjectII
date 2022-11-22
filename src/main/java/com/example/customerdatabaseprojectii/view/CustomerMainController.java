@@ -184,8 +184,8 @@ public class CustomerMainController implements Initializable {
         if(CustomerFormController.modifyCustomer){
             try {
                 String s = cd.updateDB(customer);
-                if(!Objects.equals(s, "")){
-                    getAllCustomers().set(getCustomerIndex(customer),customer);
+                if(!Objects.equals(s, "") && getSelectedCustomer().isPresent()){
+                    getAllCustomers().set(getCustomerIndex(getSelectedCustomer().get()),customer);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
