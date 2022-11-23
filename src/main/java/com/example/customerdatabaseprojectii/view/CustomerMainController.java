@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class CustomerMainController implements Initializable {
+    private static final String deleteRelatedAppointmentQuery = "DELETE FROM appointments WHERE Appointment_ID = ?";
+    private static Customers selectedCustomer = null;
     @FXML
     TableView<Customers> customerTableView;
     @FXML
@@ -58,49 +60,45 @@ public class CustomerMainController implements Initializable {
     Button deleteCustomerButton;
     @FXML
     Button customerTableSwitchButton;
-
-
-    private static Customers selectedCustomer = null;
     AppointmentsDao ad = new AppointmentsDao();
     CustomersDao cd = new CustomersDao();
-    private static final String deleteRelatedAppointmentQuery = "DELETE FROM appointments WHERE Appointment_ID = ?";
+    private final ObservableList<Customers> allCustomersObservableList = cd.getAllFromDB();
+
+    Consumer<Customers> customerConsumer = customer -> {
+        CustomersDao cd = new CustomersDao();
+
+        if (CustomerFormController.modifyCustomer) {
+            try {
+                if (cd.updateDB(customer) && getSelectedCustomer().isPresent()) {
+                    getAllCustomers().set(getCustomerIndex(getSelectedCustomer().get()), customer);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                if (cd.dbInsert(customer)) {
+                    getAllCustomers().add(customer);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     public CustomerMainController() throws SQLException {}
 
-//    public static Customers getSelectedCustomer() {
-//        if(selectedCustomer!=null) {
-//            return selectedCustomer;
-//        }else{
-//            Customers customerDefault = new Customers();
-//            customerDefault.setDivisionID(0);
-//            customerDefault.setCustomerID(0);
-//            customerDefault.setCustomerName("");
-//            customerDefault.setPostalCode("");
-//            customerDefault.setPhoneNumber("");
-//            customerDefault.setAddress("");
-//
-//            System.out.println("Selected Customer is null, returning default customer");
-//            return customerDefault;
-//        }
-//    }
-
-
-    private final ObservableList<Customers> allCustomersObservableList = cd.getAllFromDB();
-    public ObservableList<Customers> getAllCustomers() {
-        return allCustomersObservableList;
-    }
-    public static Optional<Customers> getSelectedCustomer(){
+    public static Optional<Customers> getSelectedCustomer() {
         return Optional.ofNullable(selectedCustomer);
     }
 
-    public void setCustomersList() throws SQLException {
-        CustomersDao cd = new CustomersDao();
-        getAllCustomers().addAll(cd.getAllFromDB());
-    }
-    public static void setSelectedCustomerNull(){
+    public static void setSelectedCustomerNull() {
         CustomerMainController.selectedCustomer = null;
     }
 
+    public ObservableList<Customers> getAllCustomers() {
+        return allCustomersObservableList;
+    }
 
     public void deleteRelatedAppointments() throws SQLException {
         if (getSelectedCustomer().isPresent()) {
@@ -121,31 +119,29 @@ public class CustomerMainController implements Initializable {
         String deleteQuery = "DELETE FROM customers WHERE Customer_ID = ?";
         PreparedStatement deleteStatement = DbConnection.getConnection().prepareStatement(deleteQuery);
         deleteStatement.setInt(1, customer.getCustomerID());
-
         try {
-           deleteRelatedAppointments();
-       }catch (SQLException e){
-           e.printStackTrace();
-           System.out.printf("Unable to remove appointments relating to the customer: %s%n", customer);
-       }
+            deleteRelatedAppointments();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.printf("Unable to remove appointments relating to the customer: %s%n", customer);
+        }
         getAllCustomers().removeIf(c -> c.equals(customer));
         deleteStatement.execute();
     }
 
-
-    public void setCustomerSelected(){
-    try {
-        selectedCustomer = getCustomerByIndex(getCustomerIndex(customerTableView.getSelectionModel().getSelectedItem()));
-    }catch (IndexOutOfBoundsException e){
-        System.out.println("Customer not clicked");
+    public void setCustomerSelected() {
+        try {
+            selectedCustomer = getCustomerByIndex(getCustomerIndex(customerTableView.getSelectionModel().getSelectedItem()));
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Customer not clicked");
         }
     }
-    public void clickOnCustomerToSetSelected(MouseEvent customerClicked){
+
+    public void clickOnCustomerToSetSelected(MouseEvent customerClicked) {
         setCustomerSelected();
     }
 
-
-    public Customers getCustomerByIndex(int customerIndex){
+    public Customers getCustomerByIndex(int customerIndex) {
         return getAllCustomers().get(customerIndex);
     }
 
@@ -157,6 +153,7 @@ public class CustomerMainController implements Initializable {
         }
         return -1;
     }
+
     public void deleteCustomer(ActionEvent event) throws SQLException, IOException {
         Customers customerToDel = customerTableView.getSelectionModel().getSelectedItem();
 
@@ -165,9 +162,9 @@ public class CustomerMainController implements Initializable {
             Optional<ButtonType> buttonResult = alert.showAndWait();
 
             if (buttonResult.get() == ButtonType.OK) {
-            deleteCustomerFromAllCustomers(customerToDel);
-            customerTableView.setItems(getAllCustomers());
-            Main.playSound("src/main/resources/errorSound.wav");
+                deleteCustomerFromAllCustomers(customerToDel);
+                customerTableView.setItems(getAllCustomers());
+                Main.playSound("src/main/resources/errorSound.wav");
 
             } else {
                 if (buttonResult.get() == ButtonType.CANCEL) {
@@ -176,33 +173,11 @@ public class CustomerMainController implements Initializable {
             }
         }
     }
-    Consumer<Customers> customerConsumer = customer ->{
-        CustomersDao cd = new CustomersDao();
 
-        if(CustomerFormController.modifyCustomer){
-            try {
-                String s = cd.updateDB(customer);
-                if(!Objects.equals(s, "") && getSelectedCustomer().isPresent()){
-                    getAllCustomers().set(getCustomerIndex(getSelectedCustomer().get()),customer);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }else{
-            try {
-                String s = cd.dbInsert(customer);
-                if(!Objects.equals(s, "")){
-                    getAllCustomers().add(customer);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    };
     public void addCustomer(ActionEvent event) throws IOException, SQLException {
         if (getSelectedCustomer().isEmpty()) {
             CustomerFormController.modifyCustomer = false;
-            URL path =  new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
+            URL path = new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(path);
             Parent node = loader.load();
@@ -224,19 +199,17 @@ public class CustomerMainController implements Initializable {
     public void modifyCustomer(ActionEvent event) throws IOException, SQLException {
         if (getSelectedCustomer().isPresent()) {
             CustomerFormController.modifyCustomer = true;
-            URL path =  new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
+            URL path = new File("src/main/java/com/example/customerdatabaseprojectii/view/CustomerForm.fxml").toURI().toURL();
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(path);
             Parent node = loader.load();
             CustomerFormController afc = loader.getController();
-
             afc.customerFormInit(selectedCustomer, customerConsumer);
 
             Stage customerFormStage = new Stage();
             customerFormStage.setScene(new Scene(node));
             customerFormStage.setResizable(false);
             customerFormStage.initStyle(StageStyle.DECORATED);
-
             customerFormStage.show();
         } else {
             Alerter.warningAlert("You are trying to add an customer that already exists, unselecting customer");
@@ -277,15 +250,13 @@ public class CustomerMainController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        //TODO if user has appointment within next 15 minutes prompt notification and play sound
-
         try {
             Main.playSound("src/main/resources/notification.wav");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if(System.getProperty("user.language").equals("fr") || LoginController.changeLang){
+        if (System.getProperty("user.language").equals("fr") || LoginController.changeLang) {
             custCustomerID.setText("Identifiant du client");
             custCustomerName.setText("Nom");
             custAddress.setText("Adresse");
@@ -313,6 +284,5 @@ public class CustomerMainController implements Initializable {
         custPostal.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
         custPhone.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         custDivID.setCellValueFactory(new PropertyValueFactory<>("divisionID"));
-
     }
 }

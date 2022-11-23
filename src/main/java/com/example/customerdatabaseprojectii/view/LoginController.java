@@ -83,7 +83,7 @@ public class LoginController implements Initializable {
 
         currentlyLoggedIn = findUserByUsername(username).orElse(null);
         try {
-            if (ud.verifyUserFromDB(currentlyLoggedIn)){
+            if (ud.verifyUserFromDB(currentlyLoggedIn) && Objects.equals(passwordTextEntry.getText(), currentlyLoggedIn.getPassword())){
                 for(Map.Entry<Integer, File> entry : CreateUsersController.getUserIdToFileMap().entrySet()){
                     if(Objects.equals(entry.getKey(), currentlyLoggedIn.getUser_ID())){
                         BufferedWriter writer = new BufferedWriter(new FileWriter(entry.getValue(), true));
@@ -108,7 +108,7 @@ public class LoginController implements Initializable {
                 }
             }
         } catch (Exception e) {
-            if (ud.verifyUserFromDB(currentlyLoggedIn)) {
+            if (ud.verifyUserFromDB(currentlyLoggedIn) && Objects.equals(passwordTextEntry.getText(), currentlyLoggedIn.getPassword())) {
                 for(Map.Entry<Integer, File> entry : CreateUsersController.getUserIdToFileMap().entrySet()){
                     if(Objects.equals(entry.getKey(), currentlyLoggedIn.getUser_ID())){
                         BufferedWriter writer = new BufferedWriter(new FileWriter(entry.getValue(), true));
@@ -125,6 +125,7 @@ public class LoginController implements Initializable {
             }
         }
     }
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

@@ -5,7 +5,6 @@ import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,15 +18,16 @@ public class CountriesDao implements Dao<Countries>{
 
 
     @Override
-    public String dbInsert(Countries country) throws SQLException {
+    public boolean dbInsert(Countries country) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(addCountryQuery).orElse(null);
         if (ps != null) {
             ps.setInt(1, country.getCountryID());
             ps.setString(2, country.getCountry());
 
-            return String.format("%d countries updated", ps.executeUpdate());
+            System.out.printf("%d countries updated%n", ps.executeUpdate());
+            return true;
         }
-        return "null";
+        return false;
     }
 
     @Override
@@ -49,14 +49,15 @@ public class CountriesDao implements Dao<Countries>{
     }
 
     @Override
-    public String updateDB(Countries country) throws SQLException {
+    public boolean updateDB(Countries country) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(updatedCountryQuery).orElse(null);
         if(ps != null){
             ps.setString(1, country.getCountry());
             ps.setInt(2, country.getCountryID());
-            return String.format("%d countries updated", ps.executeUpdate());
+            System.out.printf("%d countries updated%n", ps.executeUpdate());
+            return true;
         }
-        return "null";
+        return false;
     }
 
     @Override

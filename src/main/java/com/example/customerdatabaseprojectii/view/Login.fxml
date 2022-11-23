@@ -6,6 +6,7 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
@@ -14,7 +15,10 @@
     <children>
         <Pane layoutX="12.0" layoutY="18.0" prefHeight="433.0" prefWidth="478.0">
             <children>
-                <TextField fx:id="usernameTextEntry" layoutX="93.0" layoutY="147.0" prefHeight="26.0" prefWidth="231.0" promptText="Username" />
+                <TextField fx:id="usernameTextEntry" layoutX="93.0" layoutY="147.0" prefHeight="26.0" prefWidth="231.0" promptText="Username">
+               <tooltip>
+                  <Tooltip text="Enter username" />
+               </tooltip></TextField>
                 <Label fx:id="loginText" layoutX="176.0" layoutY="43.0" prefHeight="45.0" prefWidth="153.0" text="Login">
                     <font>
                         <Font size="30.0" />
@@ -25,12 +29,23 @@
                         <Font size="16.0" />
                     </font>
                 </Button>
-                <Hyperlink fx:id="createAccountLink" layoutX="360.0" layoutY="391.0" onAction="#createAccountLinkClicked" text="Create Account" />
-                <PasswordField fx:id="passwordTextEntry" layoutX="93.0" layoutY="236.0" prefHeight="26.0" prefWidth="231.0" promptText="Password" />
-                <Label fx:id="timeLabel" layoutX="360.0" layoutY="6.0" text="Label" />
-                <ToggleButton fx:id="frenchToggle" layoutX="21.0" layoutY="30.0" mnemonicParsing="false" text="French" />
+                <Hyperlink fx:id="createAccountLink" layoutX="360.0" layoutY="391.0" onAction="#createAccountLinkClicked" text="Create Account">
+               <tooltip>
+                  <Tooltip text="New user? Create account!" />
+               </tooltip></Hyperlink>
+                <PasswordField fx:id="passwordTextEntry" layoutX="93.0" layoutY="236.0" prefHeight="26.0" prefWidth="231.0" promptText="Password">
+               <tooltip>
+                  <Tooltip text="Enter password" />
+               </tooltip></PasswordField>
+                <Label fx:id="timeLabel" layoutX="360.0" layoutY="6.0" text="Label">
+               <tooltip>
+                  <Tooltip text="User time zone" />
+               </tooltip></Label>
+                <ToggleButton fx:id="frenchToggle" layoutX="21.0" layoutY="30.0" mnemonicParsing="false" text="French">
+               <tooltip>
+                  <Tooltip text="Toggle language" />
+               </tooltip></ToggleButton>
             </children>
         </Pane>
-        <Label layoutX="21.0" layoutY="347.0" prefHeight="18.0" prefWidth="114.0" />
     </children>
 </AnchorPane>

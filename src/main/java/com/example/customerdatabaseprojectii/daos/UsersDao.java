@@ -1,7 +1,6 @@
 package com.example.customerdatabaseprojectii.daos;
 
 import com.example.customerdatabaseprojectii.entity.Users;
-import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -67,16 +66,17 @@ public class UsersDao implements Dao<Users> {
     }
 
     @Override
-    public String dbInsert(Users user) throws SQLException {
+    public boolean dbInsert(Users user) throws SQLException {
             PreparedStatement ps = DbConnection.dbStatementTemplate(insertUserQuery).orElse(null);
             if (ps != null) {
                 ps.setString(1, user.getUsername());
                 ps.setString(2, user.getPassword());
                 int rowAffected = ps.executeUpdate();
-               return String.format("%d number of rows were affected with the update", rowAffected);
+                System.out.printf("%d number of rows were affected with the update%n", rowAffected);
+                return true;
             }
             System.out.println("Unsuccessfully inserted user into database");
-            return "null";
+            return false;
         }
     @Override
     public ObservableList<Users> getAllFromDB() throws SQLException {
@@ -98,7 +98,7 @@ public class UsersDao implements Dao<Users> {
     }
 
     @Override
-    public String updateDB(Users user) throws SQLException {
+    public boolean updateDB(Users user) throws SQLException {
 
         PreparedStatement ps = DbConnection.dbStatementTemplate(updateUserQuery).orElse(null);
 
@@ -107,10 +107,11 @@ public class UsersDao implements Dao<Users> {
             ps.setString(2, user.getPassword());
             ps.setInt(3, user.getUser_ID());
             ps.executeUpdate();
-            return String.format("User with %d has been updated\nUsername: %s\nPassword: %s", user.getUser_ID(), user.getUsername(), user.getPassword());
+            System.out.printf("User with %d has been updated\nUsername: %s\nPassword: %s%n", user.getUser_ID(), user.getUsername(), user.getPassword());
+            return true;
         }
         System.out.println("Unsuccessfully updated User to database");
-        return "null";
+        return false;
     }
 
     @Override

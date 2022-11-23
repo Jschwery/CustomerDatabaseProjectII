@@ -4,9 +4,11 @@ import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.daos.ContactsDao;
 import com.example.customerdatabaseprojectii.daos.CustomersDao;
+import com.example.customerdatabaseprojectii.daos.UsersDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.entity.Customers;
+import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import com.example.customerdatabaseprojectii.util.RelatedTime;
 import com.example.customerdatabaseprojectii.util.Validator;
@@ -143,24 +145,11 @@ public class AppointmentFormController {
         }catch (NullPointerException e){
             Alerter.warningAlert("Please fill in all the fields!");
         }
-        if(fieldValidator(appointment) && compareAppointmentToBusiness(appointment)){
-            appointmentHandler.accept(appointment);
-            if(isModified){//checks if the customer already had an appointment and will update the map with the new appointment, if so.
-                for (Map.Entry<Integer, Appointments> entry : AppointmentMainController.customerIDToAppointment.entrySet()) {
-                    if(entry.getKey().equals(appointment.getContactsID())){
-                        AppointmentMainController.customerIDToAppointment.put(appointment.getCustomerID(), appointment);
-                    }
-                }
-            }else{
-                insertAppointmentIntoMap(appointment.getCustomerID(), appointment);
-            }
-
             Main.playSound("src/main/resources/selectrewardsound.wav");
             resetBoxes();
             isModified = false;
             Stage stage = (Stage) afType.getScene().getWindow();
             stage.close();
-        }
     }
 
     public int findCustomerIDByName(String customerName){
@@ -216,12 +205,27 @@ public class AppointmentFormController {
         return availableAppointmentTimeSlots;
     }
 
+    /**
+     * Upon application startup maps each user, to their appointment IF there is an appointment correlated to that
+     * particular user.
+     * @throws SQLException
+     */
+    public static void fillUserAppointmentMap() throws SQLException {
+        UsersDao ud = new UsersDao();
+        AppointmentsDao ad = new AppointmentsDao();
+
+        for(Users user : ud.getAllFromDB()){
+            Optional<Appointments> appointment = ad.getAllFromDB().stream().filter(a-> Objects.equals(a.getUsersID(), user.getUser_ID())).findFirst();
+            appointment.ifPresent(appointments -> insertAppointmentIntoMap(user.getUser_ID(), appointments));
+        }
+    }
+
     //customerID mapped to an appointment
     public static void insertAppointmentIntoMap(Integer id, Appointments appointment) {
         if (!isAppointmentTimeTaken(LocalTime.parse(appointment.getStartDateTime().
                         toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)),
                 LocalTime.parse(appointment.getEndDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
-            AppointmentMainController.customerIDToAppointment.put(id, appointment);
+            AppointmentMainController.userIDToAppointment.put(id, appointment);
             System.out.println("Complete & appointment is mapped");
         } else {
             Alerter.informationAlert("Cannot create an appointment because that time slot is reserved already!");
@@ -229,7 +233,7 @@ public class AppointmentFormController {
     }
 
     public static boolean isAppointmentTimeTaken(LocalTime appointmentStart, LocalTime appointmentEnd) {
-        for (Map.Entry<Integer, Appointments> entry : AppointmentMainController.customerIDToAppointment.entrySet()) {
+        for (Map.Entry<Integer, Appointments> entry : AppointmentMainController.userIDToAppointment.entrySet()) {
             Appointments appointments = entry.getValue();
             if (appointmentStart.isAfter
                     (LocalTime.parse(appointments.getStartDateTime().toLocalDateTime().toLocalTime().

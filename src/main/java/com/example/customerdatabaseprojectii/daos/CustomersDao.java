@@ -41,7 +41,7 @@ public class CustomersDao implements Dao<Customers> {
     }
 
     @Override
-    public String dbInsert(Customers customer) throws SQLException {
+    public boolean dbInsert(Customers customer) throws SQLException {
         PreparedStatement statement = DbConnection.dbStatementTemplate(customerInsertQuery).orElse(null);
 
         if (statement != null) {
@@ -57,9 +57,10 @@ public class CustomersDao implements Dao<Customers> {
             statement.setInt(10, customer.getDivisionID());
 
             int numberOfCustomerInserted = statement.executeUpdate();
-            return String.format("%d customers inserted", numberOfCustomerInserted);
+            System.out.printf("%d customers inserted%n", numberOfCustomerInserted);
+            return true;
         }
-        return "";
+        return false;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class CustomersDao implements Dao<Customers> {
     }
 
     @Override
-    public String updateDB(Customers customer) throws SQLException {
+    public boolean updateDB(Customers customer) throws SQLException {
         PreparedStatement statement = DbConnection.dbStatementTemplate(updateCustomerQuery).orElse(null);
         if (statement != null) {
 
@@ -98,11 +99,12 @@ public class CustomersDao implements Dao<Customers> {
             statement.setInt(8, customer.getDivisionID());
             statement.setInt(9, customer.getCustomerID());
 
-            return String.format("%d customers updated", statement.executeUpdate());
+            System.out.printf("%d customers updated%n", statement.executeUpdate());
+            return true;
         }
         System.out.println("Unsuccessfully inserted customer to database");
-        return "";
-    }
+            return false;
+        }
     @Override
     public String deleteFromDB(Customers customer) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(customerDeleteQuery).orElse(null);

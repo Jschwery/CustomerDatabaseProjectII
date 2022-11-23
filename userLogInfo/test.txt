@@ -1,3 +1,0 @@
-Users{username='test', password='test'}
-CREATED ON: 2022-11-22
-Time Created: 2022-11-22 09:44:10.280935

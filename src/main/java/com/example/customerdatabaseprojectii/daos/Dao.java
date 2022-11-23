@@ -6,11 +6,11 @@ import java.sql.SQLException;
 
 public interface Dao<T> {
 
-     String dbInsert(T item) throws SQLException;
+     boolean dbInsert(T item) throws SQLException;
 
      ObservableList<T> getAllFromDB() throws SQLException;
 
-     String updateDB(T item) throws SQLException;
+     boolean updateDB(T item) throws SQLException;
 
      String deleteFromDB(T item) throws SQLException;
 

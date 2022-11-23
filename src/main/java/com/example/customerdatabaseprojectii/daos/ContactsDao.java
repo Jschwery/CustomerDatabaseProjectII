@@ -1,12 +1,10 @@
 package com.example.customerdatabaseprojectii.daos;
 
-import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.Contacts;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,17 +55,18 @@ public class ContactsDao implements Dao<Contacts>{
     }
 
     @Override
-    public String dbInsert(Contacts contact) throws SQLException {
+    public boolean dbInsert(Contacts contact) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(insertContactQuery).orElse(null);
         if(ps != null) {
             ps.setInt(1, getNumberOfContacts() + 1);
             ps.setString(2, contact.getContactName());
             ps.setString(3, contact.getEmail());
             int rowsUpdated = ps.executeUpdate();
-            return String.format("Rows updated: %d\n", rowsUpdated);
+            System.out.printf("%d rows updated%n", rowsUpdated);
+            return true;
         }
         System.out.println("Unsuccessfully inserted contact into database");
-        return "null";
+        return false;
     }
 
     @Override
@@ -89,7 +88,7 @@ public class ContactsDao implements Dao<Contacts>{
     }
 
     @Override
-    public String updateDB(Contacts contact) throws SQLException {
+    public boolean updateDB(Contacts contact) throws SQLException {
         PreparedStatement statement = DbConnection.dbStatementTemplate(updateContactQuery).orElse(null);
         if (statement != null) {
             statement.setString(1, contact.getContactName());
@@ -97,11 +96,12 @@ public class ContactsDao implements Dao<Contacts>{
             statement.setInt(3, contact.getContactID());
 
             int rowsUpdated = statement.executeUpdate();
-            return String.format("Rows updated: %d\n", rowsUpdated);
+            System.out.printf("Rows updated: %d\n%n", rowsUpdated);
+            return true;
         }
         else {
             System.out.println("Unsuccessfully updated contact to database");
-            return "null";
+            return false;
         }
     }
 

@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
@@ -16,18 +23,56 @@
          </font>
       </Label>
       <ComboBox fx:id="reportsTableSwitchComboBox" layoutX="385.0" layoutY="27.0" prefHeight="31.0" prefWidth="150.0" promptText="Tables" />
-      <TabPane fx:id="reportsTabPane" layoutX="15.0" layoutY="77.0" prefHeight="421.0" prefWidth="769.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="reportsTabPane" layoutX="15.0" layoutY="77.0" prefHeight="260.0" prefWidth="749.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Untitled Tab 1">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0" />
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0">
+                     <children>
+                        <BarChart layoutY="5.0" prefHeight="222.0" prefWidth="419.0">
+                          <xAxis>
+                            <CategoryAxis side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                            <NumberAxis side="LEFT" />
+                          </yAxis>
+                        </BarChart>
+                     </children></AnchorPane>
             </content>
           </Tab>
-          <Tab text="Untitled Tab 2">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
+            <Tab text="Untitled Tab 1">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0">
+                     <children>
+                        <BarChart layoutY="5.0" prefHeight="222.0" prefWidth="419.0">
+                           <xAxis>
+                              <CategoryAxis side="BOTTOM" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis side="LEFT" />
+                           </yAxis>
+                        </BarChart>
+                        <PieChart layoutX="428.0" layoutY="5.0" prefHeight="205.0" prefWidth="307.0" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab text="Untitled Tab 1">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0">
+                     <children>
+                        <BarChart layoutY="5.0" prefHeight="222.0" prefWidth="419.0">
+                           <xAxis>
+                              <CategoryAxis side="BOTTOM" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis side="LEFT" />
+                           </yAxis>
+                        </BarChart>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
       <Button fx:id="reportsSwitchTableButton" layoutX="551.0" layoutY="27.0" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="27.0" prefWidth="104.0" text="Switch Table">
@@ -35,5 +80,15 @@
             <Font size="15.0" />
          </font>
       </Button>
+      <Slider layoutX="37.0" layoutY="520.0" prefHeight="14.0" prefWidth="207.0">
+         <tooltip>
+            <Tooltip text="Slide the dile" />
+         </tooltip>
+      </Slider>
+      <TextField layoutX="77.0" layoutY="413.0">
+         <tooltip>
+            <Tooltip text="Enter something" />
+         </tooltip>
+      </TextField>
    </children>
 </AnchorPane>

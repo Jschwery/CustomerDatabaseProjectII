@@ -4,6 +4,7 @@ import com.example.customerdatabaseprojectii.daos.UsersDao;
 import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.DbConnection;
 //import com.example.customerdatabaseprojectii.util.GenLists;
+import com.example.customerdatabaseprojectii.view.AppointmentFormController;
 import com.example.customerdatabaseprojectii.view.CreateUsersController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -23,23 +24,6 @@ import javax.sound.sampled.*;
 
 public class Main extends Application {
     private static Stage mainStage;
-
-    /*
-    get all the users in the database and create a file for all of them
-
-    need to have a check that scans through the files and if the substring of the file until the _ is their username
-    then don't create a new file
-
-    need method that will return the file that matches the criteria of finding the file based of the username
-    Pattern pattern = Pattern.compile([a-zA-Z0-9]+_);
-    Matcher.match(file.toString);
-    for(File file : filelist){
-
-    if(file.toString().
-
-    }
-
-     */
 
     public static void matchFileCriteria(File[] filesList, Users user) throws IOException, SQLException {
         CreateUsersController controller = new CreateUsersController();
@@ -81,6 +65,9 @@ public class Main extends Application {
         }
     }
 
+    //mess arround with the auto file creation for users already in the database
+    //for user in database if file contains user.get username create username.txt if user.getusername.txt !exists
+
     @Override
     public void start(Stage stage) throws IOException {
         mainStage = stage;
@@ -90,6 +77,7 @@ public class Main extends Application {
     public static void main(String[] args) throws SQLException, IOException {
         DbConnection.makeConnection();
         getDBUsersAndCreateFiles();
+        AppointmentFormController.fillUserAppointmentMap();
         launch(args);
         DbConnection.closeConnection();
     }

@@ -23,13 +23,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -37,7 +43,7 @@ import java.util.stream.Collectors;
 
 public class AppointmentMainController implements Initializable {
 
-    public static Map<Integer, Appointments> customerIDToAppointment = new HashMap<>();
+    public static Map<Integer, Appointments> userIDToAppointment = new HashMap<>();
     protected static Appointments selectedAppointment = null;
     static Users currentUser = LoginController.getCurrentlyLoggedInUser();
     @FXML
@@ -193,9 +199,7 @@ public class AppointmentMainController implements Initializable {
                 appointment.setLastUpdatedBy(currentUser.getUsername());
                 appointment.setUsersID(currentUser.getUser_ID());
                 try {
-                    String s = ad.dbInsert(appointment);
-                    System.out.println(s);
-                    if (!Objects.equals(s, "")) {
+                    if (ad.dbInsert(appointment)) {
                         appointmentsList.add(appointment);
                         setTableFilteredAppointments();
                     }
@@ -249,7 +253,7 @@ public class AppointmentMainController implements Initializable {
                     try {
                         ad.updateDB(appointment);
                         appointmentsList.set(getIndexOfAppointment(appointment), appointment);
-
+                        setTableFilteredAppointments();
                     } catch (SQLException throwables) {
                         throwables.printStackTrace();
                     }
@@ -284,10 +288,13 @@ public class AppointmentMainController implements Initializable {
 
     //if the appointment is within the next seven days
     public void setTableFilteredAppointments() throws SQLException {
+        Set<TableView<Appointments>> appointmentTablesSet = new HashSet<>();
+        appointmentTablesSet.add(aptWeeklyTableView);
+        appointmentTablesSet.add(aptMonthlyTableView);
+        appointmentTablesSet.add(aptAllTableView);
+        appointmentTablesSet.forEach(t-> {if(t != null) {t.refresh();}});
         appointmentsList.setAll(ad.getAllFromDB());
-        aptWeeklyTableView.refresh();
-        aptMonthlyTableView.refresh();
-        aptAllTableView.refresh();
+
         if (appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsWeeklyTab.getText(), "Weekly")) {
             ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().
                             isAfter(RelatedTime.getCurrentDateTime()) && all.getEndDateTime().toLocalDateTime().
@@ -395,7 +402,11 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
+
+
     public void setColumns() {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         aptWeekID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptWeekTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         aptWeekDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -428,20 +439,55 @@ public class AppointmentMainController implements Initializable {
         aptAllCustomerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         aptAllUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptAllContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
+        aptAllStartDate.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> setStartDateAll) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+
+
+    public void checkForUpcomingUserAppointment() throws IOException {
+        Users loggedInUser = LoginController.getCurrentlyLoggedInUser();
+        LocalDateTime userTime = LocalDateTime.now(RelatedTime.getUserTimeZone());
+        ZonedDateTime estTime = ZonedDateTime.of(userTime, ZoneId.of("America/New_York"));
+
+        if(userIDToAppointment.containsKey(loggedInUser.getUser_ID())){
+            Appointments appointment = userIDToAppointment.get(loggedInUser.getUser_ID());
+            ZonedDateTime userTimeOfAppointment = ZonedDateTime.of(appointment.getStartDateTime().toLocalDateTime(), RelatedTime.getUserTimeZone());
+            LocalTime userAppointmentTimeLocal = userTimeOfAppointment.toLocalTime();
+            if(appointment.getStartDateTime().after(Timestamp.valueOf(estTime.toLocalDateTime())) &&
+                    appointment.getStartDateTime().before(Timestamp.valueOf(estTime.toLocalDateTime().plusMinutes(15)))){
+                Alerter.informationAlert(String.format("Appointment ID: %d\nDate: %s\n\nYou have an upcoming appointment at %s",
+                        appointment.getAppointmentID(), appointment.getStartDateTime().toLocalDateTime().toLocalDate(), userAppointmentTimeLocal));
+                Main.playSound("src/main/resources/notification.wav");
+            }
+        }else{
+            Alerter.informationAlert("No upcoming appointments!");
+        }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try {
-            setTableFilteredAppointments();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        try {setTableFilteredAppointments();} catch (SQLException e) {e.printStackTrace();}
+        try {checkForUpcomingUserAppointment();} catch (IOException e) {e.printStackTrace();}
+
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
         tableComboList.add("Appointments");
         tableComboList.add("Customers");
         tableComboList.add("Reports");
-
         checkUserLocation();
         setColumns();
         appointmentsSwitchTableComboBox.setItems(tableComboList);

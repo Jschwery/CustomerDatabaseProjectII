@@ -33,7 +33,7 @@ public class AppointmentsDao implements Dao<Appointments> {
     public AppointmentsDao() throws SQLException {}
 
     @Override
-    public String dbInsert(Appointments appointment) throws SQLException {
+    public boolean dbInsert(Appointments appointment) throws SQLException {
 
         PreparedStatement ps = DbConnection.dbStatementTemplate(insertAppointmenteQuery).orElse(null);
         if (ps != null) {
@@ -52,32 +52,31 @@ public class AppointmentsDao implements Dao<Appointments> {
             ps.setInt(13, appointment.getUsersID());
             ps.setInt(14, appointment.getContactsID());
 
-            //if the user does not already have an appointment & the time of the appointment is not already taken
-            //allow insertion
+            Optional<Appointments> findAppointment = getAllFromDB().stream().filter(app -> Objects.equals(app.getUsersID(), appointment.getUsersID())).findFirst();
+            DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
+            ZoneId userZone = RelatedTime.getUserTimeZone();
+            if (findAppointment.isPresent()) {
+                LocalDateTime toDisplayStart = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getStartDateTime());
+                LocalDateTime toDisplayEnd = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getEndDateTime());
+                LocalTime start = LocalTime.parse(toDisplayStart.toLocalTime().toString(), hourAndMinuteFormat);
+                LocalDate startDate = toDisplayStart.toLocalDate();
+                System.out.println(startDate);
+                LocalTime end = LocalTime.parse(toDisplayEnd.toLocalTime().toString(), hourAndMinuteFormat);
+                Alerter.informationAlert(String.format("User already has an appointment scheduled:\n%s\n\nStart: %s\nEnd: %s ", startDate, start, end));
+                return false;
+            }
             if (afc.compareAppointmentToBusiness(appointment) && getAllFromDB().stream().
                     filter(app -> Objects.equals(app.getUsersID(), LoginController.
                             getCurrentlyLoggedInUser().getUser_ID())).noneMatch(obj -> true) ||
-                    getAllFromDB().stream().filter(a -> Objects.equals(a.getUsersID(), appointment.getUsersID())).noneMatch(obj->true)) {
+                    getAllFromDB().stream().filter(a -> Objects.equals(a.getUsersID(), appointment.getUsersID())).noneMatch(obj -> true)) {
 
                 int rowsUpdated = ps.executeUpdate();
                 System.out.printf("%d rows successfully inserted appointment into database" +
                         "\nTime: " + LocalTime.now(), rowsUpdated);
-
+                return true;
             }
         }
-        Optional<Appointments> findAppointment = getAllFromDB().stream().filter(app -> Objects.equals(app.getUsersID(), appointment.getUsersID())).findFirst();
-        DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
-        ZoneId userZone = RelatedTime.getUserTimeZone();
-        if(findAppointment.isPresent()) {
-            LocalDateTime toDisplayStart = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getStartDateTime());
-            LocalDateTime toDisplayEnd = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getEndDateTime());
-            LocalTime start = LocalTime.parse(toDisplayStart.toLocalTime().toString(), hourAndMinuteFormat);
-            LocalDate startDate = toDisplayStart.toLocalDate();
-            System.out.println(startDate);
-            LocalTime end = LocalTime.parse(toDisplayEnd.toLocalTime().toString(), hourAndMinuteFormat);
-            Alerter.informationAlert(String.format("User already has an appointment scheduled:\n%s\n\nStart: %s\nEnd: %s ",startDate, start, end));
-        }
-        return "";
+        return false;
     }
 
     public ObservableList<Appointments> getAllFromDB() throws SQLException {
@@ -105,7 +104,7 @@ public class AppointmentsDao implements Dao<Appointments> {
     }
 
     @Override
-    public String updateDB(Appointments appointment) throws SQLException {
+    public boolean updateDB(Appointments appointment) throws SQLException {
             CustomerMainController mc = new CustomerMainController();
             PreparedStatement ps = DbConnection.dbStatementTemplate(appointmentUpdateQuery).orElse(null);
             if (ps != null) {
@@ -132,13 +131,14 @@ public class AppointmentsDao implements Dao<Appointments> {
                     int rowsUpdated = ps.executeUpdate();
                     System.out.println("Successfully inserted appointment into database" +
                             "\nTime: " + LocalTime.now());
-                    return String.format("%d rows updated", rowsUpdated);
+                    System.out.printf("%d rows updated%n", rowsUpdated);
+                    return true;
                 } else {
                     System.out.println("Not valid");
                 }
             }
             System.out.println("Unsuccessfully updated appointment to database");
-            return "";
+            return false;
     }
 
     @Override
