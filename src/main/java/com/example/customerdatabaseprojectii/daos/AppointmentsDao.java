@@ -42,8 +42,8 @@ public class AppointmentsDao implements Dao<Appointments> {
             ps.setString(3, appointment.getDescription());
             ps.setString(4, appointment.getLocation());
             ps.setString(5, appointment.getType());
-            ps.setTimestamp(6, appointment.getStartDateTime());
-            ps.setTimestamp(7, appointment.getEndDateTime());
+            ps.setTimestamp(6, Timestamp.valueOf(appointment.getStartDateTime()));
+            ps.setTimestamp(7, Timestamp.valueOf(appointment.getEndDateTime()));
             ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
             ps.setString(9, ud.getUserNameByID(appointment.getUsersID()));
             ps.setTimestamp(10, Timestamp.valueOf(RelatedTime.getCurrentDateTime()));
@@ -56,8 +56,8 @@ public class AppointmentsDao implements Dao<Appointments> {
             DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
             ZoneId userZone = RelatedTime.getUserTimeZone();
             if (findAppointment.isPresent()) {
-                LocalDateTime toDisplayStart = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getStartDateTime());
-                LocalDateTime toDisplayEnd = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), findAppointment.get().getEndDateTime());
+                LocalDateTime toDisplayStart = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), Timestamp.valueOf(findAppointment.get().getStartDateTime()));
+                LocalDateTime toDisplayEnd = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), Timestamp.valueOf(findAppointment.get().getEndDateTime()));
                 LocalTime start = LocalTime.parse(toDisplayStart.toLocalTime().toString(), hourAndMinuteFormat);
                 LocalDate startDate = toDisplayStart.toLocalDate();
                 System.out.println(startDate);
@@ -91,8 +91,8 @@ public class AppointmentsDao implements Dao<Appointments> {
                 apt.setDescription(rs.getString("Description"));
                 apt.setLocation(rs.getString("Location"));
                 apt.setType(rs.getString("Type"));
-                apt.setStartDateTime(Timestamp.valueOf(rs.getTimestamp("Start").toLocalDateTime()));
-                apt.setEndDateTime(Timestamp.valueOf(rs.getTimestamp("End").toLocalDateTime()));
+                apt.setStartDateTime(rs.getTimestamp("Start").toLocalDateTime());
+                apt.setEndDateTime(rs.getTimestamp("End").toLocalDateTime());
                 apt.setCustomerID(rs.getInt("Customer_ID"));
                 apt.setUsersID(rs.getInt("User_ID"));
                 apt.setContactsID(rs.getInt("Contact_ID"));
@@ -112,8 +112,8 @@ public class AppointmentsDao implements Dao<Appointments> {
                 ps.setString(2, appointment.getDescription());
                 ps.setString(3, appointment.getLocation());
                 ps.setString(4, appointment.getType());
-                ps.setTimestamp(5, appointment.getStartDateTime());
-                ps.setTimestamp(6, appointment.getEndDateTime());
+                ps.setTimestamp(5, Timestamp.valueOf(appointment.getStartDateTime()));
+                ps.setTimestamp(6, Timestamp.valueOf(appointment.getEndDateTime()));
                 ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
                 ps.setString(8, ud.getUserNameByID(appointment.getUsersID()));
                 ps.setInt(9, appointment.getCustomerID());

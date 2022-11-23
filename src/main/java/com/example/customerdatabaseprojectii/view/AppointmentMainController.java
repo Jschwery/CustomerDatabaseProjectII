@@ -296,20 +296,20 @@ public class AppointmentMainController implements Initializable {
         appointmentsList.setAll(ad.getAllFromDB());
 
         if (appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsWeeklyTab.getText(), "Weekly")) {
-            ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().
-                            isAfter(RelatedTime.getCurrentDateTime()) && all.getEndDateTime().toLocalDateTime().
+            ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all -> all.getStartDateTime().
+                            isAfter(RelatedTime.getCurrentDateTime()) && all.getEndDateTime().
                             isBefore(RelatedTime.getCurrentDateTime().plusWeeks(1)) && all.getEndDateTime().
-                            toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).
+                            isAfter(all.getStartDateTime())).
                     collect(Collectors.toCollection(FXCollections::observableArrayList));
             aptWeeklyTableView.setItems(weeklyList);
             return;
         }
         if (appointmentsMonthlyTab.isSelected() && Objects.equals(appointmentsMonthlyTab.getText(), "Monthly")) {
-            ObservableList<Appointments> monthlyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().
+            ObservableList<Appointments> monthlyList = appointmentsList.stream().filter(all -> all.getStartDateTime().
                             isAfter(RelatedTime.getCurrentDateTime().plusWeeks(1)) &&
-                            all.getStartDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1))
-                            && all.getEndDateTime().toLocalDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1))
-                            && all.getEndDateTime().toLocalDateTime().isAfter(all.getStartDateTime().toLocalDateTime())).
+                            all.getStartDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1))
+                            && all.getEndDateTime().isBefore(RelatedTime.getCurrentDateTime().plusMonths(1))
+                            && all.getEndDateTime().isAfter(all.getStartDateTime())).
                     collect(Collectors.toCollection(FXCollections::observableArrayList));
             aptMonthlyTableView.setItems(monthlyList);
             return;
@@ -402,10 +402,8 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
-
-
     public void setColumns() {
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         aptWeekID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptWeekTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -417,6 +415,38 @@ public class AppointmentMainController implements Initializable {
         aptWeekCustomerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         aptWeekUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptWeekContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
+        aptWeekStartDate.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> weekStartDate) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
+        aptWeekEndDate.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> weekEndDate) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
 
         aptMonthID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptMonthTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -428,6 +458,38 @@ public class AppointmentMainController implements Initializable {
         aptMonthCustomerID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         aptMonthUserID.setCellValueFactory(new PropertyValueFactory<>("usersID"));
         aptMonthContactID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
+        aptMonthStartDate.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> monthStartDate) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
+        aptMonthEndDate.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> setStartDateAll) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
 
         aptAllID.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         aptAllTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -455,9 +517,23 @@ public class AppointmentMainController implements Initializable {
                 };
             }
         });
+        aptAllEndDate.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> setEndDateAll) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
     }
-
-
 
     public void checkForUpcomingUserAppointment() throws IOException {
         Users loggedInUser = LoginController.getCurrentlyLoggedInUser();
@@ -466,12 +542,12 @@ public class AppointmentMainController implements Initializable {
 
         if(userIDToAppointment.containsKey(loggedInUser.getUser_ID())){
             Appointments appointment = userIDToAppointment.get(loggedInUser.getUser_ID());
-            ZonedDateTime userTimeOfAppointment = ZonedDateTime.of(appointment.getStartDateTime().toLocalDateTime(), RelatedTime.getUserTimeZone());
+            ZonedDateTime userTimeOfAppointment = ZonedDateTime.of(appointment.getStartDateTime(), RelatedTime.getUserTimeZone());
             LocalTime userAppointmentTimeLocal = userTimeOfAppointment.toLocalTime();
-            if(appointment.getStartDateTime().after(Timestamp.valueOf(estTime.toLocalDateTime())) &&
-                    appointment.getStartDateTime().before(Timestamp.valueOf(estTime.toLocalDateTime().plusMinutes(15)))){
+            if(appointment.getStartDateTime().isAfter(estTime.toLocalDateTime()) &&
+                    appointment.getStartDateTime().isBefore(estTime.toLocalDateTime().plusMinutes(15))){
                 Alerter.informationAlert(String.format("Appointment ID: %d\nDate: %s\n\nYou have an upcoming appointment at %s",
-                        appointment.getAppointmentID(), appointment.getStartDateTime().toLocalDateTime().toLocalDate(), userAppointmentTimeLocal));
+                        appointment.getAppointmentID(), appointment.getStartDateTime().toLocalDate(), userAppointmentTimeLocal));
                 Main.playSound("src/main/resources/notification.wav");
             }
         }else{
@@ -483,6 +559,7 @@ public class AppointmentMainController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {setTableFilteredAppointments();} catch (SQLException e) {e.printStackTrace();}
         try {checkForUpcomingUserAppointment();} catch (IOException e) {e.printStackTrace();}
+        try {AppointmentFormController.fillUserAppointmentMap();} catch (SQLException e) {e.printStackTrace();}
 
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
         tableComboList.add("Appointments");

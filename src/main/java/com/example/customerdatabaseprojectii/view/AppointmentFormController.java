@@ -140,8 +140,8 @@ public class AppointmentFormController {
             LocalTime localStartTime = RelatedTime.formattedTimeParser(hourAndMinuteFormat, afStartTimePicker.getValue());
             LocalDateTime localDateTimeStartAppointment = LocalDateTime.of(localAppointmentDateStart, localStartTime);
             LocalDateTime localDateTimeEndAppointment = LocalDateTime.of(localAppointmentDateEnd, localEndTime);
-            appointment.setStartDateTime(Timestamp.valueOf(localDateTimeStartAppointment));
-            appointment.setEndDateTime(Timestamp.valueOf(localDateTimeEndAppointment));
+            appointment.setStartDateTime(localDateTimeStartAppointment);
+            appointment.setEndDateTime(localDateTimeEndAppointment);
         }catch (NullPointerException e){
             Alerter.warningAlert("Please fill in all the fields!");
         }
@@ -170,10 +170,10 @@ public class AppointmentFormController {
     public void fillAppointmentData(Appointments appointment) throws SQLException {
         DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
 
-        afDatePickerStart.setValue(appointment.getStartDateTime().toLocalDateTime().toLocalDate());
-        afDatePickerEnd.setValue(appointment.getStartDateTime().toLocalDateTime().toLocalDate());
-        afStartTimePicker.setValue(appointment.getStartDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat));
-        afEndTimePicker.setValue(appointment.getEndDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat));
+        afDatePickerStart.setValue(appointment.getStartDateTime().toLocalDate());
+        afDatePickerEnd.setValue(appointment.getStartDateTime().toLocalDate());
+        afStartTimePicker.setValue(appointment.getStartDateTime().toLocalTime().format(hourAndMinuteFormat));
+        afEndTimePicker.setValue(appointment.getEndDateTime().toLocalTime().format(hourAndMinuteFormat));
         afType.setText(appointment.getType());
         afUserID.setText(String.valueOf(appointment.getUsersID()));
         afSelectCustomer.setValue(getCustomerNameByID(appointment.getCustomerID()));
@@ -211,24 +211,19 @@ public class AppointmentFormController {
      * @throws SQLException
      */
     public static void fillUserAppointmentMap() throws SQLException {
-        UsersDao ud = new UsersDao();
         AppointmentsDao ad = new AppointmentsDao();
-
-        for(Users user : ud.getAllFromDB()){
-            Optional<Appointments> appointment = ad.getAllFromDB().stream().filter(a-> Objects.equals(a.getUsersID(), user.getUser_ID())).findFirst();
-            appointment.ifPresent(appointments -> insertAppointmentIntoMap(user.getUser_ID(), appointments));
-        }
+        ad.getAllFromDB().forEach(app -> insertAppointmentIntoMap(app.getUsersID(), app));
     }
 
     //customerID mapped to an appointment
     public static void insertAppointmentIntoMap(Integer id, Appointments appointment) {
         if (!isAppointmentTimeTaken(LocalTime.parse(appointment.getStartDateTime().
-                        toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)),
-                LocalTime.parse(appointment.getEndDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
+                       toLocalTime().format(hourAndMinuteFormat)),
+                LocalTime.parse(appointment.getEndDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
             AppointmentMainController.userIDToAppointment.put(id, appointment);
             System.out.println("Complete & appointment is mapped");
         } else {
-            Alerter.informationAlert("Cannot create an appointment because that time slot is reserved already!");
+            System.out.printf("Could not add appointment for user with ID: %d%n", appointment.getUsersID());
         }
     }
 
@@ -236,13 +231,13 @@ public class AppointmentFormController {
         for (Map.Entry<Integer, Appointments> entry : AppointmentMainController.userIDToAppointment.entrySet()) {
             Appointments appointments = entry.getValue();
             if (appointmentStart.isAfter
-                    (LocalTime.parse(appointments.getStartDateTime().toLocalDateTime().toLocalTime().
+                    (LocalTime.parse(appointments.getStartDateTime().toLocalTime().
                             format(hourAndMinuteFormat))) && appointmentStart.
                     isBefore(LocalTime.parse(appointments.getEndDateTime().
-                            toLocalDateTime().toLocalTime().format(hourAndMinuteFormat))) || appointmentEnd.
-                    isAfter(LocalTime.parse(appointments.getStartDateTime().toLocalDateTime().toLocalTime().
+                            toLocalTime().format(hourAndMinuteFormat))) || appointmentEnd.
+                    isAfter(LocalTime.parse(appointments.getStartDateTime().toLocalTime().
                             format(hourAndMinuteFormat))) && appointmentEnd.
-                    isBefore(LocalTime.parse(appointments.getEndDateTime().toLocalDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
+                    isBefore(LocalTime.parse(appointments.getEndDateTime().toLocalTime().format(hourAndMinuteFormat)))) {
                 return true;
             }
         }
@@ -316,12 +311,12 @@ public class AppointmentFormController {
 
     public boolean compareAppointmentToBusiness(Appointments appointments) {
 
-        ZonedDateTime userZdtStart = ZonedDateTime.of(appointments.getStartDateTime().toLocalDateTime(), ZoneId.systemDefault());
-        ZonedDateTime userZdtEnd = ZonedDateTime.of(appointments.getEndDateTime().toLocalDateTime(), ZoneId.systemDefault());
+        ZonedDateTime userZdtStart = ZonedDateTime.of(appointments.getStartDateTime(), ZoneId.systemDefault());
+        ZonedDateTime userZdtEnd = ZonedDateTime.of(appointments.getEndDateTime(), ZoneId.systemDefault());
         ZonedDateTime estZdtStart = userZdtStart.withZoneSameInstant(ZoneId.of("America/New_York"));
         ZonedDateTime estZdtEnd = userZdtEnd.withZoneSameInstant(ZoneId.of("America/New_York"));
 
-        int checkWithinBusinessWeek = appointments.getStartDateTime().toLocalDateTime().toLocalDate().getDayOfWeek().getValue();
+        int checkWithinBusinessWeek = appointments.getStartDateTime().toLocalDate().getDayOfWeek().getValue();
         LocalTime estLocalTimeStart = estZdtStart.toLocalTime();
         LocalTime estLocalTimeEnd = estZdtEnd.toLocalTime();
         LocalTime businessOpenTime = LocalTime.of(8, 0, 0);
@@ -339,10 +334,10 @@ public class AppointmentFormController {
             return false;
         }
         if (checkWithinBusinessWeek > endBusinessWeek) {
-            Alerter.informationAlert("The business is closed on: " + appointments.getStartDateTime().toLocalDateTime().toLocalDate().getDayOfWeek() + "\nBusiness days are Monday-Friday");
+            Alerter.informationAlert("The business is closed on: " + appointments.getStartDateTime().toLocalDate().getDayOfWeek() + "\nBusiness days are Monday-Friday");
             return false;
         }
-        if (appointments.getEndDateTime().before(appointments.getStartDateTime())) {
+        if (appointments.getEndDateTime().isBefore(appointments.getStartDateTime())) {
             Alerter.informationAlert("Appointment start time must be selected before end time!");
             return false;
         }

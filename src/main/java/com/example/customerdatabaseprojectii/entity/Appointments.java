@@ -2,6 +2,7 @@ package com.example.customerdatabaseprojectii.entity;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class Appointments {
     private int appointmentID;
@@ -9,8 +10,8 @@ public class Appointments {
     private String description;
     private String location;
     private String type;
-    private Timestamp startDateTime;
-    private Timestamp endDateTime;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
     private Time createDateTime;
     private String createdBy;
     private Timestamp lastUpdate;
@@ -81,19 +82,19 @@ public class Appointments {
         this.type = type;
     }
 
-    public Timestamp getStartDateTime() {
+    public LocalDateTime getStartDateTime() {
         return startDateTime;
     }
 
-    public void setStartDateTime(Timestamp startDateTime) {
+    public void setStartDateTime(LocalDateTime startDateTime) {
         this.startDateTime = startDateTime;
     }
 
-    public Timestamp getEndDateTime() {
+    public LocalDateTime getEndDateTime() {
         return endDateTime;
     }
 
-    public void setEndDateTime(Timestamp endDateTime) {
+    public void setEndDateTime(LocalDateTime endDateTime) {
         this.endDateTime = endDateTime;
     }
 
