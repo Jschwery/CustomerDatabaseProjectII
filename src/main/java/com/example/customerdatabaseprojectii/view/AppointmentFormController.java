@@ -14,10 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -25,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,6 +64,8 @@ public class AppointmentFormController {
     Supplier<ObservableList<String>> customersSupplier;
     ObservableList<Contacts> contactsObservableList;
     Appointments appointment;
+    ObservableList<Appointments> appointmentList;
+    AppointmentMainController amc;
     public static boolean isModified = false;
     ContactsDao contactsDao = new ContactsDao();
     ObservableList<Customers> observableListOfCustomers;
@@ -77,12 +77,13 @@ public class AppointmentFormController {
 
     public void appointmentInit(ObservableList<Contacts> contactsObservableList, Appointments appointment,
                                 Consumer<Appointments> appointmentHandler, Supplier<ObservableList<String>> customersSupplier,
-                                ObservableList<Customers> customersList) throws SQLException {
+                                ObservableList<Customers> customersList, ObservableList<Appointments> appointmentList) throws SQLException {
         this.appointmentHandler = appointmentHandler;
         this.contactsObservableList = contactsObservableList;
         this.appointment = appointment;
         this.customersSupplier = customersSupplier;
         this.observableListOfCustomers = customersList;
+        this.appointmentList = appointmentList;
         if(appointment == null){
             this.appointment = new Appointments();
         }
@@ -153,6 +154,7 @@ public class AppointmentFormController {
             }else{
                 insertAppointmentIntoMap(appointment.getCustomerID(), appointment);
             }
+
             Main.playSound("src/main/resources/selectrewardsound.wav");
             resetBoxes();
             isModified = false;

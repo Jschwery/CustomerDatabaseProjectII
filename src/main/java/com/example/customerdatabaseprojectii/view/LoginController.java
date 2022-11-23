@@ -125,17 +125,6 @@ public class LoginController implements Initializable {
             }
         }
     }
-    /*
-    need to put all of the users from the database if their key does not already exist into the map
-
-    get the users that dont exist into the userLogInfo
-        -- need create user controller to be more loose
-
-
-
-
-     */
-
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

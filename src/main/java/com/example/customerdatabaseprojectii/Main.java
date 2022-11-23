@@ -44,7 +44,7 @@ public class Main extends Application {
     public static void matchFileCriteria(File[] filesList, Users user) throws IOException, SQLException {
         CreateUsersController controller = new CreateUsersController();
         UsersDao ud = new UsersDao();
-        Pattern pattern = Pattern.compile("(userLogInfo\\*[a-zA-Z0-9]+_[a-zA-z0-9]+.txt)", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("(userLogInfo\\*[a-zA-Z0-9]+.txt)", Pattern.CASE_INSENSITIVE);
         if(filesList.length<= ud.getAllFromDB().size()){
             controller.storeCreationDate(user);
         }else{
@@ -59,10 +59,9 @@ public class Main extends Application {
 
     public static void getDBUsersAndCreateFiles() throws SQLException, IOException {
         UsersDao userDao = new UsersDao();
+        File file = new File("userLogInfo");
+        File[] filesList = file.listFiles();
         for(Users user : userDao.getAllFromDB()){
-            File file = new File("userLogInfo");
-            File[] filesList = file.listFiles();
-            System.out.println(Arrays.toString(filesList));
             assert filesList != null;
             matchFileCriteria(filesList, user);
         }

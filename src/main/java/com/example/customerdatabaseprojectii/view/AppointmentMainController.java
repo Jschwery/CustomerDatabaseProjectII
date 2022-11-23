@@ -197,6 +197,7 @@ public class AppointmentMainController implements Initializable {
                     System.out.println(s);
                     if (!Objects.equals(s, "")) {
                         appointmentsList.add(appointment);
+                        setTableFilteredAppointments();
                     }
                 } catch (SQLException s) {
                     s.printStackTrace();
@@ -216,7 +217,7 @@ public class AppointmentMainController implements Initializable {
                 return null;
             };
             try {
-                formController.appointmentInit(contactsObservableList, selectedAppointment, addAppointment, customerNameSupplier, customersObservableList);
+                formController.appointmentInit(contactsObservableList, selectedAppointment, addAppointment, customerNameSupplier, customersObservableList, appointmentsList);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -248,6 +249,7 @@ public class AppointmentMainController implements Initializable {
                     try {
                         ad.updateDB(appointment);
                         appointmentsList.set(getIndexOfAppointment(appointment), appointment);
+
                     } catch (SQLException throwables) {
                         throwables.printStackTrace();
                     }
@@ -266,7 +268,7 @@ public class AppointmentMainController implements Initializable {
                         e.printStackTrace();
                     }
                     return null;
-                }, customersObservableList);
+                }, customersObservableList, appointmentsList);
             } catch (SQLException s) {
                 s.printStackTrace();
             }
@@ -283,7 +285,9 @@ public class AppointmentMainController implements Initializable {
     //if the appointment is within the next seven days
     public void setTableFilteredAppointments() throws SQLException {
         appointmentsList.setAll(ad.getAllFromDB());
-
+        aptWeeklyTableView.refresh();
+        aptMonthlyTableView.refresh();
+        aptAllTableView.refresh();
         if (appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsWeeklyTab.getText(), "Weekly")) {
             ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all -> all.getStartDateTime().toLocalDateTime().
                             isAfter(RelatedTime.getCurrentDateTime()) && all.getEndDateTime().toLocalDateTime().
@@ -434,7 +438,6 @@ public class AppointmentMainController implements Initializable {
             e.printStackTrace();
         }
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
-
         tableComboList.add("Appointments");
         tableComboList.add("Customers");
         tableComboList.add("Reports");
