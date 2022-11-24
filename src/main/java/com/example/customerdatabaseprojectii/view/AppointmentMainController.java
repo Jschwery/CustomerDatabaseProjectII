@@ -221,7 +221,8 @@ public class AppointmentMainController implements Initializable {
                 return null;
             };
             try {
-                formController.appointmentInit(contactsObservableList, selectedAppointment, addAppointment, customerNameSupplier, customersObservableList, appointmentsList);
+                formController.appointmentInit(contactsObservableList, selectedAppointment, addAppointment,
+                        customerNameSupplier, customersObservableList, appointmentsList);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
