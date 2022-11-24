@@ -3,92 +3,75 @@
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="558.0" prefWidth="791.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.ReportsMainController">
-   <children>
-      <Label fx:id="reportsTableLabel" layoutX="30.0" layoutY="26.0" text="Reports Table">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-      <ComboBox fx:id="reportsTableSwitchComboBox" layoutX="385.0" layoutY="27.0" prefHeight="31.0" prefWidth="150.0" promptText="Tables" />
-      <TabPane fx:id="reportsTabPane" layoutX="15.0" layoutY="77.0" prefHeight="260.0" prefWidth="749.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab text="Untitled Tab 1">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0">
-                     <children>
-                        <BarChart layoutY="5.0" prefHeight="222.0" prefWidth="419.0">
-                          <xAxis>
-                            <CategoryAxis side="BOTTOM" />
-                          </xAxis>
-                          <yAxis>
-                            <NumberAxis side="LEFT" />
-                          </yAxis>
-                        </BarChart>
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-            <Tab text="Untitled Tab 1">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0">
-                     <children>
-                        <BarChart layoutY="5.0" prefHeight="222.0" prefWidth="419.0">
-                           <xAxis>
-                              <CategoryAxis side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                        <PieChart layoutX="428.0" layoutY="5.0" prefHeight="205.0" prefWidth="307.0" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="Untitled Tab 1">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="374.0" prefWidth="737.0">
-                     <children>
-                        <BarChart layoutY="5.0" prefHeight="222.0" prefWidth="419.0">
-                           <xAxis>
-                              <CategoryAxis side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-        </tabs>
-      </TabPane>
-      <Button fx:id="reportsSwitchTableButton" layoutX="551.0" layoutY="27.0" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="27.0" prefWidth="104.0" text="Switch Table">
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Button>
-      <Slider layoutX="37.0" layoutY="520.0" prefHeight="14.0" prefWidth="207.0">
-         <tooltip>
-            <Tooltip text="Slide the dile" />
-         </tooltip>
-      </Slider>
-      <TextField layoutX="77.0" layoutY="413.0">
-         <tooltip>
-            <Tooltip text="Enter something" />
-         </tooltip>
-      </TextField>
-   </children>
+<AnchorPane prefHeight="806.0" prefWidth="872.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.ReportsMainController">
+    <children>
+        <Label fx:id="reportsTableLabel" layoutX="30.0" layoutY="26.0" text="Reports Table">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <ComboBox fx:id="reportsTableSwitchComboBox" layoutX="578.0" layoutY="45.0" prefHeight="31.0" prefWidth="150.0" promptText="Tables" />
+        <Button fx:id="reportsSwitchTableButton" layoutX="740.0" layoutY="45.0" mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="31.0" prefWidth="104.0" text="Switch Table">
+            <font>
+                <Font size="15.0" />
+            </font>
+        </Button>
+        <AnchorPane layoutX="11.0" layoutY="93.0" minHeight="0.0" minWidth="0.0" prefHeight="293.0" prefWidth="838.0">
+            <children>
+                <TableView fx:id="reportTableView" layoutY="36.0" prefHeight="257.0" prefWidth="830.0">
+                    <columns>
+                        <TableColumn fx:id="reportID" prefWidth="71.0" text="ID" />
+                        <TableColumn fx:id="reportTitle" prefWidth="109.0" text="Title" />
+                        <TableColumn fx:id="reportType" prefWidth="112.0" text="Type" />
+                        <TableColumn fx:id="reportDescription" prefWidth="146.0" text="Description" />
+                        <TableColumn fx:id="reportStart" prefWidth="137.0" text="Start " />
+                        <TableColumn fx:id="reportEnd" prefWidth="146.0" text="End" />
+                        <TableColumn fx:id="reportCustomerID" prefWidth="108.0" text="Customer ID" />
+                    </columns>
+                </TableView>
+                <ComboBox fx:id="switchCustomerComboBox" layoutY="-1.0" prefHeight="31.0" prefWidth="150.0" promptText="Tables" />
+                <Button fx:id="switchContact" layoutX="163.0" layoutY="-1.0" mnemonicParsing="false" onAction="#contactSwitched" prefHeight="31.0" prefWidth="76.0" text="Switch">
+                    <font>
+                        <Font size="15.0" />
+                    </font>
+                </Button>
+            </children>
+        </AnchorPane>
+        <Separator layoutX="6.0" layoutY="402.0" prefHeight="20.0" prefWidth="864.0" />
+        <TextField fx:id="reportSearch" layoutX="11.0" layoutY="461.0" prefHeight="26.0" prefWidth="400.0" />
+        <ListView fx:id="reportList" layoutX="11.0" layoutY="493.0" prefHeight="235.0" prefWidth="400.0" />
+        <Button fx:id="reportListButton" layoutX="229.0" layoutY="742.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="182.0" text="Button" />
+        <BarChart fx:id="reportGraph" layoutX="453.0" layoutY="464.0" prefHeight="293.0" prefWidth="400.0">
+            <xAxis>
+                <CategoryAxis side="BOTTOM" />
+            </xAxis>
+            <yAxis>
+                <NumberAxis side="LEFT" />
+            </yAxis>
+        </BarChart>
+        <Slider fx:id="reportSlider" layoutX="550.0" layoutY="769.0" prefHeight="24.0" prefWidth="242.0" />
+        <Separator layoutX="424.0" layoutY="412.0" orientation="VERTICAL" prefHeight="369.0" prefWidth="0.0" />
+        <Label layoutX="16.0" layoutY="417.0" text="Report Search">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+        </Label>
+        <Label layoutX="453.0" layoutY="417.0" prefHeight="25.0" prefWidth="92.0" text="Graph View">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+        </Label>
+    </children>
 </AnchorPane>

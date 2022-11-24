@@ -146,6 +146,8 @@ public class AppointmentFormController {
             Alerter.warningAlert("Please fill in all the fields!");
         }
             Main.playSound("src/main/resources/selectrewardsound.wav");
+            fieldValidator(appointment);
+            appointmentHandler.accept(appointment);
             resetBoxes();
             isModified = false;
             Stage stage = (Stage) afType.getScene().getWindow();

@@ -175,6 +175,7 @@ public class AppointmentMainController implements Initializable {
         if (selectedAppointment != null) {
             ad.deleteFromDB(selectedAppointment);
             appointmentsList.remove(selectedAppointment);
+            setTableFilteredAppointments();
             Main.playSound("src/main/resources/errorSound.wav");
         } else {
             Alerter.informationAlert("No appointment selected to delete");
@@ -547,20 +548,20 @@ public class AppointmentMainController implements Initializable {
             LocalTime userAppointmentTimeLocal = userTimeOfAppointment.toLocalTime();
             if(appointment.getStartDateTime().isAfter(estTime.toLocalDateTime()) &&
                     appointment.getStartDateTime().isBefore(estTime.toLocalDateTime().plusMinutes(15))){
+                Main.playSound("src/main/resources/notification.wav");
                 Alerter.informationAlert(String.format("Appointment ID: %d\nDate: %s\n\nYou have an upcoming appointment at %s",
                         appointment.getAppointmentID(), appointment.getStartDateTime().toLocalDate(), userAppointmentTimeLocal));
-                Main.playSound("src/main/resources/notification.wav");
+            }else{
+                Alerter.informationAlert("No upcoming appointments!");
             }
-        }else{
-            Alerter.informationAlert("No upcoming appointments!");
         }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {setTableFilteredAppointments();} catch (SQLException e) {e.printStackTrace();}
-        try {checkForUpcomingUserAppointment();} catch (IOException e) {e.printStackTrace();}
         try {AppointmentFormController.fillUserAppointmentMap();} catch (SQLException e) {e.printStackTrace();}
+        try {checkForUpcomingUserAppointment();} catch (IOException e) {e.printStackTrace();}
 
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
         tableComboList.add("Appointments");
