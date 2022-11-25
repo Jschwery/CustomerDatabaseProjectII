@@ -23,9 +23,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReportsMainController implements Initializable {
@@ -57,9 +55,18 @@ public class ReportsMainController implements Initializable {
     @FXML
     TableColumn<Appointments, Integer> reportCustomerID;
     @FXML
-    Slider reportSlider;
+    TableView<Appointments> reportTableView1;
     @FXML
-    BarChart<String, Integer> reportGraph;
+    TableColumn<Appointments, String> reportType1;
+    @FXML
+    TableColumn<Appointments, LocalDateTime> reportMonth1;
+    @FXML
+    TextField reportSearchFilter;
+    @FXML
+    BarChart<String, Integer> reportGraph1;
+
+
+
 
     AppointmentsDao ad = new AppointmentsDao();
     ContactsDao cd = new ContactsDao();
@@ -73,6 +80,9 @@ public class ReportsMainController implements Initializable {
                 toUpperCase(), contactName.toUpperCase())).findFirst();
         return contactsTemp.map(Contacts::getContactID).orElse(0);
     }
+
+
+
 
     /**
      * Adds all the appointments from a specific contact selected from the combobox to an observable list
@@ -134,18 +144,41 @@ public class ReportsMainController implements Initializable {
     //then place inside the combobox the name of the contact
     public void fillContactCombobox() throws SQLException {
         ObservableList<String> contactNames = FXCollections.observableArrayList();
+        Set<String> contactNameSet = new HashSet<>();
         for(Appointments appointments : ad.getAllFromDB()){
             for(Contacts contact : cd.getAllFromDB()){
                 if(Objects.equals(appointments.getContactsID(), contact.getContactID())){
-                    contactNames.add(contact.getContactName());
+                    contactNameSet.add(contact.getContactName());
                 }
             }
         }
+        contactNames.addAll(contactNameSet);
         switchCustomerComboBox.setItems(contactNames);
     }
 
     public void initializeReportTable() throws SQLException {
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM");
+        reportTableView1.setItems(ad.getAllFromDB());
+        reportType1.setCellValueFactory(new PropertyValueFactory<>("type"));
+        reportMonth1.setCellValueFactory(new PropertyValueFactory<>("start"));
+        reportMonth1.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> setStartDateTime) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean blank) {
+                        super.updateItem(item, blank);
+                        if (blank) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                        }
+                    }
+                };
+            }
+        });
+
+
         reportTableView.setItems(ad.getAllFromDB());
         reportID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));
         reportTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
