@@ -10,12 +10,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -83,40 +81,28 @@ public class LoginController implements Initializable {
 
         currentlyLoggedIn = findUserByUsername(username).orElse(null);
         try {
-            if (ud.verifyUserFromDB(currentlyLoggedIn) && Objects.equals(passwordTextEntry.getText(), currentlyLoggedIn.getPassword())){
-                for(Map.Entry<Integer, File> entry : CreateUsersController.getUserIdToFileMap().entrySet()){
-                    if(Objects.equals(entry.getKey(), currentlyLoggedIn.getUser_ID())){
-                        BufferedWriter writer = new BufferedWriter(new FileWriter(entry.getValue(), true));
-                        writer.write(String.format("\n%s Logged in on %s", currentlyLoggedIn.getUsername(), RelatedTime.getCurrentDateTime()));
-                        writer.flush();
-                        writer.close();
-                    }
-                }
-                if(changeLang || Objects.equals(System.getProperty("user.language"), "fr")){
+            if (ud.verifyUserFromDB(currentlyLoggedIn) && Objects.equals(passwordTextEntry.getText(), currentlyLoggedIn.getPassword())) {
+                BufferedWriter writer = new BufferedWriter(new FileWriter("userLogInfo/login_activity.txt", true));
+                writer.write(String.format("Username: %s\nLog in attempt: %s\n\n", username, LocalDateTime.now()));
+                writer.flush();
+                writer.close();
+                if (changeLang || Objects.equals(System.getProperty("user.language"), "fr")) {
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
                             Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(currentlyLoggedIn.getUsername())), false);
-                }else{
+                } else {
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
                             Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(currentlyLoggedIn.getUsername())), false);
                 }
             } else {
                 String userLang = System.getProperty("user.language");
-                if(Objects.equals(userLang, "fr") || frenchToggle.isSelected()){
+                if (Objects.equals(userLang, "fr") || frenchToggle.isSelected()) {
                     Alerter.informationAlert("identifiant ou mot de passe incorrect");
-                }else {
+                } else {
                     Alerter.informationAlert("Incorrect username or password!");
                 }
             }
         } catch (Exception e) {
             if (ud.verifyUserFromDB(currentlyLoggedIn) && Objects.equals(passwordTextEntry.getText(), currentlyLoggedIn.getPassword())) {
-                for(Map.Entry<Integer, File> entry : CreateUsersController.getUserIdToFileMap().entrySet()){
-                    if(Objects.equals(entry.getKey(), currentlyLoggedIn.getUser_ID())){
-                        BufferedWriter writer = new BufferedWriter(new FileWriter(entry.getValue(), true));
-                        writer.write(String.format("\n%s Logged in on %s", currentlyLoggedIn.getUsername(), RelatedTime.getCurrentDateTime()));
-                        writer.flush();
-                        writer.close();
-                    }
-                }
                 Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
                         Main.getMainStage(), 450, 385, "Welcome!", false);
                 e.printStackTrace();

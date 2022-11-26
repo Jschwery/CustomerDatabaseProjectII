@@ -30,6 +30,7 @@ public class CreateUsersController {
     PasswordField reenterPasswordTextField;
     UsersDao ud = new UsersDao();
 
+
     private static final Map<Integer, File> userIdToFileMap = new HashMap<>();
     public static Map<Integer, File> getUserIdToFileMap(){
         return userIdToFileMap;
@@ -45,16 +46,18 @@ public class CreateUsersController {
         }
     }
 
-    public static void scanUserLogDirectory(){
+    public static boolean scanUserLogDirectory(File fileToCheck){
         File directory = new File("userLogInfo");
         File[] directoryFileListing = directory.listFiles();
 
         if(directoryFileListing != null){
             for(File file : directoryFileListing){
-                System.out.println(file);
+                if(Objects.equals(fileToCheck, file)){
+                    return false;
+                }
             }
         }
-
+        return true;
     }
 
     public boolean accountSubmitEvaluator(String uName, String pWord, String rePWord) {
@@ -88,28 +91,36 @@ public class CreateUsersController {
             System.out.println("Could not switch back to login");
         }
     }
-    public void storeCreationDate(Users user) throws IOException {
+    public void storeCreationDate(Users user) throws IOException, SQLException {
         LocalDate attemptDate = LocalDateTime.now().toLocalDate();
-        Timestamp attemptTimestamp = Timestamp.valueOf(LocalDateTime.now());
+        Optional<Timestamp> getCreateTime = ud.getAllFromDB().stream().filter(u -> Objects.equals(u.getUser_ID(), user.getUser_ID())).map(Users::getCreateDateTime).findFirst();
+
         File file = new File(String.format("userLogInfo/%s.txt", user.getUsername()));
-        try {
-            ud.getAllFromDB().forEach(k-> {
-                try {
-                    addUserIDToFileMap(k.getUser_ID(), new File(String.format("userLogInfo/%s.txt", user.getUsername())));
-                } catch (SQLException e) {
-                    e.printStackTrace();
+        if (!scanUserLogDirectory(file)) {
+            try {
+                ud.getAllFromDB().forEach(k -> {
+                    try {
+                        addUserIDToFileMap(k.getUser_ID(), new File(String.format("userLogInfo/%s.txt", user.getUsername())));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                });
+                addUserIDToFileMap(user.getUser_ID(), file);
+                BufferedWriter bw = new BufferedWriter(new FileWriter(String.format("userLogInfo/%s.txt", user.getUsername())));
+                if (getCreateTime.isPresent()) {
+                    bw.write(String.format("User: %s\n\nCreated on: %s ", user, getCreateTime.get()));
+                    bw.flush();
+                    bw.close();
                 }
-            });
-            addUserIDToFileMap(user.getUser_ID(), file);
-        }catch (SQLException e){
-            e.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        if(!file.exists()) {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            bw.write(user + "\nCREATED ON: "+attemptDate + "\nTime Created: " + attemptTimestamp);
-            bw.close();
-        }else{
-            System.out.println("User file already exists!");
+        else {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+            writer.write(String.format("%s Logged in attempt on: %s\n", user.getUsername(), attemptDate));
+            writer.flush();
+            writer.close();
         }
     }
     public void submitUserClicker(ActionEvent event) throws SQLException {

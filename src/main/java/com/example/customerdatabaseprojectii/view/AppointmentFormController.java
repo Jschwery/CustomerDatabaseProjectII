@@ -67,7 +67,6 @@ public class AppointmentFormController {
     ObservableList<Contacts> contactsObservableList;
     Appointments appointment;
     ObservableList<Appointments> appointmentList;
-    AppointmentMainController amc;
     public static boolean isModified = false;
     ContactsDao contactsDao = new ContactsDao();
     ObservableList<Customers> observableListOfCustomers;
@@ -146,19 +145,20 @@ public class AppointmentFormController {
             Alerter.warningAlert("Please fill in all the fields!");
         }
             Main.playSound("src/main/resources/selectrewardsound.wav");
-            fieldValidator(appointment);
-            appointmentHandler.accept(appointment);
-            resetBoxes();
-            isModified = false;
-            Stage stage = (Stage) afType.getScene().getWindow();
-            stage.close();
+            if(fieldValidator(appointment)) {
+                appointmentHandler.accept(appointment);
+                resetBoxes();
+                isModified = false;
+                Stage stage = (Stage) afType.getScene().getWindow();
+                stage.close();
+            }
     }
 
     public int findCustomerIDByName(String customerName){
         CustomersDao cd = new CustomersDao();
         try {
             for (Customers customer : cd.getAllFromDB()){
-                if(Objects.equals(customerName.toUpperCase(), customerName.toUpperCase())){
+                if(Objects.equals(customerName.toUpperCase(), customer.getCustomerName().toUpperCase())){
                     return customer.getCustomerID();
                 }
             }

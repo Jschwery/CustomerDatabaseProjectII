@@ -5,19 +5,17 @@ import com.example.customerdatabaseprojectii.util.DbConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 
 public class UsersDao implements Dao<Users> {
 
     private static final String usersQuery = "SELECT * FROM users";
 
 
-    private static final String insertUserQuery = "Insert INTO users (User_Name, Password) " +
-            "VALUES (?,?)";
-    private static final String updateUserQuery = "UPDATE users SET User_Name = ?, Password = ? WHERE User_ID = ?";
+    private static final String insertUserQuery = "Insert INTO users (User_Name, Password, Create_Date, Created_By, Last_Update, Last_Updated_By) " +
+            "VALUES (?,?,?,?,?,?)";
+    private static final String updateUserQuery = "UPDATE users SET User_Name = ?, Password = ?, Last_Update = ?, Last_Updated_By = ? WHERE User_ID = ?";
     private static final String deleteUserQuery = "DELETE FROM users WHERE User_ID = ?";
 
     public String getUserNameByID(int userID) throws SQLException {
@@ -71,6 +69,11 @@ public class UsersDao implements Dao<Users> {
             if (ps != null) {
                 ps.setString(1, user.getUsername());
                 ps.setString(2, user.getPassword());
+                ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                ps.setString(4, user.getUsername());
+                ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                ps.setString(6, user.getUsername());
+
                 int rowAffected = ps.executeUpdate();
                 System.out.printf("%d number of rows were affected with the update%n", rowAffected);
                 return true;
@@ -90,6 +93,7 @@ public class UsersDao implements Dao<Users> {
                 tempUser.setUsername(rs.getString("User_Name"));
                 tempUser.setPassword(rs.getString("Password"));
                 tempUser.setUser_ID(rs.getInt("User_ID"));
+                tempUser.setCreateDateTime(rs.getTimestamp("Create_Date"));
 
                 observableUsersList.add(tempUser);
             }
@@ -106,6 +110,8 @@ public class UsersDao implements Dao<Users> {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
             ps.setInt(3, user.getUser_ID());
+            ps.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(5, user.getUsername());
             ps.executeUpdate();
             System.out.printf("User with %d has been updated\nUsername: %s\nPassword: %s%n", user.getUser_ID(), user.getUsername(), user.getPassword());
             return true;

@@ -4,7 +4,6 @@ module com.example.customerdatabaseprojectii {
     requires java.sql;
     requires java.desktop;
 
-
     opens com.example.customerdatabaseprojectii to javafx.fxml;
     exports com.example.customerdatabaseprojectii;
     exports com.example.customerdatabaseprojectii.view;

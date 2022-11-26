@@ -13,8 +13,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
 import java.io.IOException;
@@ -24,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ReportsMainController implements Initializable {
@@ -63,26 +70,48 @@ public class ReportsMainController implements Initializable {
     @FXML
     TextField reportSearchFilter;
     @FXML
-    BarChart<String, Integer> reportGraph1;
+    BarChart<String, Integer> reportGraph2;
+    @FXML
+    Pane selectFilterPane;
+    @FXML
+    AnchorPane filterPopupAnchorPane;
+    @FXML
+    Label varReportLabel;
+
+    //get all the users log ins
+    //user log in within 3 days of appointment 5 days of appointment 7 days of appointment and one month of appointment
+
+    public void scanLoginAndGenAverage(){
+        Pattern namePattern = Pattern.compile("[]")
+    }
 
 
+    public void setGraphTab(){
+        XYChart.Series threeDaysSeries = new XYChart.Series();
+        threeDaysSeries.setName("3 Days");
+        threeDaysSeries.getData().add("h");
+
+        XYChart.Series fiveDaysSeries = new XYChart.Series();
+
+
+
+        XYChart.Series sevenDaysSeries = new XYChart.Series();
+
+
+        XYChart.Series oneMonthSeries = new XYChart.Series();
+    }
 
 
     AppointmentsDao ad = new AppointmentsDao();
     ContactsDao cd = new ContactsDao();
+    private static Appointments appointmentSelected = null;
     public ReportsMainController() throws SQLException {}
 
-    public Optional<Appointments> findAppointmentByID(Integer contactID) throws SQLException {
-        return ad.getAllFromDB().stream().filter(appointment -> Objects.equals(appointment.getContactsID(), contactID)).findFirst();
-    }
     public Integer getContactIDByContactName(String contactName) throws SQLException {
         Optional<Contacts> contactsTemp = cd.getAllFromDB().stream().filter(contact -> Objects.equals(contact.getContactName().
                 toUpperCase(), contactName.toUpperCase())).findFirst();
         return contactsTemp.map(Contacts::getContactID).orElse(0);
     }
-
-
-
 
     /**
      * Adds all the appointments from a specific contact selected from the combobox to an observable list
@@ -101,6 +130,44 @@ public class ReportsMainController implements Initializable {
             return false;
         }).collect(Collectors.toCollection(FXCollections::observableArrayList));
         reportTableView.setItems(appointmentsFilteredByContacts);
+    }
+
+    public void setSelectedFilteredAppointment(MouseEvent event){
+        appointmentSelected = reportTableView1.getSelectionModel().getSelectedItem();
+    }
+
+    public void setFilterByType(ActionEvent event) throws SQLException {
+        if(!Objects.equals(appointmentSelected, null)){
+                try {//if the selected appointment matches a type in the database then add that to an observable list and set the table
+                    Integer num = Math.toIntExact(ad.getAllFromDB().stream().filter(appointment -> Objects.equals(appointment.getType().toUpperCase(),
+                            appointmentSelected.getType().toUpperCase())).count());
+                    varReportLabel.setVisible(true);
+                    varReportLabel.setText(String.format("%d appointments found with the type: %s", num, appointmentSelected.getType()));
+                } catch (SQLException e) {e.printStackTrace();}
+        }
+        filterPopupAnchorPane.setVisible(false);
+        selectFilterPane.setVisible(false);
+    }
+    public void setFilterByMonth(ActionEvent event){
+        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
+        try {//if the selected appointment matches a type in the database then add that to an observable list and set the table
+           Integer num = Math.toIntExact(ad.getAllFromDB().stream().filter(appointment -> Objects.
+                   equals(appointment.getStartDateTime().toLocalDate().format(monthFormat),
+                           appointmentSelected.getStartDateTime().toLocalDate().format(monthFormat))).count());
+            varReportLabel.setVisible(true);
+            varReportLabel.setText(String.format("%d appointments found with month: %s", num,
+                    appointmentSelected.getStartDateTime().toLocalDate().format(monthFormat)));
+        } catch (SQLException e) {e.printStackTrace();}
+        filterPopupAnchorPane.setVisible(false);
+        selectFilterPane.setVisible(false);
+    }
+    //when select create popup thats asks if they are looking for total type/month
+    public void setFilterLabels(ActionEvent event) throws SQLException {
+        if(appointmentSelected != null) {
+            varReportLabel.setVisible(false);
+            filterPopupAnchorPane.setVisible(true);
+            selectFilterPane.setVisible(true);
+        }
     }
 
     public void switchTablesClicked(ActionEvent event) throws IOException {
@@ -137,11 +204,23 @@ public class ReportsMainController implements Initializable {
                     reportsTableSwitchComboBox.getValue()));
         }
     }
+    //all appointments we get the type of each appointment, and
+    public void filterSearchbar(KeyEvent event) throws SQLException {
+        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
+        if(event.getCode() == KeyCode.ENTER || Objects.equals(reportSearchFilter.getText(), "")){
+            String filterString = reportSearchFilter.getText();
+            ObservableList<Appointments> appointmentList = ad.getAllFromDB().stream().filter(appointment -> appointment.getType().
+                            toUpperCase().contains(filterString.toUpperCase()) ||
+                            appointment.getStartDateTime().toLocalDate().format(monthFormat).contains(filterString)).
+                    collect(Collectors.toCollection(FXCollections::observableArrayList));
+            if(appointmentList.size() <1){
+                reportTableView1.setItems(null);
+            }else {
+                reportTableView1.setItems(appointmentList);
+            }
+        }
+    }
 
-
-    //get the contacts from the appointments list
-    //then go through the contacts list and match the contactID
-    //then place inside the combobox the name of the contact
     public void fillContactCombobox() throws SQLException {
         ObservableList<String> contactNames = FXCollections.observableArrayList();
         Set<String> contactNameSet = new HashSet<>();
@@ -157,10 +236,11 @@ public class ReportsMainController implements Initializable {
     }
 
     public void initializeReportTable() throws SQLException {
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM");
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
         reportTableView1.setItems(ad.getAllFromDB());
         reportType1.setCellValueFactory(new PropertyValueFactory<>("type"));
-        reportMonth1.setCellValueFactory(new PropertyValueFactory<>("start"));
+        reportMonth1.setCellValueFactory(new PropertyValueFactory<>("startDateTime"));
         reportMonth1.setCellFactory(new Callback<>() {
             @Override
             public TableCell<Appointments, LocalDateTime> call(TableColumn<Appointments, LocalDateTime> setStartDateTime) {
@@ -171,13 +251,12 @@ public class ReportsMainController implements Initializable {
                         if (blank) {
                             setText(null);
                         } else {
-                            setText(item.atZone(ZoneId.systemDefault()).format(dateFormat));
+                            setText(item.atZone(ZoneId.systemDefault()).format(monthFormat));
                         }
                     }
                 };
             }
         });
-
 
         reportTableView.setItems(ad.getAllFromDB());
         reportID.setCellValueFactory(new PropertyValueFactory<>("contactsID"));

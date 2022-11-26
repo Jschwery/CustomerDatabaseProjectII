@@ -1,3 +1,0 @@
-Users{username='moop', password='123'}
-CREATED ON: 2022-11-23
-Time Created: 2022-11-23 08:55:05.3890779

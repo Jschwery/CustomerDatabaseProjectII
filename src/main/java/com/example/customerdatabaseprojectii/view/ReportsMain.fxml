@@ -3,20 +3,25 @@
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="527.0" prefWidth="921.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.ReportsMainController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="577.0" prefWidth="757.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.ReportsMainController">
    <center>
-      <TabPane BorderPane.alignment="CENTER">
+      <TabPane prefHeight="567.0" prefWidth="739.0" BorderPane.alignment="CENTER">
          <tabs>
             <Tab text="Tab 1 ">
                <content>
@@ -41,16 +46,73 @@
             </Tab>
             <Tab text="Tab 2">
                <content>
-                  <AnchorPane prefHeight="487.0" prefWidth="695.0">
+                  <AnchorPane prefHeight="479.0" prefWidth="757.0">
                      <children>
-                        <TableView fx:id="reportTableView1" layoutX="42.0" layoutY="91.0" prefHeight="306.0" prefWidth="340.0">
+                        <TableView fx:id="reportTableView1" layoutX="20.0" layoutY="63.0" onMouseClicked="#setSelectedFilteredAppointment" prefHeight="276.0" prefWidth="713.0">
                            <columns>
-                              <TableColumn fx:id="reportType1" prefWidth="170.0" text="Type" />
-                              <TableColumn fx:id="reportMonth1" prefWidth="168.0" text="Month" />
+                              <TableColumn fx:id="reportType1" prefWidth="264.0" text="Type" />
+                              <TableColumn fx:id="reportMonth1" minWidth="2.0" prefWidth="209.0" text="Month" />
                            </columns>
+                           <tooltip>
+                              <Tooltip text="Click on a row to select an appointment" />
+                           </tooltip>
                         </TableView>
-                        <Button layoutX="292.0" layoutY="56.0" mnemonicParsing="false" onAction="#contactSwitched" prefHeight="26.0" prefWidth="87.0" text="Select" />
-                        <BarChart fx:id="reportGraph1" layoutX="486.0" layoutY="81.0" prefHeight="326.0" prefWidth="421.0">
+                        <Button layoutX="377.0" layoutY="23.0" mnemonicParsing="false" onAction="#setFilterLabels" prefHeight="29.0" prefWidth="162.0" text="Select">
+                           <tooltip>
+                              <Tooltip text="After selected an appointment from table click to find the month / type data selections" />
+                           </tooltip></Button>
+                        <TextField fx:id="reportSearchFilter" layoutX="20.0" layoutY="24.0" onKeyPressed="#filterSearchbar" onKeyTyped="#filterSearchbar" prefHeight="26.0" prefWidth="336.0" promptText="Enter an appointment type / appointment month">
+                           <tooltip>
+                              <Tooltip text="Enter an appointment type or month found in the table, and then hit the &quot;enter&quot; key to filter" />
+                           </tooltip></TextField>
+                        <AnchorPane fx:id="filterPopupAnchorPane" layoutX="14.0" layoutY="320.0" prefHeight="107.0" prefWidth="727.0" visible="false">
+                           <children>
+                              <Pane fx:id="selectFilterPane" prefHeight="123.0" prefWidth="726.0">
+                                 <children>
+                                    <Pane layoutX="10.0" layoutY="16.0" prefHeight="67.0" prefWidth="323.0">
+                                       <children>
+                                          <Button layoutX="206.0" layoutY="20.0" mnemonicParsing="false" onAction="#setFilterByType" prefHeight="30.0" prefWidth="103.0" text="Select">
+                                             <tooltip>
+                                                <Tooltip text="Find type total of selected appointment match" />
+                                             </tooltip></Button>
+                                          <Label layoutX="29.0" layoutY="12.0" prefHeight="45.0" prefWidth="151.0" text="Total Type:">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </Pane>
+                                 </children>
+                              </Pane>
+                              <Pane layoutX="364.0" layoutY="14.0" prefHeight="67.0" prefWidth="323.0">
+                                 <children>
+                                    <Button layoutX="207.0" layoutY="20.0" mnemonicParsing="false" onAction="#setFilterByMonth" prefHeight="30.0" prefWidth="102.0" text="Select">
+                                       <tooltip>
+                                          <Tooltip text="Find month total of selected appointment match" />
+                                       </tooltip></Button>
+                                    <Label layoutX="20.0" layoutY="16.0" prefHeight="35.0" prefWidth="164.0" text="Total Month:">
+                                       <font>
+                                          <Font size="24.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </Pane>
+                           </children>
+                        </AnchorPane>
+                        <Label fx:id="varReportLabel" layoutX="34.0" layoutY="364.0" prefHeight="28.0" prefWidth="614.0" text="Label" visible="false">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab text="Tab 3">
+               <content>
+                  <AnchorPane prefHeight="509.0" prefWidth="835.0">
+                     <children>
+                        <BarChart fx:id="reportGraph2" layoutX="14.0" layoutY="14.0" prefHeight="334.0" prefWidth="370.0">
                           <xAxis>
                             <CategoryAxis side="BOTTOM" />
                           </xAxis>
@@ -58,7 +120,7 @@
                             <NumberAxis side="LEFT" />
                           </yAxis>
                         </BarChart>
-                        <TextField fx:id="reportSearchFilter" layoutX="42.0" layoutY="56.0" prefHeight="26.0" prefWidth="243.0" />
+                        <PieChart layoutX="396.0" layoutY="7.0" prefHeight="335.0" prefWidth="362.0" />
                      </children>
                   </AnchorPane>
                </content>
@@ -70,7 +132,7 @@
       <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <buttons>
             <ComboBox fx:id="reportsTableSwitchComboBox" minWidth="44.0" prefHeight="26.0" prefWidth="150.0" promptText="Menu" />
-          <Button mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="26.0" text="Go" />
+          <Button mnemonicParsing="false" onAction="#switchTablesClicked" prefHeight="31.0" text="Go" />
         </buttons>
       </ButtonBar>
    </top>

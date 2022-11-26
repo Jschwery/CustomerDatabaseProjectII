@@ -24,33 +24,6 @@ import javax.sound.sampled.*;
 
 public class Main extends Application {
     private static Stage mainStage;
-
-    public static void matchFileCriteria(File[] filesList, Users user) throws IOException, SQLException {
-        CreateUsersController controller = new CreateUsersController();
-        UsersDao ud = new UsersDao();
-        Pattern pattern = Pattern.compile("(userLogInfo\\*[a-zA-Z0-9]+.txt)", Pattern.CASE_INSENSITIVE);
-        if(filesList.length<= ud.getAllFromDB().size()){
-            controller.storeCreationDate(user);
-        }else{
-            for(File file : filesList){
-                Matcher matcher = pattern.matcher(file.toString());
-                if(matcher.matches()){
-                    controller.storeCreationDate(user);
-                }
-            }
-        }
-    }
-
-    public static void getDBUsersAndCreateFiles() throws SQLException, IOException {
-        UsersDao userDao = new UsersDao();
-        File file = new File("userLogInfo");
-        File[] filesList = file.listFiles();
-        for(Users user : userDao.getAllFromDB()){
-            assert filesList != null;
-            matchFileCriteria(filesList, user);
-        }
-    }
-
     public static void playSound(String fileUrl) throws IOException{
         URL soundFile = new File(fileUrl).toURI().toURL();
         try {
@@ -76,7 +49,7 @@ public class Main extends Application {
     }
     public static void main(String[] args) throws SQLException, IOException {
         DbConnection.makeConnection();
-        getDBUsersAndCreateFiles();
+//        getDBUsersAndCreateFiles();
         launch(args);
         DbConnection.closeConnection();
     }
