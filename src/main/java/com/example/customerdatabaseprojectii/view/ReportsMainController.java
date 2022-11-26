@@ -4,8 +4,10 @@ package com.example.customerdatabaseprojectii.view;
 import com.example.customerdatabaseprojectii.Main;
 import com.example.customerdatabaseprojectii.daos.AppointmentsDao;
 import com.example.customerdatabaseprojectii.daos.ContactsDao;
+import com.example.customerdatabaseprojectii.daos.UsersDao;
 import com.example.customerdatabaseprojectii.entity.Appointments;
 import com.example.customerdatabaseprojectii.entity.Contacts;
+import com.example.customerdatabaseprojectii.entity.Users;
 import com.example.customerdatabaseprojectii.util.Alerter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,13 +25,16 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -77,23 +82,67 @@ public class ReportsMainController implements Initializable {
     AnchorPane filterPopupAnchorPane;
     @FXML
     Label varReportLabel;
+    UsersDao ud = new UsersDao();
+    List<String> userNamesFound = new ArrayList<>();
+    List<LocalDateTime> userDateFound = new ArrayList<>();
+    private static String mostAnxiousUser;
+    Map<Integer, Integer> userIDNumberLoginsWithinWeek = new HashMap<>();
+    Map<Integer, Integer> userIDNumberLoginsWithinMonth = new HashMap<>();
 
-    //get all the users log ins
-    //user log in within 3 days of appointment 5 days of appointment 7 days of appointment and one month of appointment
 
-    public void scanLoginAndGenAverage(){
-        Pattern namePattern = Pattern.compile("[]")
+    public void fillMap(List<String> userNames, List<LocalDateTime>listDates) throws SQLException {
+        //all the userIDs from the list are entered as the keys
+        List<Integer> userIDs = ud.getAllFromDB().stream().filter(user-> userNames.stream().
+                anyMatch(names -> user.getUsername().equals(names.toUpperCase()))).map(Users::getUser_ID).collect(Collectors.toList());
+
+        //getting the startTime for each of the users in the list
+        List<Timestamp> appointmentDate = ud.getAllFromDB().stream().filter(user -> userIDs.stream().
+                anyMatch(userID -> Objects.equals(user.getUser_ID(), userID))).map(Users::getCreateDateTime).collect(Collectors.toList());
+
+
+        appointmentDate.stream().filter(appTime -> userDateFound.stream().anyMatch(loggedIn -> loggedIn.plusMinutes(10079).isBefore(appTime.toLocalDateTime()))).count();
+        //we have the userIDs representing each user in the reports, and we have a list of all their appointment startTimes
+
+        //and we have a list of the time that user logged in
+
+
+
+
+    }
+
+
+    public void scanLoginAndGenAverage() throws IOException {
+        Pattern namePattern = Pattern.compile("[^\\s]([a-zA-Z])+$|[^\\s]([a-zA-Z]+\\d?$)");
+        Pattern datePattern = Pattern.compile("([\\d{4}]+-.*$)");
+        String loginString;
+        String dateString;
+        int entryCount = 0;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("userLogInfo/login_activity.txt")));
+        BufferedReader dateReader = new BufferedReader(new InputStreamReader(new FileInputStream("userLogInfo/login_activity.txt")));
+
+
+        while((loginString = reader.readLine()) != null) {
+            Matcher matcher = namePattern.matcher(loginString);
+
+            while(matcher.find()) {
+                entryCount++;
+                userNamesFound.add(matcher.group());
+            }
+        }
+        reader.close();
+        while((dateString = dateReader.readLine())!=null){
+            Matcher matcher = datePattern.matcher(dateString);
+            while(matcher.find()){
+                String dateToParse = (matcher.group());
+                LocalDateTime dateOfLogEntry = LocalDateTime.parse(dateToParse);
+                userDateFound.add(dateOfLogEntry);
+            }
+        }
+        dateReader.close();
     }
 
 
     public void setGraphTab(){
-        XYChart.Series threeDaysSeries = new XYChart.Series();
-        threeDaysSeries.setName("3 Days");
-        threeDaysSeries.getData().add("h");
-
-        XYChart.Series fiveDaysSeries = new XYChart.Series();
-
-
 
         XYChart.Series sevenDaysSeries = new XYChart.Series();
 
@@ -305,7 +354,8 @@ public class ReportsMainController implements Initializable {
         try {
             fillContactCombobox();
             initializeReportTable();
-        } catch (SQLException e) {
+            scanLoginAndGenAverage();
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
 
