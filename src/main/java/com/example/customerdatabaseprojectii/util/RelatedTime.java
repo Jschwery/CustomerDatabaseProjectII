@@ -13,6 +13,10 @@ public class RelatedTime {
     private static final String userLang = System.getProperty("user.language");
     private static final String userCountry = System.getProperty("user.country");
 
+    /**
+     * Method to print out all the ZoneIds if it is needed to
+     * switch the time based off of Zones
+     */
     public static void printZoneIDs() {
         Set<String> zoneIds = ZoneId.getAvailableZoneIds();
         List<String> zoneList = new ArrayList<>(zoneIds);
@@ -31,6 +35,7 @@ public class RelatedTime {
         return LocalTime.parse(startTime, formatter);
     }
 
+    //getters and setters
     public static ZoneId getUserTimeZone() {
         return userTimeZone;
     }
@@ -48,22 +53,16 @@ public class RelatedTime {
         return LocalDate.now();
     }
 
-    public static String getUserLang() {
-        return userLang;
-    }
-
-    public static String getUserCountry() {
-        return userCountry;
-    }
-
+    /**
+     *
+     * @param Zone The zone to be switched to from eastern time zone
+     * @param timeFromDB the time of the appointment from the database, which is stored in the business timezone est
+     * @return
+     */
     public static LocalDateTime changeTimeBusinessToUserLocal(String Zone, Timestamp timeFromDB) {
         LocalDateTime ofEasternTime = timeFromDB.toLocalDateTime();
         ZonedDateTime zdtOfUser = ZonedDateTime.of(ofEasternTime, ZoneId.of(Zone));
         return zdtOfUser.toLocalDateTime();
-    }
-
-    public static ZonedDateTime getTimeNowForSpecificZone(String zone) {
-        return ZonedDateTime.of(getCurrentDateTime(), ZoneId.of(zone));
     }
 
     public enum TimePeriod {

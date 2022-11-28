@@ -14,6 +14,11 @@ public class First_Level_DivisionsDao{
 
     private static final String frstLvlDvsnQuery = "SELECT * FROM first_level_divisions";
 
+    /**
+     *
+     * @return an observableArrayList of all the first_level_divisions within the database
+     * @throws SQLException
+     */
     public ObservableList<First_Level_Divisions> getAll() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(frstLvlDvsnQuery).orElse(null);
         ObservableList<First_Level_Divisions> observableFrstLvlDvsnList = FXCollections.observableArrayList();

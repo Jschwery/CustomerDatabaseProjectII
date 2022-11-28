@@ -18,6 +18,13 @@ public class UsersDao implements Dao<Users> {
     private static final String updateUserQuery = "UPDATE users SET User_Name = ?, Password = ?, Last_Update = ?, Last_Updated_By = ? WHERE User_ID = ?";
     private static final String deleteUserQuery = "DELETE FROM users WHERE User_ID = ?";
 
+
+    /**
+     *
+     * @param userID takes in the userID
+     * @return returns the username that matches the userID
+     * @throws SQLException
+     */
     public String getUserNameByID(int userID) throws SQLException {
         Connection usersConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(usersQuery, usersConnection);
@@ -39,6 +46,12 @@ public class UsersDao implements Dao<Users> {
         return "no user found";
     }
 
+    /**
+     *
+     * @param user takes in a user to check whether they have an account or not
+     * @return returns true if the user has an account or false otherwise
+     * @throws SQLException
+     */
     public boolean verifyUserFromDB(Users user) throws SQLException {
         Connection usersConnection = DbConnection.getConnection();
         DbConnection.makePreparedStatement(usersQuery, usersConnection);
@@ -63,6 +76,12 @@ public class UsersDao implements Dao<Users> {
         return false;
     }
 
+    /**
+     *
+     * @param user takes in a user to be inserted into the database
+     * @return false if the user is not found
+     * @throws SQLException
+     */
     @Override
     public boolean dbInsert(Users user) throws SQLException {
             PreparedStatement ps = DbConnection.dbStatementTemplate(insertUserQuery).orElse(null);
@@ -101,6 +120,12 @@ public class UsersDao implements Dao<Users> {
         return observableUsersList;
     }
 
+    /**
+     *
+     * @param user takes in a user to update the database value of that particular user
+     * @return returns true if the user is updated, false otherwise
+     * @throws SQLException
+     */
     @Override
     public boolean updateDB(Users user) throws SQLException {
 
@@ -120,6 +145,12 @@ public class UsersDao implements Dao<Users> {
         return false;
     }
 
+    /**
+     *
+     * @param user takes in the user to be deleted
+     * @return returns true if the user was deleted successfully or false otherwise
+     * @throws SQLException
+     */
     @Override
     public String deleteFromDB(Users user) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(deleteUserQuery).orElse(null);

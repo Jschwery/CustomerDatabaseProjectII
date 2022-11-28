@@ -52,6 +52,11 @@
             <artifactId>javafx-base</artifactId>
             <version>19</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>17.0.0.1</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-media -->
 
 

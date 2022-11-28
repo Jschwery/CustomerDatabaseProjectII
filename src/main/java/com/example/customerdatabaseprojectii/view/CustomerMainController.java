@@ -100,6 +100,10 @@ public class CustomerMainController implements Initializable {
         return allCustomersObservableList;
     }
 
+    /**
+     * Deletes all the related appointments to the customer
+     * @throws SQLException
+     */
     public void deleteRelatedAppointments() throws SQLException {
         if (getSelectedCustomer().isPresent()) {
             int customerIDToDelete = getSelectedCustomer().get().getCustomerID();
@@ -115,6 +119,11 @@ public class CustomerMainController implements Initializable {
         }
     }
 
+    /**
+     *
+     * @param customer deletes the selected customer from the database
+     * @throws SQLException
+     */
     public void deleteCustomerFromAllCustomers(Customers customer) throws SQLException {
         String deleteQuery = "DELETE FROM customers WHERE Customer_ID = ?";
         PreparedStatement deleteStatement = DbConnection.getConnection().prepareStatement(deleteQuery);
@@ -129,6 +138,9 @@ public class CustomerMainController implements Initializable {
         deleteStatement.execute();
     }
 
+    /**
+     * sets a variable 'selectedCustomer' to a customer row clicked within the customer tableview
+     */
     public void setCustomerSelected() {
         try {
             selectedCustomer = getCustomerByIndex(getCustomerIndex(customerTableView.getSelectionModel().getSelectedItem()));
@@ -137,6 +149,10 @@ public class CustomerMainController implements Initializable {
         }
     }
 
+    /**
+     * when clicked calls the method setCustomerSelected which stores the selected customer in a variable
+     * @param customerClicked
+     */
     public void clickOnCustomerToSetSelected(MouseEvent customerClicked) {
         setCustomerSelected();
     }
@@ -154,6 +170,12 @@ public class CustomerMainController implements Initializable {
         return -1;
     }
 
+    /**
+     *
+     * @param event on delete button click deleted a customer from the database and related tableview lists
+     * @throws SQLException
+     * @throws IOException
+     */
     public void deleteCustomer(ActionEvent event) throws SQLException, IOException {
         Customers customerToDel = customerTableView.getSelectionModel().getSelectedItem();
 
@@ -174,6 +196,13 @@ public class CustomerMainController implements Initializable {
         }
     }
 
+    /**
+     *
+     * @param event A modifyCustomer variable will be set to false,indicating that there is not a customer selected to update and a new customer will be created.
+     *              a selected customer and consumer are passed to submit the customer to the database and update the table
+     * @throws IOException
+     * @throws SQLException
+     */
     public void addCustomer(ActionEvent event) throws IOException, SQLException {
         if (getSelectedCustomer().isEmpty()) {
             CustomerFormController.modifyCustomer = false;
@@ -196,6 +225,14 @@ public class CustomerMainController implements Initializable {
         }
     }
 
+    /**
+     *
+     * @param event on modify button click the modifyCustomer variable will be set to true, indicating
+     *              the there is a selected customer, and to find the data stored in that customer to the text fields
+     *              then we also pass in a consumer that will update the customer to the database
+     * @throws IOException
+     * @throws SQLException
+     */
     public void modifyCustomer(ActionEvent event) throws IOException, SQLException {
         if (getSelectedCustomer().isPresent()) {
             CustomerFormController.modifyCustomer = true;
@@ -217,6 +254,10 @@ public class CustomerMainController implements Initializable {
         }
     }
 
+    /**
+     * @param event on button click switch the tables to Customers, Appointments, or Reports based off of the value stored in the combobox
+     * @throws IOException
+     */
     public void switchTablesClicked(ActionEvent event) throws IOException {
         try {
             switch (customerTableSwitchComboBox.getValue()) {
@@ -250,11 +291,6 @@ public class CustomerMainController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try {
-            Main.playSound("src/main/resources/notification.wav");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         if (System.getProperty("user.language").equals("fr") || LoginController.changeLang) {
             custCustomerID.setText("Identifiant du client");

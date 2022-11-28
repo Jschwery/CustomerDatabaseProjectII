@@ -24,6 +24,12 @@ import javax.sound.sampled.*;
 
 public class Main extends Application {
     private static Stage mainStage;
+
+    /**
+     * This method can be used to play sound files whenever a certain action takes place
+     * @param fileUrl the Url of the wav audio file to be played
+     * @throws IOException
+     */
     public static void playSound(String fileUrl) throws IOException{
         URL soundFile = new File(fileUrl).toURI().toURL();
         try {
@@ -38,9 +44,6 @@ public class Main extends Application {
         }
     }
 
-    //mess arround with the auto file creation for users already in the database
-    //for user in database if file contains user.get username create username.txt if user.getusername.txt !exists
-
     @Override
     public void start(Stage stage) throws IOException {
         mainStage = stage;
@@ -49,7 +52,6 @@ public class Main extends Application {
     }
     public static void main(String[] args) throws SQLException, IOException {
         DbConnection.makeConnection();
-//        getDBUsersAndCreateFiles();
         launch(args);
         DbConnection.closeConnection();
     }
@@ -57,6 +59,16 @@ public class Main extends Application {
         return mainStage;
     }
 
+    /**
+     *
+     * @param url The URL of the fxml file for the scene to load
+     * @param stage The stage to set the scene, can pass in a new stage to be loaded or the main stage can be used
+     * @param minHeight set the minHeight of the scene to be loaded
+     * @param minWidth set the minWidth of the scene to be loaded
+     * @param title set the title of the scene to be loaded
+     * @param setResize set the ability to resize the scene
+     * @throws IOException
+     */
     public static void changeScene(String url, Stage stage, int minHeight, int minWidth, String title, boolean setResize) throws IOException {
         URL path =  new File(url).toURI().toURL();
         Parent node = FXMLLoader.load(path);

@@ -9,6 +9,10 @@ import java.util.function.Function;
 
 public class Alerter {
 
+    /**
+     * Alerts the user with information that they need to be notified of
+     * @param message The message to be displayed when the information alter is prompted
+     */
     public static void informationAlert(String message) {
         String userLang = System.getProperty("user.language");
 
@@ -25,6 +29,11 @@ public class Alerter {
             }
         }
     }
+
+    /**
+     * Alerts the user of a warning they need to be aware of
+     * @param message A message to be displayed to the user when they need to be warned
+     */
     public static void warningAlert(String message) {
         String userLang = System.getProperty("user.language");
 

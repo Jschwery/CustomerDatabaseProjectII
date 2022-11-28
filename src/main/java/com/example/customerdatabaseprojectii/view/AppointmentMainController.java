@@ -157,10 +157,19 @@ public class AppointmentMainController implements Initializable {
     public AppointmentMainController() throws SQLException {
     }
 
+    /**
+     *
+     * @param appointment the appointment in which you are looking for the index
+     * @return returns the index of the appointment within the observable list
+     */
     public int getIndexOfAppointment(Appointments appointment) {
         return appointmentsList.indexOf(appointment);
     }
 
+    /**
+     * sets the selected appointment with a mouse click on the appointment tableview
+     * @param event
+     */
     public void setSelectedAppointment(MouseEvent event) {
         if (appointmentsAllTab.isSelected()) {
             selectedAppointment = aptAllTableView.getSelectionModel().getSelectedItem();
@@ -171,6 +180,15 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
+    /**
+     *
+     * @param event when the delete button is clicked, it will make sure that the appointment selected is not null
+     *              and if it is, then alert the user that they are trying to delete an appointment that is not selected.
+     *              If the appointment is not null then it will first delete the appointment from the db, then from the list that
+     *              the tableview is using, then refresh the list of the tableview
+     * @throws SQLException
+     * @throws IOException
+     */
     public void deleteAppointment(ActionEvent event) throws SQLException, IOException {
         if (selectedAppointment != null) {
             ad.deleteFromDB(selectedAppointment);
@@ -194,8 +212,8 @@ public class AppointmentMainController implements Initializable {
             FXMLLoader fxL = new FXMLLoader();
             fxL.setLocation(path);
             Parent node = fxL.load();
-            AppointmentFormController formController = fxL.getController();
-            Consumer<Appointments> addAppointment = appointment -> {
+            AppointmentFormController formController = fxL.getController();//getting controller of appointmentform
+            Consumer<Appointments> addAppointment = appointment -> {//consumer takes appointment, inserts to db, and the appointment list, then refresh tables
                 appointment.setCreatedBy(currentUser.getUsername());
                 appointment.setLastUpdatedBy(currentUser.getUsername());
                 appointment.setUsersID(currentUser.getUser_ID());
@@ -239,6 +257,14 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
+    /**
+     *
+     * @param event when update is clicked get the selected appointment,
+     *              get the controller of the appointment form so that the values from the field
+     *              can be submitted to the database and list via the consumer passed in, that takes the appointment
+     *              currently selected so that it can be updated.
+     * @throws IOException
+     */
     public void updateAppointmentForm(ActionEvent event) throws IOException {
         if (selectedAppointment != null) {
             URL path = new File("src/main/java/com/example/customerdatabaseprojectii/view/AppointmentForm.fxml").toURI().toURL();
@@ -288,7 +314,12 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
-    //if the appointment is within the next seven days
+    /**
+     * sets the appointments table with appointments filtered by the length until their start date
+     * it does this by getting the name of the tab and if its weekly, then it will filter by all the appointments
+     * that week, same for monthly, and if it's neither all the appointments will be displayed
+     * @throws SQLException
+     */
     public void setTableFilteredAppointments() throws SQLException {
         Set<TableView<Appointments>> appointmentTablesSet = new HashSet<>();
         appointmentTablesSet.add(aptWeeklyTableView);
@@ -319,6 +350,11 @@ public class AppointmentMainController implements Initializable {
         aptAllTableView.setItems(appointmentsList);
     }
 
+    /**
+     * Switches the scene to Customer, Appointments, or Reports based off of the value selected in the combobox
+     * @param event
+     * @throws IOException
+     */
     public void switchTablesClicked(ActionEvent event) throws IOException {
         try {
             switch (appointmentsSwitchTableComboBox.getValue()) {
@@ -350,6 +386,11 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
+    /**
+     * Checks the user location, and translates all the labels to french if french is detected,
+     * there is also a manual way to test this, for people who don't have their default language in French
+     * but would like to see labels in French
+     */
     public void checkUserLocation() {
         if ((System.getProperty("user.language").equals("fr") || LoginController.changeLang)) {
             appointmentsWeeklyTab.setText("Hebdomadaire");
@@ -404,6 +445,10 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
+    /**
+     * Initializes the columns to take values of the object type that is set to the table, each
+     * column in the table correlates to a variable of the object that is set to the tableview
+     */
     public void setColumns() {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -537,6 +582,11 @@ public class AppointmentMainController implements Initializable {
         });
     }
 
+    //todo
+    /**
+     * Checks if the user has an appointment within 15 minutes of logging in
+     * @throws IOException
+     */
     public void checkForUpcomingUserAppointment() throws IOException {
         Users loggedInUser = LoginController.getCurrentlyLoggedInUser();
         LocalDateTime userTime = LocalDateTime.now(RelatedTime.getUserTimeZone());

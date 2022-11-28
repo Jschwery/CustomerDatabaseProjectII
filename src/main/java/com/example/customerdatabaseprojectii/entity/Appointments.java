@@ -98,32 +98,8 @@ public class Appointments {
         this.endDateTime = endDateTime;
     }
 
-    public Time getCreateDateTime() {
-        return createDateTime;
-    }
-
-    public void setCreateDateTime(Time createDateTime) {
-        this.createDateTime = createDateTime;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public Timestamp getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Timestamp lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public String getLastUpdatedBy() {
-        return lastUpdatedBy;
     }
 
     public void setLastUpdatedBy(String lastUpdatedBy) {

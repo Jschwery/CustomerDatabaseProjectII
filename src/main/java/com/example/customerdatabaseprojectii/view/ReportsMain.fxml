@@ -19,7 +19,7 @@
    <center>
       <TabPane prefHeight="567.0" prefWidth="739.0" BorderPane.alignment="CENTER">
          <tabs>
-            <Tab text="Tab 1 ">
+            <Tab closable="false" text="Contact Schedule">
                <content>
                   <AnchorPane prefHeight="487.0" prefWidth="695.0">
                      <children>
@@ -40,7 +40,7 @@
                   </AnchorPane>
                </content>
             </Tab>
-            <Tab text="Tab 2">
+            <Tab closable="false" text="Appointment Type / Month">
                <content>
                   <AnchorPane prefHeight="479.0" prefWidth="757.0">
                      <children>
@@ -100,8 +100,8 @@
                               <Font size="24.0" />
                            </font>
                         </Label>
-                        <ComboBox fx:id="comboBoxThirdReport" layoutX="563.0" layoutY="25.0" onAction="#comboClicked" prefWidth="150.0" promptText="UserID" />
-                        <Label fx:id="thirdReportVarLabel" layoutX="563.0" text="Label">
+                        <ComboBox fx:id="comboBoxThirdReport" layoutX="563.0" layoutY="21.0" onAction="#comboClicked" prefHeight="30.0" prefWidth="150.0" promptText="UserID" />
+                        <Label fx:id="thirdReportVarLabel" layoutX="563.0" text="Log in attempts:">
                            <font>
                               <Font size="13.0" />
                            </font>

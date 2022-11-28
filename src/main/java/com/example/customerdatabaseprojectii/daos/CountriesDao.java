@@ -16,7 +16,12 @@ public class CountriesDao implements Dao<Countries>{
             "WHERE Country_ID=?";
     private static final String deleteCountryQuery = "DELETE FROM countries WHERE Country_ID=?";
 
-
+    /**
+     *
+     * @param country Takes in a country to be inserted into the database
+     * @return returns true if the country was inserted successfully
+     * @throws SQLException
+     */
     @Override
     public boolean dbInsert(Countries country) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(addCountryQuery).orElse(null);
@@ -30,6 +35,11 @@ public class CountriesDao implements Dao<Countries>{
         return false;
     }
 
+    /**
+     * returns all the countries from the database
+     * @return
+     * @throws SQLException
+     */
     @Override
     public ObservableList<Countries> getAllFromDB() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(getAllCountriesQuery).orElse(null);
@@ -48,6 +58,12 @@ public class CountriesDao implements Dao<Countries>{
         return countries;
     }
 
+    /**
+     *
+     * @param country the country to be updated in the database
+     * @return returns true if update was successful and false otherwise
+     * @throws SQLException
+     */
     @Override
     public boolean updateDB(Countries country) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(updatedCountryQuery).orElse(null);
@@ -60,6 +76,12 @@ public class CountriesDao implements Dao<Countries>{
         return false;
     }
 
+    /**
+     *
+     * @param country takes a country to match and delete from the database
+     * @return a string of the string of the number of countries deleted
+     * @throws SQLException
+     */
     @Override
     public String deleteFromDB(Countries country) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(deleteCountryQuery).orElse(null);

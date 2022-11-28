@@ -49,15 +49,29 @@ public class CustomerFormController{
     Consumer<Customers> customersConsumer;
     Customers customer;
 
+    /**
+     * Adds counties to an observable list to be used for filling the countries combobox
+     */
     public void addCountriesToObservableList(){
         customerCountries.add("U.S");
         customerCountries.add("UK");
         customerCountries.add("Canada");
     }
+
+    /**
+     * @return return the current size of the customer list + 1.
+     * Used for generating the id of the next customer.
+     * @throws SQLException
+     */
     public int getCustomerIDCount() throws SQLException {
         return cd.getAllFromDB().size() + 1;
     }
 
+    /**
+     * @param divID takes in the division Id the customer selected
+     * @return return a string of the country, decided by the range in which the division id falls into
+     * @throws SQLException
+     */
     public String findCountryIDByDivID(int divID) throws SQLException {
         String country;
         if(divID >= 1 && divID <= 54){
@@ -69,6 +83,11 @@ public class CustomerFormController{
         }
         return country;
     }
+
+    /**
+     * @param divID takes in a division id
+     * @return returns an observable list of all the firstlevel divisions that are correlated to the country
+     */
     public ObservableList<First_Level_Divisions> findFirstLevelsByDivID(int divID) {
         if (divID >= 1 && divID <= 54) {
             return unitedStatesFirstLevelDiv;
@@ -79,6 +98,11 @@ public class CustomerFormController{
         }
     }
 
+    /**
+     * @param divID takes the division id selected from the combobox
+     * @return  returns a string of the first_level_division that equal the division passed in
+     * @throws SQLException
+     */
     public String findFirstLevelDiv(int divID) throws SQLException {
 
         Optional<First_Level_Divisions> matchDiv = divisions.getAll().stream().filter(div -> div.getDivisionID() == divID).findFirst();
@@ -88,6 +112,9 @@ public class CustomerFormController{
     return "";
     }
 
+    /**
+     * populates the observable lists of each country with their correlated first level divisions
+     */
     public void populateObservableFirstLevelDivs(){
       try{
         for(First_Level_Divisions div : divisions.getAll()){
@@ -107,6 +134,13 @@ public class CustomerFormController{
         }
     }
 
+    /**
+     *
+     * @param selectedCustomer takes in the selected customer and consumer, which will be used to submit to the database
+     *                         and list based off of the values entered into the text fields and selectors
+     * @param customerConsumer
+     * @throws SQLException
+     */
     public void customerFormInit(Customers selectedCustomer, Consumer<Customers> customerConsumer) throws SQLException {
         this.customersConsumer = customerConsumer;
         this.customer = selectedCustomer;
@@ -124,6 +158,11 @@ public class CustomerFormController{
         }
     }
 
+    /**
+     * Filters the first level division combobox depending on which country is selected from the country combobox.
+     * If U.S. is selected for example, then the first_level_division combobox will be filled with U.S. states.
+     * @param event
+     */
     public void filterFirstLevelByCountry(ActionEvent event) {
 
         String countrySelected = cfCustomerCountry.getSelectionModel().getSelectedItem();
@@ -170,6 +209,12 @@ public class CustomerFormController{
             System.out.println("No country selected");
         }
     }
+
+    /**
+     *
+     * @param divisionName takes in the division name
+     * @return returns the division ID number that matched the name passed in
+     */
     public int getDivisionID(String divisionName) {
         First_Level_DivisionsDao fldd = new First_Level_DivisionsDao();
         try {
@@ -184,12 +229,18 @@ public class CustomerFormController{
         return -1;
     }
 
+    /**
+     * closes the scene window and clears the lists
+     */
     public void closeSceneWindow() {
         Stage stage = (Stage) cfCustomerName.getScene().getWindow();
         CustomerMainController.setSelectedCustomerNull();
         clearLists();
         stage.close();
     }
+    /*
+    clears the lists and sets the forms text fields to blank
+     */
     public void clearLists(){
         unitedKingdomFirstLevelDiv.clear();
         unitedStatesFirstLevelDiv.clear();
@@ -203,6 +254,11 @@ public class CustomerFormController{
         cfCustomerFirstLevel.setValue("");
     }
 
+    /**
+     * Validates all the fields within the form and make sure that the types entered are what is expected
+     * if they are expected then the customer will be set to the values within those text fields, and selectors
+     * @return
+     */
     public boolean validateFields(){
         if(Validator.intChecker(cfCustomerID.getText(), "Please only enter number characters for CustomerID text field!")){
             customer.setCustomerID(Integer.parseInt(cfCustomerID.getText()));
@@ -226,6 +282,13 @@ public class CustomerFormController{
         return true;
     }
 
+    /**
+     * When the add button is clicked then this method will check to see if the customer is null,
+     * if so create a new customer. Then validate the fields, which also sets the values for the customer
+     * and then the consumer will take this customer and submit it to the database, and the observable list.
+     * @param event
+     * @throws IOException
+     */
     public void addCustomerClicked(ActionEvent event) throws IOException {
         if(Objects.equals(customer, null)){
             customer = new Customers();

@@ -44,6 +44,9 @@ public class LoginController implements Initializable {
     UsersDao ud = new UsersDao();
     CreateUsersController createUsersController = new CreateUsersController();
 
+    /**
+     * Translates the labels to French if the user language system property is set to French.
+     */
     public void translateLabels() {
         String userLang = System.getProperty("user.language");
         Locale frenchLocale = new Locale("fr", "FR");
@@ -62,10 +65,21 @@ public class LoginController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    /**
+     *
+     * @param userName username of the user being searched for
+     * @return an Optional indicating that the user may or may not have been found
+     * @throws SQLException
+     */
     public Optional<Users> findUserByUsername(String userName) throws SQLException {
         return ud.getAllFromDB().stream().filter(u -> Objects.equals(u.getUsername().toUpperCase(), userName.toUpperCase())).findFirst();
     }
 
+    /**
+     * @param event create account clicked and the user is switched to the create account scene
+     * @throws IOException
+     */
     public void createAccountLinkClicked(ActionEvent event) throws IOException {
         Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/CreateUser.fxml",
                 Main.getMainStage(), 450, 385, "Welcome", false);
@@ -75,6 +89,13 @@ public class LoginController implements Initializable {
         ZoneId userTimeZone = ZoneId.systemDefault();
         timeLabel.setText(String.valueOf(userTimeZone));
     }
+
+    /**
+     * @param event login clicked, verifies the username and password entered exists within the database
+     *              and sets the currently logged-in user
+     * @throws SQLException
+     * @throws IOException
+     */
     public void ButtonClick(ActionEvent event) throws SQLException, IOException {
         String username = usernameTextEntry.getText();
         System.out.println("Loggedin user = " + findUserByUsername(username).orElse(null));
@@ -98,6 +119,7 @@ public class LoginController implements Initializable {
                 if (Objects.equals(userLang, "fr") || frenchToggle.isSelected()) {
                     Alerter.informationAlert("identifiant ou mot de passe incorrect");
                 } else {
+                    Main.playSound("src/main/resources/errorSound.wav");
                     Alerter.informationAlert("Incorrect username or password!");
                 }
             }
@@ -107,6 +129,7 @@ public class LoginController implements Initializable {
                         Main.getMainStage(), 450, 385, "Welcome!", false);
                 e.printStackTrace();
             } else {
+                Main.playSound("src/main/resources/errorSound.wav");
                 Alerter.informationAlert("Incorrect username or password!");
             }
         }

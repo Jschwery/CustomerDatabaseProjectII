@@ -24,7 +24,11 @@ public class CustomersDao implements Dao<Customers> {
             "VALUES (?,?,?,?,?,?,?,?,?,?)";
     private static final String customerDeleteQuery = "DELETE FROM customer WHERE Customer_ID = ?";
 
-
+    /**
+     *
+     * @return the number of customers found within the database
+     * @throws SQLException
+     */
     public int getNumberOfCustomer() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(customersQuery).orElse(null);
         ObservableList<Customers> customers = FXCollections.observableArrayList();
@@ -40,6 +44,12 @@ public class CustomersDao implements Dao<Customers> {
         return -1;
     }
 
+    /**
+     *
+     * @param customer the customer to add to the database
+     * @return true if the customer is added to the database and false otherwise
+     * @throws SQLException
+     */
     @Override
     public boolean dbInsert(Customers customer) throws SQLException {
         PreparedStatement statement = DbConnection.dbStatementTemplate(customerInsertQuery).orElse(null);
@@ -63,6 +73,11 @@ public class CustomersDao implements Dao<Customers> {
         return false;
     }
 
+    /**
+     *
+     * @return returns an observable list of all the customers within the database
+     * @throws SQLException
+     */
     @Override
     public ObservableList<Customers> getAllFromDB() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(customersQuery).orElse(null);

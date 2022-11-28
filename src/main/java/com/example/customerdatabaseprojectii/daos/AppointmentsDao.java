@@ -32,6 +32,12 @@ public class AppointmentsDao implements Dao<Appointments> {
 
     public AppointmentsDao() throws SQLException {}
 
+    /**
+     * @param appointment Takes in an appointment to be inserted to the databse
+     * @return returns true if the appointment was successfully inserted and complies with the business
+     * requirements of submitting an appointment
+     * @throws SQLException
+     */
     @Override
     public boolean dbInsert(Appointments appointment) throws SQLException {
 
@@ -79,6 +85,10 @@ public class AppointmentsDao implements Dao<Appointments> {
         return false;
     }
 
+    /**
+     * @return returns an observable list of all the appointments currently stored in the database
+     * @throws SQLException
+     */
     public ObservableList<Appointments> getAllFromDB() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(appointmentsQuery).orElse(null);
         ObservableList<Appointments> apps = FXCollections.observableArrayList();
@@ -103,6 +113,12 @@ public class AppointmentsDao implements Dao<Appointments> {
         return apps;
     }
 
+    /**
+     * @param appointment takes in an appointment to update, and checks to see if the appointment is in the database, and whether the
+     *                    foreign keys that are required are also present before submitting the appointment
+     * @return returns true if the appointment has been updated, and false otherwise
+     * @throws SQLException
+     */
     @Override
     public boolean updateDB(Appointments appointment) throws SQLException {
             CustomerMainController mc = new CustomerMainController();
@@ -141,6 +157,12 @@ public class AppointmentsDao implements Dao<Appointments> {
             return false;
     }
 
+    /**
+     *
+     * @param appointment the appointment that is to be deleted from the database
+     * @return  returns a string of all the amount of appointments that have been deleted from the db
+     * @throws SQLException
+     */
     @Override
     public String deleteFromDB(Appointments appointment) throws SQLException {
 

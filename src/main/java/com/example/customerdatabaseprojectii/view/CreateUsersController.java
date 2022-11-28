@@ -35,8 +35,12 @@ public class CreateUsersController {
     public static Map<Integer, File> getUserIdToFileMap(){
         return userIdToFileMap;
     }
-    //we are going to start by looping through all the
-    //this is getting all the users in the database and finding the user that
+
+    /**
+     * @param userID userID to add to the filemap
+     * @param file file to add to the filemap
+     * @throws SQLException
+     */
     public void addUserIDToFileMap(Integer userID, File file) throws SQLException {
         Optional<Users> userFoundByID = ud.getAllFromDB().stream().filter(k -> Objects.equals(k.getUser_ID(), userID)).findFirst();
         if(userFoundByID.isPresent()){
@@ -46,6 +50,11 @@ public class CreateUsersController {
         }
     }
 
+    /**
+     *
+     * @param fileToCheck file to check if the file exists within the directory
+     * @return true if the file exists, false otherwise
+     */
     public static boolean scanUserLogDirectory(File fileToCheck){
         File directory = new File("userLogInfo");
         File[] directoryFileListing = directory.listFiles();
@@ -60,6 +69,13 @@ public class CreateUsersController {
         return true;
     }
 
+    /**
+     * if the username is not taken by another user, and the passwords match then the user is allowed to be created
+     * @param uName username entered
+     * @param pWord password entered
+     * @param rePWord re-entered password
+     * @return true if the user meets the requirements, otherwise false
+     */
     public boolean accountSubmitEvaluator(String uName, String pWord, String rePWord) {
         if (uName == null || pWord == null || rePWord == null) {
             Alerter.informationAlert("Please check that the fields are all filled in!");
@@ -83,6 +99,11 @@ public class CreateUsersController {
         }
         return true;
     }
+
+    /**
+     * closes the scene window
+     * @param event
+     */
     public void cancelButtonClicked(ActionEvent event) {
         try {
             Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/Login.fxml", Main.getMainStage(), 495, 485, "Login", false);
@@ -91,6 +112,13 @@ public class CreateUsersController {
             System.out.println("Could not switch back to login");
         }
     }
+
+    /**
+     *
+     * @param user takes in a user, to store the creation date of that user
+     * @throws IOException
+     * @throws SQLException
+     */
     public void storeCreationDate(Users user) throws IOException, SQLException {
         LocalDate attemptDate = LocalDateTime.now().toLocalDate();
         Optional<Timestamp> getCreateTime = ud.getAllFromDB().stream().filter(u -> Objects.equals(u.getUser_ID(), user.getUser_ID())).map(Users::getCreateDateTime).findFirst();
@@ -123,6 +151,12 @@ public class CreateUsersController {
             writer.close();
         }
     }
+
+    /**
+     *
+     * @param event when clicked the user will be created and submitted to the database
+     * @throws SQLException
+     */
     public void submitUserClicker(ActionEvent event) throws SQLException {
         Users user = new Users();
         String username = usernameTextField.getText();

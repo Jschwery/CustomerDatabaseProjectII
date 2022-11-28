@@ -169,6 +169,11 @@ public class AppointmentFormController {
         return -1;
     }
 
+    /**
+     *
+     * @param appointment Takes in an appointment and
+     * @throws SQLException
+     */
     public void fillAppointmentData(Appointments appointment) throws SQLException {
         DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -195,6 +200,11 @@ public class AppointmentFormController {
         afContact.setItems(contactNames);
     }
 
+    /**
+     *
+     * @return returns an observable list that will be used to set the time available for appointments
+     * which is from 8 am until 10pm, with 15 minute increments
+     */
     public ObservableList<String> setTimeComboBoxes() {
         DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
         ObservableList<String> availableAppointmentTimeSlots = FXCollections.observableArrayList();
@@ -229,6 +239,12 @@ public class AppointmentFormController {
         }
     }
 
+    /**
+     *
+     * @param appointmentStart the appointment start time to be checked
+     * @param appointmentEnd the appointment end time to be checked
+     * @return returns true if the appointment time slot is already in use, and false if the time slot is already taken
+     */
     public static boolean isAppointmentTimeTaken(LocalTime appointmentStart, LocalTime appointmentEnd) {
         for (Map.Entry<Integer, Appointments> entry : AppointmentMainController.userIDToAppointment.entrySet()) {
             Appointments appointments = entry.getValue();
@@ -246,6 +262,13 @@ public class AppointmentFormController {
         return false;
     }
 
+    /**
+     *
+     * @param scheduleAppointment takes in an appointment and sets the appointments values if the text fields
+     *                            comply with the type expected
+     * @return returns true if all the fields are validated, and false if any of the fields fails to validate
+     * @throws SQLException
+     */
     public boolean fieldValidator(Appointments scheduleAppointment) throws SQLException {
         ContactsDao cd = new ContactsDao();
 
@@ -292,6 +315,9 @@ public class AppointmentFormController {
         return true;
     }
 
+    /**
+     * resets all the textfields and comboboxes
+     */
     public void resetBoxes() {
         afDescription.clear();
         afLocation.clear();
@@ -306,11 +332,21 @@ public class AppointmentFormController {
         afContact.setValue(null);
     }
 
+    /**
+     * closes the scene
+     * @param event
+     */
     public void cancelButtonClicked(ActionEvent event){
         Stage stage = (Stage) afTitle.getScene().getWindow();
         stage.close();
     }
 
+    /**
+     *
+     * @param appointments takes an appointment and makes sure that its start and end data & time comply with
+     *                     the hours days that the business is open
+     * @return returns true if the appointment complies, and false otherwise
+     */
     public boolean compareAppointmentToBusiness(Appointments appointments) {
 
         ZonedDateTime userZdtStart = ZonedDateTime.of(appointments.getStartDateTime(), ZoneId.systemDefault());

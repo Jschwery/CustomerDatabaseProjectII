@@ -20,6 +20,12 @@ public class ContactsDao implements Dao<Contacts>{
 
     public ContactsDao() throws SQLException {}
 
+    /**
+     *
+     * @param name the name of the contact
+     * @return the id of the contact you are looking for with their name
+     * @throws SQLException
+     */
     public int returnContactIDbyName(String name) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(contactQuery).orElse(null);
         if(ps != null) {
@@ -37,7 +43,10 @@ public class ContactsDao implements Dao<Contacts>{
         return -1;
     }
 
-
+    /**
+     * @return returns the number of contacts currently in the database
+     * @throws SQLException
+     */
     private static int getNumberOfContacts() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(contactQuery).orElse(null);
         if (ps != null) {
@@ -54,6 +63,12 @@ public class ContactsDao implements Dao<Contacts>{
         return -1;
     }
 
+    /**
+     *
+     * @param contact Takes in a contact to be inserted to the database
+     * @return returns true if the contact was inserted successfully, and false otherwise
+     * @throws SQLException
+     */
     @Override
     public boolean dbInsert(Contacts contact) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(insertContactQuery).orElse(null);
@@ -69,6 +84,11 @@ public class ContactsDao implements Dao<Contacts>{
         return false;
     }
 
+    /**
+     *
+     * @return returns an observable list of all the contacts currently in the database
+     * @throws SQLException
+     */
     @Override
     public ObservableList<Contacts> getAllFromDB() throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(contactQuery).orElse(null);
@@ -86,7 +106,11 @@ public class ContactsDao implements Dao<Contacts>{
         }
         return observableContactsList;
     }
-
+    /**
+     * @param contact takes in a contact to be updated to the database
+     * @return returns true if the contact was updated successfully updated and false otherwise
+     * @throws SQLException
+     */
     @Override
     public boolean updateDB(Contacts contact) throws SQLException {
         PreparedStatement statement = DbConnection.dbStatementTemplate(updateContactQuery).orElse(null);
@@ -105,6 +129,11 @@ public class ContactsDao implements Dao<Contacts>{
         }
     }
 
+    /**
+     * @param contact takes a contact to match and delete from the database
+     * @return returns the number of rows affected with the delete statement
+     * @throws SQLException
+     */
     @Override
     public String deleteFromDB(Contacts contact) throws SQLException {
         PreparedStatement ps = DbConnection.dbStatementTemplate(deleteContactQuery).orElse(null);
