@@ -3,13 +3,30 @@ package com.example.customerdatabaseprojectii.entity;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Users {
     private String username;
     private String password;
     private Timestamp createDateTime;
-    private int user_ID;
+    private int user_ID = 0;
+    public static Map<Integer, Integer> count = new HashMap<>();
 
+    public static void setCount(Users user, Integer logged){
+        count.put(user.getUser_ID(), logged);
+    }
+
+    public int getUserLogInCount() {
+        return userLogInCount;
+    }
+
+
+    public void setUserLogInCount(int userLogInCount) {
+        this.userLogInCount = userLogInCount;
+    }
+
+    private int userLogInCount;
 
     @Override
     public String toString() {

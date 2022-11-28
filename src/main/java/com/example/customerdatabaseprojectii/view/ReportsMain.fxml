@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.ComboBox?>
@@ -19,7 +15,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="577.0" prefWidth="757.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.ReportsMainController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="607.0" prefWidth="839.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.customerdatabaseprojectii.view.ReportsMainController">
    <center>
       <TabPane prefHeight="567.0" prefWidth="739.0" BorderPane.alignment="CENTER">
          <tabs>
@@ -48,7 +44,7 @@
                <content>
                   <AnchorPane prefHeight="479.0" prefWidth="757.0">
                      <children>
-                        <TableView fx:id="reportTableView1" layoutX="20.0" layoutY="63.0" onMouseClicked="#setSelectedFilteredAppointment" prefHeight="276.0" prefWidth="713.0">
+                        <TableView fx:id="reportTableView1" layoutX="20.0" layoutY="63.0" onMouseClicked="#setSelectedFilteredAppointment" prefHeight="276.0" prefWidth="806.0">
                            <columns>
                               <TableColumn fx:id="reportType1" prefWidth="264.0" text="Type" />
                               <TableColumn fx:id="reportMonth1" minWidth="2.0" prefWidth="209.0" text="Month" />
@@ -104,23 +100,12 @@
                               <Font size="24.0" />
                            </font>
                         </Label>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="Tab 3">
-               <content>
-                  <AnchorPane prefHeight="509.0" prefWidth="835.0">
-                     <children>
-                        <BarChart fx:id="reportGraph2" layoutX="14.0" layoutY="14.0" prefHeight="334.0" prefWidth="370.0">
-                          <xAxis>
-                            <CategoryAxis side="BOTTOM" />
-                          </xAxis>
-                          <yAxis>
-                            <NumberAxis side="LEFT" />
-                          </yAxis>
-                        </BarChart>
-                        <PieChart layoutX="396.0" layoutY="7.0" prefHeight="335.0" prefWidth="362.0" />
+                        <ComboBox fx:id="comboBoxThirdReport" layoutX="563.0" layoutY="25.0" onAction="#comboClicked" prefWidth="150.0" promptText="UserID" />
+                        <Label fx:id="thirdReportVarLabel" layoutX="563.0" text="Label">
+                           <font>
+                              <Font size="13.0" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
                </content>

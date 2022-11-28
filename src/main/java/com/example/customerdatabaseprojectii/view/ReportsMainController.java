@@ -1,4 +1,3 @@
-
 package com.example.customerdatabaseprojectii.view;
 
 import com.example.customerdatabaseprojectii.Main;
@@ -15,7 +14,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
@@ -28,8 +26,6 @@ import javafx.util.Callback;
 import java.io.*;
 import java.net.URL;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +35,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ReportsMainController implements Initializable {
+    private static String mostAnxiousUser;
+    private static Appointments appointmentSelected = null;
     @FXML
     Label reportsTableLabel;
     @FXML
@@ -81,84 +79,104 @@ public class ReportsMainController implements Initializable {
     @FXML
     AnchorPane filterPopupAnchorPane;
     @FXML
+    ComboBox<Integer> comboBoxThirdReport;
+    @FXML
+    Label thirdReportVarLabel;
+    @FXML
     Label varReportLabel;
     UsersDao ud = new UsersDao();
     List<String> userNamesFound = new ArrayList<>();
     List<LocalDateTime> userDateFound = new ArrayList<>();
-    private static String mostAnxiousUser;
-    Map<Integer, Integer> userIDNumberLoginsWithinWeek = new HashMap<>();
+
+public ReportsMainController() throws SQLException {}
     Map<Integer, Integer> userIDNumberLoginsWithinMonth = new HashMap<>();
+    AppointmentsDao ad = new AppointmentsDao();
+    ContactsDao cd = new ContactsDao();
 
-
-    public void fillMap(List<String> userNames, List<LocalDateTime>listDates) throws SQLException {
-        //all the userIDs from the list are entered as the keys
-        List<Integer> userIDs = ud.getAllFromDB().stream().filter(user-> userNames.stream().
-                anyMatch(names -> user.getUsername().equals(names.toUpperCase()))).map(Users::getUser_ID).collect(Collectors.toList());
-
-        //getting the startTime for each of the users in the list
-        List<Timestamp> appointmentDate = ud.getAllFromDB().stream().filter(user -> userIDs.stream().
-                anyMatch(userID -> Objects.equals(user.getUser_ID(), userID))).map(Users::getCreateDateTime).collect(Collectors.toList());
-
-
-        appointmentDate.stream().filter(appTime -> userDateFound.stream().anyMatch(loggedIn -> loggedIn.plusMinutes(10079).isBefore(appTime.toLocalDateTime()))).count();
-        //we have the userIDs representing each user in the reports, and we have a list of all their appointment startTimes
-
-        //and we have a list of the time that user logged in
-
-
-
-
+    public Integer findUserIDByName(String userName) throws SQLException {
+        Optional<Users> foundUser = ud.getAllFromDB().stream().filter(name -> Objects.equals(name.getUsername().toUpperCase(), userName.toUpperCase())).findFirst();
+        return foundUser.map(Users::getUser_ID).orElse(-1);
     }
 
+    public Optional<Users> findUserByID(int id) throws SQLException {
+        return ud.getAllFromDB().stream().filter(user -> Objects.equals(user.getUser_ID(), id)).findFirst();
+    }
 
-    public void scanLoginAndGenAverage() throws IOException {
+    public void comboClicked(ActionEvent event) throws SQLException {
+        Integer userIDWhoHasAppointment = comboBoxThirdReport.getSelectionModel().getSelectedItem();
+        Optional<Integer> appointmentCount = ud.getAllFromDB().stream().
+                filter(user -> Objects.equals(user.getUser_ID(), userIDWhoHasAppointment)).map(Users::getUserLogInCount).findFirst();
+        if(appointmentCount.isPresent()) {
+            thirdReportVarLabel.setVisible(true);
+            findUserByID(userIDWhoHasAppointment).ifPresent(selectedUser -> thirdReportVarLabel.
+                    setText(String.format("User %s with ID: %d has logged in %d times", selectedUser.getUsername(),
+                            selectedUser.getUser_ID(), Users.count.get(selectedUser.getUser_ID()))));
+        }
+    }
+
+    //going to put the userID in the map if the
+    public void userMapIterator(int userID) throws SQLException {
+            for (Map.Entry<Integer, Integer> entry : Users.count.entrySet()) {
+                if (entry.getKey().equals(userID)) {
+                    entry.setValue(entry.getValue() + 1);
+                }
+            }
+        }
+
+        public void initUserCountMap(){
+            List<Integer> userIDs = userNamesFound.stream().map(username -> {
+                try {
+                    return findUserIDByName(username);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                return null;
+            }).collect(Collectors.toList());
+            userIDs.forEach(uID -> Users.count.put(uID, 0));
+            System.out.println(userNamesFound);
+            System.out.println(userIDs);
+            System.out.println("inited the user map");
+        }
+
+    public void fillNameList() throws IOException, SQLException {
         Pattern namePattern = Pattern.compile("[^\\s]([a-zA-Z])+$|[^\\s]([a-zA-Z]+\\d?$)");
-        Pattern datePattern = Pattern.compile("([\\d{4}]+-.*$)");
         String loginString;
-        String dateString;
-        int entryCount = 0;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("userLogInfo/login_activity.txt")));
-        BufferedReader dateReader = new BufferedReader(new InputStreamReader(new FileInputStream("userLogInfo/login_activity.txt")));
-
-
-        while((loginString = reader.readLine()) != null) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream
+                ("userLogInfo/login_activity.txt")));
+        while ((loginString = reader.readLine()) != null) {
             Matcher matcher = namePattern.matcher(loginString);
-
-            while(matcher.find()) {
-                entryCount++;
+            while (matcher.find()) {
                 userNamesFound.add(matcher.group());
             }
         }
-        reader.close();
-        while((dateString = dateReader.readLine())!=null){
-            Matcher matcher = datePattern.matcher(dateString);
-            while(matcher.find()){
-                String dateToParse = (matcher.group());
-                LocalDateTime dateOfLogEntry = LocalDateTime.parse(dateToParse);
-                userDateFound.add(dateOfLogEntry);
+    }
+
+    //todo maybe need to initialize the users map first
+    public void scanLoginLog() throws IOException, SQLException {
+        Pattern namePattern = Pattern.compile("[^\\s]([a-zA-Z])+$|[^\\s]([a-zA-Z]+\\d?$)");
+        String loginString;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream
+                ("userLogInfo/login_activity.txt")));
+        while ((loginString = reader.readLine()) != null) {
+            Matcher matcher = namePattern.matcher(loginString);
+            while (matcher.find()) {
+                if(findUserByID(findUserIDByName(matcher.group())).isPresent()){
+                    Users user = findUserByID(findUserIDByName(matcher.group())).get();
+                    Users.setCount(user, Users.count.get(user.getUser_ID()));
+                    userMapIterator(user.getUser_ID());
+                }
             }
         }
-        dateReader.close();
+        Users user = findUserByID(findUserIDByName("jojo")).orElse(null);
+        assert user != null;
+        System.out.println(user.getUsername() + "" + user.getUserLogInCount());
+        reader.close();
     }
-
-
-    public void setGraphTab(){
-
-        XYChart.Series sevenDaysSeries = new XYChart.Series();
-
-
-        XYChart.Series oneMonthSeries = new XYChart.Series();
-    }
-
-
-    AppointmentsDao ad = new AppointmentsDao();
-    ContactsDao cd = new ContactsDao();
-    private static Appointments appointmentSelected = null;
-    public ReportsMainController() throws SQLException {}
 
     public Integer getContactIDByContactName(String contactName) throws SQLException {
-        Optional<Contacts> contactsTemp = cd.getAllFromDB().stream().filter(contact -> Objects.equals(contact.getContactName().
-                toUpperCase(), contactName.toUpperCase())).findFirst();
+        Optional<Contacts> contactsTemp = cd.getAllFromDB().stream().
+                filter(contact -> Objects.equals(contact.getContactName().
+                        toUpperCase(), contactName.toUpperCase())).findFirst();
         return contactsTemp.map(Contacts::getContactID).orElse(0);
     }
 
@@ -173,46 +191,55 @@ public class ReportsMainController implements Initializable {
     public void contactSwitched() throws SQLException {
         ObservableList<Appointments> appointmentsFilteredByContacts = FXCollections.observableArrayList();
         appointmentsFilteredByContacts = ad.getAllFromDB().stream().filter(appointment -> {
-            try {return Objects.equals(appointment.getContactsID(),
+            try {
+                return Objects.equals(appointment.getContactsID(),
                         getContactIDByContactName(switchCustomerComboBox.getValue()));
-            } catch (SQLException e) {e.printStackTrace();}
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             return false;
         }).collect(Collectors.toCollection(FXCollections::observableArrayList));
         reportTableView.setItems(appointmentsFilteredByContacts);
     }
 
-    public void setSelectedFilteredAppointment(MouseEvent event){
+    public void setSelectedFilteredAppointment(MouseEvent event) {
         appointmentSelected = reportTableView1.getSelectionModel().getSelectedItem();
     }
 
     public void setFilterByType(ActionEvent event) throws SQLException {
-        if(!Objects.equals(appointmentSelected, null)){
-                try {//if the selected appointment matches a type in the database then add that to an observable list and set the table
-                    Integer num = Math.toIntExact(ad.getAllFromDB().stream().filter(appointment -> Objects.equals(appointment.getType().toUpperCase(),
-                            appointmentSelected.getType().toUpperCase())).count());
-                    varReportLabel.setVisible(true);
-                    varReportLabel.setText(String.format("%d appointments found with the type: %s", num, appointmentSelected.getType()));
-                } catch (SQLException e) {e.printStackTrace();}
+        if (!Objects.equals(appointmentSelected, null)) {
+            try {//if the selected appointment matches a type in the database then add that to an observable list and set the table
+                Integer num = Math.toIntExact(ad.getAllFromDB().stream().filter(appointment -> Objects.equals(appointment.getType().toUpperCase(),
+                        appointmentSelected.getType().toUpperCase())).count());
+                varReportLabel.setVisible(true);
+                varReportLabel.setText(String.format("%d appointments found with the type: %s", num, appointmentSelected.getType()));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         filterPopupAnchorPane.setVisible(false);
         selectFilterPane.setVisible(false);
     }
-    public void setFilterByMonth(ActionEvent event){
+
+    public void setFilterByMonth(ActionEvent event) {
         DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
         try {//if the selected appointment matches a type in the database then add that to an observable list and set the table
-           Integer num = Math.toIntExact(ad.getAllFromDB().stream().filter(appointment -> Objects.
-                   equals(appointment.getStartDateTime().toLocalDate().format(monthFormat),
-                           appointmentSelected.getStartDateTime().toLocalDate().format(monthFormat))).count());
+            Integer num = Math.toIntExact(ad.getAllFromDB().stream().filter(appointment -> Objects.
+                    equals(appointment.getStartDateTime().toLocalDate().format(monthFormat),
+                            appointmentSelected.getStartDateTime().toLocalDate().format(monthFormat))).count());
             varReportLabel.setVisible(true);
             varReportLabel.setText(String.format("%d appointments found with month: %s", num,
                     appointmentSelected.getStartDateTime().toLocalDate().format(monthFormat)));
-        } catch (SQLException e) {e.printStackTrace();}
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         filterPopupAnchorPane.setVisible(false);
         selectFilterPane.setVisible(false);
     }
+
     //when select create popup thats asks if they are looking for total type/month
     public void setFilterLabels(ActionEvent event) throws SQLException {
-        if(appointmentSelected != null) {
+        if (appointmentSelected != null) {
             varReportLabel.setVisible(false);
             filterPopupAnchorPane.setVisible(true);
             selectFilterPane.setVisible(true);
@@ -253,29 +280,45 @@ public class ReportsMainController implements Initializable {
                     reportsTableSwitchComboBox.getValue()));
         }
     }
+
     //all appointments we get the type of each appointment, and
     public void filterSearchbar(KeyEvent event) throws SQLException {
         DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
-        if(event.getCode() == KeyCode.ENTER || Objects.equals(reportSearchFilter.getText(), "")){
+        if (event.getCode() == KeyCode.ENTER || Objects.equals(reportSearchFilter.getText(), "")) {
             String filterString = reportSearchFilter.getText();
             ObservableList<Appointments> appointmentList = ad.getAllFromDB().stream().filter(appointment -> appointment.getType().
                             toUpperCase().contains(filterString.toUpperCase()) ||
                             appointment.getStartDateTime().toLocalDate().format(monthFormat).contains(filterString)).
                     collect(Collectors.toCollection(FXCollections::observableArrayList));
-            if(appointmentList.size() <1){
+            if (appointmentList.size() < 1) {
                 reportTableView1.setItems(null);
-            }else {
+            } else {
                 reportTableView1.setItems(appointmentList);
             }
         }
+    }
+    public void fillReportComboBox() throws SQLException {
+        List<Integer> customerIDs = userNamesFound.stream().map(username -> {
+            try {
+                return findUserIDByName(username);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
+        //get all users from db and stream and then we got to see which ones from the customerIDs match
+        ObservableList<Integer> users = ud.getAllFromDB().stream().map(Users::getUser_ID).
+                filter(user_id -> customerIDs.stream().anyMatch(one -> Objects.equals(one, user_id))).
+                collect(Collectors.toCollection(FXCollections::observableArrayList));
+        comboBoxThirdReport.setItems(users);
     }
 
     public void fillContactCombobox() throws SQLException {
         ObservableList<String> contactNames = FXCollections.observableArrayList();
         Set<String> contactNameSet = new HashSet<>();
-        for(Appointments appointments : ad.getAllFromDB()){
-            for(Contacts contact : cd.getAllFromDB()){
-                if(Objects.equals(appointments.getContactsID(), contact.getContactID())){
+        for (Appointments appointments : ad.getAllFromDB()) {
+            for (Contacts contact : cd.getAllFromDB()) {
+                if (Objects.equals(appointments.getContactsID(), contact.getContactID())) {
                     contactNameSet.add(contact.getContactName());
                 }
             }
@@ -351,13 +394,13 @@ public class ReportsMainController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try {
-            fillContactCombobox();
+        try {fillContactCombobox();
+            fillNameList();
             initializeReportTable();
-            scanLoginAndGenAverage();
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        }
+            fillReportComboBox();
+            initUserCountMap();
+            scanLoginLog();
+        } catch (SQLException | IOException e) {e.printStackTrace();}
 
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
         tableComboList.add("Appointments");
