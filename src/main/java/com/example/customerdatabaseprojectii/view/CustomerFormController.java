@@ -270,11 +270,7 @@ public class CustomerFormController{
         }else{
             return false;
         }
-        if(Validator.stringChecker(cfCustomerAddress.getText(), "Please only enter alphabetical characters for Customer Address text field!")){
-            customer.setAddress(cfCustomerAddress.getText());
-        }else{
-            return false;
-        }if(Validator.intChecker(cfCustomerPostal.getText(), "An Integer value was not entered in the expected value range for Postal Code text field!")){
+        if(Validator.intChecker(cfCustomerPostal.getText(), "An Integer value was not entered in the expected value range for Postal Code text field!")){
             customer.setPostalCode(cfCustomerPostal.getText());
         }else{
             return false;
@@ -297,7 +293,7 @@ public class CustomerFormController{
         if(validateFields()) {
             customer.setPhoneNumber(cfCustomerNumber.getText());
             customer.setDivisionID(getDivisionID(cfCustomerFirstLevel.getValue()));
-
+            customer.setAddress(cfCustomerAddress.getText());
             customersConsumer.accept(customer);
             Main.playSound("src/main/resources/selectrewardsound.wav");
             CustomerMainController.setSelectedCustomerNull();

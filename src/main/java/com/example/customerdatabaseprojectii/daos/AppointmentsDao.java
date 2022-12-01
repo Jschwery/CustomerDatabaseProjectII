@@ -10,6 +10,7 @@ import com.example.customerdatabaseprojectii.view.LoginController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,7 @@ public class AppointmentsDao implements Dao<Appointments> {
      * @throws SQLException
      */
     @Override
-    public boolean dbInsert(Appointments appointment) throws SQLException {
+    public boolean dbInsert(Appointments appointment) throws SQLException, IOException {
 
         PreparedStatement ps = DbConnection.dbStatementTemplate(insertAppointmenteQuery).orElse(null);
         if (ps != null) {

@@ -222,7 +222,7 @@ public class AppointmentMainController implements Initializable {
                         appointmentsList.add(appointment);
                         setTableFilteredAppointments();
                     }
-                } catch (SQLException s) {
+                } catch (SQLException | IOException s) {
                     s.printStackTrace();
                 }
             };
@@ -315,6 +315,10 @@ public class AppointmentMainController implements Initializable {
     }
 
     /**
+     * @lambda
+     * lambdas used to filter the start date time of the appointments which is needed to find out whether
+     * the appointment should be placed into the weekly, monthly, or all list to be displayed
+     *
      * sets the appointments table with appointments filtered by the length until their start date
      * it does this by getting the name of the tab and if its weekly, then it will filter by all the appointments
      * that week, same for monthly, and if it's neither all the appointments will be displayed
@@ -582,7 +586,6 @@ public class AppointmentMainController implements Initializable {
         });
     }
 
-    //todo
     /**
      * Checks if the user has an appointment within 15 minutes of logging in
      * @throws IOException
