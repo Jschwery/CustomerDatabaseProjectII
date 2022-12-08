@@ -19,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -62,6 +63,8 @@ public class AppointmentFormController {
     @FXML
     Label appointmentVarTitle;
     @FXML
+    TextArea timeInfo;
+    @FXML
     ComboBox<String> afSelectCustomer;
     Consumer<Appointments> appointmentHandler;
     Supplier<ObservableList<String>> customersSupplier;
@@ -71,9 +74,14 @@ public class AppointmentFormController {
     ContactsDao contactsDao = new ContactsDao();
     ObservableList<Customers> observableListOfCustomers;
 
-    public AppointmentFormController() throws SQLException {
+    public AppointmentFormController() throws SQLException {}
+    //prompts the user with information that the time selections are in EST
+    public void showTimeInfo(){
+        timeInfo.setVisible(true);
     }
-
+    public void exitTimeInfo(){
+        timeInfo.setVisible(false);
+    }
     /**
      * @throws SQLException
      * @lambda lambda used to insert each appointment into the map, which is gets from the database
@@ -87,7 +95,6 @@ public class AppointmentFormController {
         ad.getAllFromDB().forEach(app -> insertAppointmentIntoMap(app.getUsersID(), app));
     }
 
-    //customerID mapped to an appointment
     public static void insertAppointmentIntoMap(Integer id, Appointments appointment) {
         if (!isAppointmentTimeTaken(LocalTime.parse(appointment.getStartDateTime().
                         toLocalTime().format(hourAndMinuteFormat)),
@@ -189,16 +196,22 @@ public class AppointmentFormController {
             LocalTime localStartTime = RelatedTime.formattedTimeParser(hourAndMinuteFormat, afStartTimePicker.getValue());
             LocalDateTime localDateTimeStartAppointment = LocalDateTime.of(localAppointmentDateStart, localStartTime);
             LocalDateTime localDateTimeEndAppointment = LocalDateTime.of(localAppointmentDateEnd, localEndTime);
+
             appointment.setStartDateTime(localDateTimeStartAppointment);
             appointment.setEndDateTime(localDateTimeEndAppointment);
+            if(!isModified){
+                ZonedDateTime userStartZdt = ZonedDateTime.of(appointment.getStartDateTime(), RelatedTime.getUserTimeZone());
+                ZonedDateTime userEndZdt = ZonedDateTime.of(appointment.getEndDateTime(), RelatedTime.getUserTimeZone());
+                appointment.setStartDateTime(userStartZdt.toLocalDateTime());
+                appointment.setEndDateTime(userEndZdt.toLocalDateTime());
+            }
         } catch (NullPointerException e) {
             Alerter.warningAlert("Please fill in all the fields!");
         }
-        if (fieldValidator(appointment) && compareAppointmentToBusiness(appointment)) {
+        if(fieldValidator(appointment) && compareAppointmentToBusiness(appointment)){
             appointment.setTitle(afTitle.getText());
             appointment.setLocation(afLocation.getText());
             appointment.setDescription(afDescription.getText());
-
             Main.playSound("src/main/resources/selectrewardsound.wav");
             appointmentHandler.accept(appointment);
             resetBoxes();
@@ -284,7 +297,6 @@ public class AppointmentFormController {
         } else {
             return false;
         }
-
         if (Validator.stringChecker(afType.getText(), "Please only enter alphabetical characters for Type field!")) {
             scheduleAppointment.setType(afType.getText());
         } else {
@@ -355,7 +367,13 @@ public class AppointmentFormController {
         int startBusinessWeek = DayOfWeek.MONDAY.getValue();
         int endBusinessWeek = DayOfWeek.FRIDAY.getValue();
         System.out.println("Appointment Duration: " + Duration.between(estLocalTimeStart, estLocalTimeEnd).getSeconds());
-
+        System.out.println("Appointment passed in start and end time");
+        System.out.println(appointments.getStartDateTime());
+        System.out.println(appointments.getEndDateTime());
+        System.out.println("---------------------------------");
+        System.out.println("Business Times");
+        System.out.println(businessOpenTime);
+        System.out.println(businessCloseTime);
         if (estLocalTimeStart.isBefore(businessOpenTime)) {
             Main.playSound("src/main/resources/errorSound.wav");
             Alerter.informationAlert("The appointment time: " + estLocalTimeStart + " is before the business open time: " + businessOpenTime);
@@ -376,19 +394,9 @@ public class AppointmentFormController {
             Alerter.informationAlert("Appointment start time must be selected before end time!");
             return false;
         }
-        if (Duration.between(estLocalTimeStart, estLocalTimeEnd).getSeconds() > 3600) {
-            Main.playSound("src/main/resources/errorSound.wav");
-            Alerter.informationAlert("Appointments have a max time duration of 60 minutes." + "\nSelected appointment duration: " +
-                    Duration.between(estLocalTimeStart, estLocalTimeEnd).getSeconds() / 60 + " minutes.");
-            return false;
-        }
-        /*if the time is after the business opens and before they close and within the business week
-            return true and validated set true
-        */
         if (estLocalTimeStart.isAfter(businessOpenTime) && estLocalTimeStart.isBefore(businessCloseTime)) {
-            return checkWithinBusinessWeek > startBusinessWeek && checkWithinBusinessWeek < endBusinessWeek;
+            return checkWithinBusinessWeek >= startBusinessWeek && checkWithinBusinessWeek < endBusinessWeek + 1;
         }
-        System.out.println("Didn't pass the business test");
         return false;
     }
 }

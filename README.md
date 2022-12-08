@@ -1,7 +1,7 @@
 #<ins>*Cool* Software Company Scheduling Desktop Application</ins>
 
 ####Author: Jared Schwery
-####Email: jsch454@wgu.edu
+####Contact Email: jsch454@wgu.edu
 ####Date 11/28/2022
 
 ##Build Info
@@ -10,7 +10,7 @@
 ####Java JDK 17.0.1
 ####JavaFX-SDK-19.0
 ####mysql-connector-java-8.0.30
-####Application Version 0.0.1
+####Student Application Version 0.0.1
 
 
 ##Purpose:

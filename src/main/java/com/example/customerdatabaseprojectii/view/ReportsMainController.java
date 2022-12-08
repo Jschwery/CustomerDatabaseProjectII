@@ -156,9 +156,6 @@ public ReportsMainController() throws SQLException {}
             return null;
         }).collect(Collectors.toList());
         userIDs.forEach(uID -> Users.count.put(uID, 0));
-        System.out.println(userNamesFound);
-        System.out.println(userIDs);
-        System.out.println("inited the user map");
     }
 
     /**
@@ -262,6 +259,7 @@ public ReportsMainController() throws SQLException {}
         filterPopupAnchorPane.setVisible(false);
         selectFilterPane.setVisible(false);
     }
+
     /**
      * filter the response to how many appointments are found by month
      * @param event
@@ -281,6 +279,7 @@ public ReportsMainController() throws SQLException {}
         filterPopupAnchorPane.setVisible(false);
         selectFilterPane.setVisible(false);
     }
+
     public void setFilterLabels(ActionEvent event) throws SQLException {
         if (appointmentSelected != null) {
             varReportLabel.setVisible(false);
@@ -288,6 +287,28 @@ public ReportsMainController() throws SQLException {}
             selectFilterPane.setVisible(true);
         }
     }
+
+    /**
+     * filters the table to appointments that match the entered search query when enter is pressed
+     * @param event
+     * @throws SQLException
+     */
+    public void filterSearchbar(KeyEvent event) throws SQLException {
+        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
+        if (event.getCode() == KeyCode.ENTER || Objects.equals(reportSearchFilter.getText(), "")) {
+            String filterString = reportSearchFilter.getText();
+            ObservableList<Appointments> appointmentList = ad.getAllFromDB().stream().filter(appointment -> appointment.getType().
+                            toUpperCase().contains(filterString.toUpperCase()) ||
+                            appointment.getStartDateTime().toLocalDate().format(monthFormat).contains(filterString)).
+                    collect(Collectors.toCollection(FXCollections::observableArrayList));
+            if (appointmentList.size() < 1) {
+                reportTableView1.setItems(null);
+            } else {
+                reportTableView1.setItems(appointmentList);
+            }
+        }
+    }
+
     /**
      * @param event on button click switch the tables to Customers, Appointments, or Reports based off of the value stored in the combobox
      * @throws IOException
@@ -324,27 +345,6 @@ public ReportsMainController() throws SQLException {}
             System.out.println("Exception happened in getting combobox value");
             Alerter.informationAlert(String.format("Could not find the table: %s. Please try again later!",
                     reportsTableSwitchComboBox.getValue()));
-        }
-    }
-
-    /**
-     * filters the table to appointments that match the entered search query when enter is pressed
-     * @param event
-     * @throws SQLException
-     */
-    public void filterSearchbar(KeyEvent event) throws SQLException {
-        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MM");
-        if (event.getCode() == KeyCode.ENTER || Objects.equals(reportSearchFilter.getText(), "")) {
-            String filterString = reportSearchFilter.getText();
-            ObservableList<Appointments> appointmentList = ad.getAllFromDB().stream().filter(appointment -> appointment.getType().
-                            toUpperCase().contains(filterString.toUpperCase()) ||
-                            appointment.getStartDateTime().toLocalDate().format(monthFormat).contains(filterString)).
-                    collect(Collectors.toCollection(FXCollections::observableArrayList));
-            if (appointmentList.size() < 1) {
-                reportTableView1.setItems(null);
-            } else {
-                reportTableView1.setItems(appointmentList);
-            }
         }
     }
 

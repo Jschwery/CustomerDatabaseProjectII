@@ -99,5 +99,6 @@
             </Tab>
         </tabs>
       </TabPane>
+      <Label fx:id="timeZoneText" layoutX="14.0" layoutY="69.0" text="Label" />
    </children>
 </AnchorPane>

@@ -11,7 +11,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,34 +38,36 @@ public class LoginController implements Initializable {
     @FXML
     ToggleButton frenchToggle;
 
+    public LoginController() throws MalformedURLException {}
     private static Users currentlyLoggedIn = null;
     public static boolean changeLang = false;
+    UsersDao ud = new UsersDao();
     public static Users getCurrentlyLoggedInUser(){
         return currentlyLoggedIn;
     }
-    UsersDao ud = new UsersDao();
-    CreateUsersController createUsersController = new CreateUsersController();
+    public final static Locale userLocale = Locale.getDefault();
+    private final ResourceBundle userBundle = bundleGen("Lang");
+
+    public static ResourceBundle bundleGen(String baseName) throws MalformedURLException {
+    File file = new File(baseName + userLocale);
+    URL[] urls = {file.toURI().toURL()};
+    ClassLoader loader = new URLClassLoader(urls);
+    return ResourceBundle.getBundle(baseName, Locale.getDefault(), loader);
+    }
+
 
     /**
      * Translates the labels to French if the user language system property is set to French.
      */
-    public void translateLabels() {
-        String userLang = System.getProperty("user.language");
-        Locale frenchLocale = new Locale("fr", "FR");
-        ResourceBundle frenchBundle = ResourceBundle.getBundle("Lang", frenchLocale);
-        try {
-            if (Objects.equals(userLang, "fr")) {
-                Locale.setDefault(frenchLocale);
-                loginButton.setText(frenchBundle.getString("loginButtonText"));
-                usernameTextEntry.setPromptText(frenchBundle.getString("usernamePromptText"));
-                passwordTextEntry.setPromptText(frenchBundle.getString("passwordPromptText"));
-                createAccountLink.setText(frenchBundle.getString("createAccountHyperLink"));
-                loginText.setText(frenchBundle.getString("loginText"));
+    public void translateLabels() throws MalformedURLException {
+            loginButton.setText(userBundle.getString("loginButtonText"));
+            usernameTextEntry.setPromptText(userBundle.getString("usernamePromptText"));
+            passwordTextEntry.setPromptText(userBundle.getString("passwordPromptText"));
+            createAccountLink.setText(userBundle.getString("createAccountHyperLink"));
+            loginText.setText(userBundle.getString("loginText"));
+            if(Objects.equals(userBundle.getString("loginText"), "Connexion") || changeLang) {
                 loginText.setLayoutX(130);
             }
-        } catch (MissingResourceException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -85,6 +89,9 @@ public class LoginController implements Initializable {
                 Main.getMainStage(), 450, 385, "Welcome", false);
     }
 
+    /**
+     * Sets the label for the users specific time Zone
+     */
     public void setTimeLabel() {
         ZoneId userTimeZone = ZoneId.systemDefault();
         timeLabel.setText(String.valueOf(userTimeZone));
@@ -98,6 +105,7 @@ public class LoginController implements Initializable {
      */
     public void ButtonClick(ActionEvent event) throws SQLException, IOException {
         String username = usernameTextEntry.getText();
+        String password = passwordTextEntry.getText();
         System.out.println("Loggedin user = " + findUserByUsername(username).orElse(null));
 
         currentlyLoggedIn = findUserByUsername(username).orElse(null);
@@ -107,7 +115,7 @@ public class LoginController implements Initializable {
                 writer.write(String.format("Username: %s\nLog in attempt: %s\n\n", username, LocalDateTime.now()));
                 writer.flush();
                 writer.close();
-                if (changeLang || Objects.equals(System.getProperty("user.language"), "fr")) {
+                if (changeLang || Objects.equals(userBundle.getString("loginText"), "Connexion")) {
                     Main.changeScene("src/main/java/com/example/customerdatabaseprojectii/view/appointmentsMain.fxml",
                             Main.getMainStage(), 450, 385, String.format("Bienvenu %s!", Objects.requireNonNull(currentlyLoggedIn.getUsername())), false);
                 } else {
@@ -115,12 +123,38 @@ public class LoginController implements Initializable {
                             Main.getMainStage(), 450, 385, String.format("Welcome %s!", Objects.requireNonNull(currentlyLoggedIn.getUsername())), false);
                 }
             } else {
-                String userLang = System.getProperty("user.language");
-                if (Objects.equals(userLang, "fr") || frenchToggle.isSelected()) {
+                if (Objects.equals(userBundle.getString("loginText"), "Connexion") || frenchToggle.isSelected()) {
                     Alerter.informationAlert("identifiant ou mot de passe incorrect");
-                } else {
                     Main.playSound("src/main/resources/errorSound.wav");
-                    Alerter.informationAlert("Incorrect username or password!");
+                } else {
+                    System.out.println("username");
+                    System.out.println(currentlyLoggedIn.getUsername());
+                    System.out.println("password");
+                    System.out.println(currentlyLoggedIn.getPassword());
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("userLogInfo/login_activity.txt", true));
+                    if (Objects.equals(findUserByUsername(username).orElse(null), null)) {
+                        System.out.println(currentlyLoggedIn.getUsername()+ " "  + "Username: " + username);
+                        writer.flush();
+                        writer.close();
+                        Main.playSound("src/main/resources/errorSound.wav");
+                        Alerter.informationAlert(String.format("Username %s not found!", username));
+                    } else if (Objects.equals(currentlyLoggedIn.getUsername(), username) &&
+                            !Objects.equals(currentlyLoggedIn.getPassword(), password)) {
+                        writer.write(String.format("""
+                                        Username: '%s' failed to login on %s
+                                        Expected username: %s
+                                        Expected password: %s
+                                        Entered username: %s
+                                        Entered password: %s
+
+                                        """,
+                                currentlyLoggedIn.getUsername(), LocalDateTime.now(), currentlyLoggedIn.getUsername(),
+                                currentlyLoggedIn.getPassword(), username, password));
+                        writer.flush();
+                        writer.close();
+                        Main.playSound("src/main/resources/errorSound.wav");
+                        Alerter.informationAlert("Incorrect username or password!");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -135,18 +169,16 @@ public class LoginController implements Initializable {
         }
     }
 
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        translateLabels();
-        setTimeLabel();
         Locale frenchLocale = new Locale("fr", "FR");
         ResourceBundle frenchBundle = ResourceBundle.getBundle("Lang", frenchLocale);
+        try {translateLabels();} catch (MalformedURLException e) {e.printStackTrace();}
+        setTimeLabel();
+
         frenchToggle.setOnAction(action -> {
             if (frenchToggle.isSelected()) {
                 changeLang = true;
-                Locale.setDefault(frenchLocale);
                 frenchToggle.setText("English");
                 loginButton.setText(frenchBundle.getString("loginButtonText"));
                 usernameTextEntry.setPromptText(frenchBundle.getString("usernamePromptText"));

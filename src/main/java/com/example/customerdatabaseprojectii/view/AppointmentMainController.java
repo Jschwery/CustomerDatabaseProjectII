@@ -27,6 +27,7 @@ import javafx.util.Callback;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -136,6 +137,8 @@ public class AppointmentMainController implements Initializable {
     @FXML
     Button wkDeleteAppointmentButton;
     @FXML
+    Label timeZoneText;
+    @FXML
     Button mnthAddAppointmentButton;
     @FXML
     Button mnthUpdateAppointmentButton;
@@ -158,7 +161,6 @@ public class AppointmentMainController implements Initializable {
     }
 
     /**
-     *
      * @param appointment the appointment in which you are looking for the index
      * @return returns the index of the appointment within the observable list
      */
@@ -168,6 +170,7 @@ public class AppointmentMainController implements Initializable {
 
     /**
      * sets the selected appointment with a mouse click on the appointment tableview
+     *
      * @param event
      */
     public void setSelectedAppointment(MouseEvent event) {
@@ -180,8 +183,12 @@ public class AppointmentMainController implements Initializable {
         }
     }
 
+    public void setTextLabel() {
+        ZoneId userTimeZone = ZoneId.systemDefault();
+        timeZoneText.setText(String.format("Time Zone: %s", userTimeZone));
+    }
+
     /**
-     *
      * @param event when the delete button is clicked, it will make sure that the appointment selected is not null
      *              and if it is, then alert the user that they are trying to delete an appointment that is not selected.
      *              If the appointment is not null then it will first delete the appointment from the db, then from the list that
@@ -190,12 +197,19 @@ public class AppointmentMainController implements Initializable {
      * @throws IOException
      */
     public void deleteAppointment(ActionEvent event) throws SQLException, IOException {
-        if (selectedAppointment != null) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete this appointment?");
+        Optional<ButtonType> buttonResult = alert.showAndWait();
+
+        if (buttonResult.orElse(null) == ButtonType.OK && selectedAppointment != null) {
             ad.deleteFromDB(selectedAppointment);
             appointmentsList.remove(selectedAppointment);
             setTableFilteredAppointments();
             Main.playSound("src/main/resources/errorSound.wav");
-        } else {
+            if (buttonResult.orElse(null) == ButtonType.CANCEL) {
+                setTableFilteredAppointments();
+            }
+        }
+        else if(Objects.equals(selectedAppointment, null)){
             Alerter.informationAlert("No appointment selected to delete");
         }
     }
@@ -258,11 +272,9 @@ public class AppointmentMainController implements Initializable {
     }
 
     /**
-     *
      * @param event when update is clicked get the selected appointment,
      *              get the controller of the appointment form so that the values from the field
      *              can be submitted to the database and list via the consumer passed in, that takes the appointment
-     *              currently selected so that it can be updated.
      * @throws IOException
      */
     public void updateAppointmentForm(ActionEvent event) throws IOException {
@@ -282,7 +294,7 @@ public class AppointmentMainController implements Initializable {
                         ad.updateDB(appointment);
                         appointmentsList.set(getIndexOfAppointment(appointment), appointment);
                         setTableFilteredAppointments();
-                    } catch (SQLException throwables) {
+                    } catch (SQLException | MalformedURLException throwables) {
                         throwables.printStackTrace();
                     }
                 }
@@ -315,23 +327,36 @@ public class AppointmentMainController implements Initializable {
     }
 
     /**
-     * @lambda
-     * lambdas used to filter the start date time of the appointments which is needed to find out whether
+     * @throws SQLException
+     * @lambda lambdas used to filter the start date time of the appointments which is needed to find out whether
      * the appointment should be placed into the weekly, monthly, or all list to be displayed
-     *
+     * <p>
      * sets the appointments table with appointments filtered by the length until their start date
      * it does this by getting the name of the tab and if its weekly, then it will filter by all the appointments
      * that week, same for monthly, and if it's neither all the appointments will be displayed
-     * @throws SQLException
      */
     public void setTableFilteredAppointments() throws SQLException {
         Set<TableView<Appointments>> appointmentTablesSet = new HashSet<>();
         appointmentTablesSet.add(aptWeeklyTableView);
         appointmentTablesSet.add(aptMonthlyTableView);
         appointmentTablesSet.add(aptAllTableView);
-        appointmentTablesSet.forEach(t-> {if(t != null) {t.refresh();}});
+        appointmentTablesSet.forEach(t -> {
+            if (t != null) {
+                t.refresh();
+            }
+        });
         appointmentsList.setAll(ad.getAllFromDB());
 
+        appointmentsList.forEach(appointment -> {
+            ZonedDateTime estZoneStartTime = ZonedDateTime.of(appointment.getStartDateTime(), ZoneId.of("America/New_York"));
+            ZonedDateTime estZoneEndTime = ZonedDateTime.of(appointment.getEndDateTime(), ZoneId.of("America/New_York"));
+            ZonedDateTime userZoneStartTime = estZoneStartTime.withZoneSameInstant(ZoneId.systemDefault());
+            ZonedDateTime userZoneEndTime = estZoneEndTime.withZoneSameInstant(ZoneId.systemDefault());
+            LocalDateTime userLocalStartTime = userZoneStartTime.toLocalDateTime();
+            LocalDateTime userLocalEndTime = userZoneEndTime.toLocalDateTime();
+            appointment.setStartDateTime(userLocalStartTime);
+            appointment.setEndDateTime(userLocalEndTime);
+        });
         if (appointmentsWeeklyTab.isSelected() && Objects.equals(appointmentsWeeklyTab.getText(), "Weekly")) {
             ObservableList<Appointments> weeklyList = appointmentsList.stream().filter(all -> all.getStartDateTime().
                             isAfter(RelatedTime.getCurrentDateTime()) && all.getEndDateTime().
@@ -356,6 +381,7 @@ public class AppointmentMainController implements Initializable {
 
     /**
      * Switches the scene to Customer, Appointments, or Reports based off of the value selected in the combobox
+     *
      * @param event
      * @throws IOException
      */
@@ -395,8 +421,8 @@ public class AppointmentMainController implements Initializable {
      * there is also a manual way to test this, for people who don't have their default language in French
      * but would like to see labels in French
      */
-    public void checkUserLocation() {
-        if ((System.getProperty("user.language").equals("fr") || LoginController.changeLang)) {
+    public void checkUserLocation() throws MalformedURLException {
+        if ((System.getProperty("user.language").equals("fr") || Objects.equals(LoginController.bundleGen("Lang").getString("loginText"), "Connexion"))) {
             appointmentsWeeklyTab.setText("Hebdomadaire");
             appointmentsMonthlyTab.setText("Mensuel");
             appointmentsAllTab.setText("Toute");
@@ -588,6 +614,7 @@ public class AppointmentMainController implements Initializable {
 
     /**
      * Checks if the user has an appointment within 15 minutes of logging in
+     *
      * @throws IOException
      */
     public void checkForUpcomingUserAppointment() throws IOException {
@@ -595,16 +622,16 @@ public class AppointmentMainController implements Initializable {
         LocalDateTime userTime = LocalDateTime.now(RelatedTime.getUserTimeZone());
         ZonedDateTime estTime = ZonedDateTime.of(userTime, ZoneId.of("America/New_York"));
 
-        if(userIDToAppointment.containsKey(loggedInUser.getUser_ID())){
+        if (userIDToAppointment.containsKey(loggedInUser.getUser_ID())) {
             Appointments appointment = userIDToAppointment.get(loggedInUser.getUser_ID());
             ZonedDateTime userTimeOfAppointment = ZonedDateTime.of(appointment.getStartDateTime(), RelatedTime.getUserTimeZone());
             LocalTime userAppointmentTimeLocal = userTimeOfAppointment.toLocalTime();
-            if(appointment.getStartDateTime().isAfter(estTime.toLocalDateTime()) &&
-                    appointment.getStartDateTime().isBefore(estTime.toLocalDateTime().plusMinutes(15))){
+            if (appointment.getStartDateTime().isAfter(estTime.toLocalDateTime()) &&
+                    appointment.getStartDateTime().isBefore(estTime.toLocalDateTime().plusMinutes(15))) {
                 Main.playSound("src/main/resources/notification.wav");
                 Alerter.informationAlert(String.format("Appointment ID: %d\nDate: %s\n\nYou have an upcoming appointment at %s",
                         appointment.getAppointmentID(), appointment.getStartDateTime().toLocalDate(), userAppointmentTimeLocal));
-            }else{
+            } else {
                 Alerter.informationAlert("No upcoming appointments!");
             }
         }
@@ -612,15 +639,32 @@ public class AppointmentMainController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try {setTableFilteredAppointments();} catch (SQLException e) {e.printStackTrace();}
-        try {AppointmentFormController.fillUserAppointmentMap();} catch (SQLException e) {e.printStackTrace();}
-        try {checkForUpcomingUserAppointment();} catch (IOException e) {e.printStackTrace();}
+        setTextLabel();
+        try {
+            setTableFilteredAppointments();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            AppointmentFormController.fillUserAppointmentMap();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            checkForUpcomingUserAppointment();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         ObservableList<String> tableComboList = FXCollections.observableArrayList();
         tableComboList.add("Appointments");
         tableComboList.add("Customers");
         tableComboList.add("Reports");
-        checkUserLocation();
+        try {
+            checkUserLocation();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         setColumns();
         appointmentsSwitchTableComboBox.setItems(tableComboList);
     }

@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +43,13 @@ public class AppointmentsDao implements Dao<Appointments> {
     @Override
     public boolean dbInsert(Appointments appointment) throws SQLException, IOException {
 
+        ZonedDateTime userZdtStart = ZonedDateTime.of(appointment.getStartDateTime(), ZoneId.systemDefault());
+        ZonedDateTime userZdtEnd = ZonedDateTime.of(appointment.getEndDateTime(), ZoneId.systemDefault());
+        ZonedDateTime estZdtStart = userZdtStart.withZoneSameInstant(ZoneId.of("America/New_York"));
+        ZonedDateTime estZdtEnd = userZdtEnd.withZoneSameInstant(ZoneId.of("America/New_York"));
+        LocalDateTime estLocalTimeStart = estZdtStart.toLocalDateTime();
+        LocalDateTime estLocalTimeEnd = estZdtEnd.toLocalDateTime();
+
         PreparedStatement ps = DbConnection.dbStatementTemplate(insertAppointmenteQuery).orElse(null);
         if (ps != null) {
             ps.setInt(1, appointment.getAppointmentID());
@@ -49,8 +57,8 @@ public class AppointmentsDao implements Dao<Appointments> {
             ps.setString(3, appointment.getDescription());
             ps.setString(4, appointment.getLocation());
             ps.setString(5, appointment.getType());
-            ps.setTimestamp(6, Timestamp.valueOf(appointment.getStartDateTime()));
-            ps.setTimestamp(7, Timestamp.valueOf(appointment.getEndDateTime()));
+            ps.setTimestamp(6, Timestamp.valueOf(estLocalTimeStart));
+            ps.setTimestamp(7, Timestamp.valueOf(estLocalTimeEnd));
             ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
             ps.setString(9, ud.getUserNameByID(appointment.getUsersID()));
             ps.setTimestamp(10, Timestamp.valueOf(RelatedTime.getCurrentDateTime()));
@@ -59,27 +67,10 @@ public class AppointmentsDao implements Dao<Appointments> {
             ps.setInt(13, appointment.getUsersID());
             ps.setInt(14, appointment.getContactsID());
 
-            Optional<Appointments> findAppointment = getAllFromDB().stream().filter(app -> Objects.equals(app.getUsersID(), appointment.getUsersID())).findFirst();
-            DateTimeFormatter hourAndMinuteFormat = DateTimeFormatter.ofPattern("HH:mm");
-            ZoneId userZone = RelatedTime.getUserTimeZone();
-            if (findAppointment.isPresent()) {
-                LocalDateTime toDisplayStart = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), Timestamp.valueOf(findAppointment.get().getStartDateTime()));
-                LocalDateTime toDisplayEnd = RelatedTime.changeTimeBusinessToUserLocal(userZone.toString(), Timestamp.valueOf(findAppointment.get().getEndDateTime()));
-                LocalTime start = LocalTime.parse(toDisplayStart.toLocalTime().toString(), hourAndMinuteFormat);
-                LocalDate startDate = toDisplayStart.toLocalDate();
-                System.out.println(startDate);
-                LocalTime end = LocalTime.parse(toDisplayEnd.toLocalTime().toString(), hourAndMinuteFormat);
-                Alerter.informationAlert(String.format("User already has an appointment scheduled:\n%s\n\nStart: %s\nEnd: %s ", startDate, start, end));
-                return false;
-            }
-            if (afc.compareAppointmentToBusiness(appointment) && getAllFromDB().stream().
-                    filter(app -> Objects.equals(app.getUsersID(), LoginController.
-                            getCurrentlyLoggedInUser().getUser_ID())).noneMatch(obj -> true) ||
-                    getAllFromDB().stream().filter(a -> Objects.equals(a.getUsersID(), appointment.getUsersID())).noneMatch(obj -> true)) {
-
-                int rowsUpdated = ps.executeUpdate();
+            int rowsUpdated = ps.executeUpdate();
+            if(rowsUpdated > 0) {
                 System.out.printf("%d rows successfully inserted appointment into database" +
-                        "\nTime: " + LocalTime.now(), rowsUpdated);
+                        "\nTime: %s", rowsUpdated, LocalTime.now());
                 return true;
             }
         }
@@ -121,16 +112,24 @@ public class AppointmentsDao implements Dao<Appointments> {
      * @throws SQLException
      */
     @Override
-    public boolean updateDB(Appointments appointment) throws SQLException {
+    public boolean updateDB(Appointments appointment) throws SQLException, MalformedURLException {
             CustomerMainController mc = new CustomerMainController();
             PreparedStatement ps = DbConnection.dbStatementTemplate(appointmentUpdateQuery).orElse(null);
-            if (ps != null) {
+
+            ZonedDateTime userZdtStart = ZonedDateTime.of(appointment.getStartDateTime(), ZoneId.systemDefault());
+            ZonedDateTime userZdtEnd = ZonedDateTime.of(appointment.getEndDateTime(), ZoneId.systemDefault());
+            ZonedDateTime estZdtStart = userZdtStart.withZoneSameInstant(ZoneId.of("America/New_York"));
+            ZonedDateTime estZdtEnd = userZdtEnd.withZoneSameInstant(ZoneId.of("America/New_York"));
+            LocalDateTime estLocalTimeStart = estZdtStart.toLocalDateTime();
+            LocalDateTime estLocalTimeEnd = estZdtEnd.toLocalDateTime();
+
+        if (ps != null) {
                 ps.setString(1, appointment.getTitle());
                 ps.setString(2, appointment.getDescription());
                 ps.setString(3, appointment.getLocation());
                 ps.setString(4, appointment.getType());
-                ps.setTimestamp(5, Timestamp.valueOf(appointment.getStartDateTime()));
-                ps.setTimestamp(6, Timestamp.valueOf(appointment.getEndDateTime()));
+                ps.setTimestamp(5, Timestamp.valueOf(estLocalTimeStart));
+                ps.setTimestamp(6, Timestamp.valueOf(estLocalTimeEnd));
                 ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
                 ps.setString(8, ud.getUserNameByID(appointment.getUsersID()));
                 ps.setInt(9, appointment.getCustomerID());

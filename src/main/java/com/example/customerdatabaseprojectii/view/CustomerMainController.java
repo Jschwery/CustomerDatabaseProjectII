@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -63,30 +64,28 @@ public class CustomerMainController implements Initializable {
     AppointmentsDao ad = new AppointmentsDao();
     CustomersDao cd = new CustomersDao();
     private final ObservableList<Customers> allCustomersObservableList = cd.getAllFromDB();
+    private final ResourceBundle userBundle = LoginController.bundleGen("Lang");
+
+
 
     Consumer<Customers> customerConsumer = customer -> {
-        CustomersDao cd = new CustomersDao();
 
         if (CustomerFormController.modifyCustomer) {
             try {
                 if (cd.updateDB(customer) && getSelectedCustomer().isPresent()) {
                     getAllCustomers().set(getCustomerIndex(getSelectedCustomer().get()), customer);
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            } catch (SQLException e) {e.printStackTrace();}
         } else {
             try {
                 if (cd.dbInsert(customer)) {
                     getAllCustomers().add(customer);
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            } catch (SQLException e) {e.printStackTrace();}
         }
     };
 
-    public CustomerMainController() throws SQLException {}
+    public CustomerMainController() throws SQLException, MalformedURLException {}
 
     public static Optional<Customers> getSelectedCustomer() {
         return Optional.ofNullable(selectedCustomer);
@@ -120,7 +119,6 @@ public class CustomerMainController implements Initializable {
     }
 
     /**
-     *
      * @param customer deletes the selected customer from the database
      * @throws SQLException
      */
@@ -171,7 +169,6 @@ public class CustomerMainController implements Initializable {
     }
 
     /**
-     *
      * @param event on delete button click deleted a customer from the database and related tableview lists
      * @throws SQLException
      * @throws IOException
@@ -179,25 +176,36 @@ public class CustomerMainController implements Initializable {
     public void deleteCustomer(ActionEvent event) throws SQLException, IOException {
         Customers customerToDel = customerTableView.getSelectionModel().getSelectedItem();
 
-        {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete this customer?");
             Optional<ButtonType> buttonResult = alert.showAndWait();
 
-            if (buttonResult.get() == ButtonType.OK) {
+            if (buttonResult.orElse(null) == ButtonType.OK && customerToDel != null) {
                 deleteCustomerFromAllCustomers(customerToDel);
                 customerTableView.setItems(getAllCustomers());
                 Main.playSound("src/main/resources/errorSound.wav");
-
-            } else {
-                if (buttonResult.get() == ButtonType.CANCEL) {
+                if (buttonResult.orElse(null) == ButtonType.CANCEL) {
                     customerTableView.setItems(getAllCustomers());
                 }
+            }else if(Objects.equals(customerToDel, null)) {
+                Alerter.informationAlert("Select a customer to delete!");
             }
-        }
     }
 
     /**
-     *
+     * @param stageNode takes in a parent node to set the scene with
+     * @param isResizeable boolean value to allow the resizing of the stage if true, if false
+     *                     then prevents the stage resizing.
+     */
+    public void setStage(Parent stageNode,  boolean isResizeable){
+        Stage customerFormStage = new Stage();
+        customerFormStage.setScene(new Scene(stageNode));
+        customerFormStage.setResizable(isResizeable);
+        customerFormStage.initStyle(StageStyle.DECORATED);
+
+        customerFormStage.show();
+    }
+
+    /**
      * @param event A modifyCustomer variable will be set to false,indicating that there is not a customer selected to update and a new customer will be created.
      *              a selected customer and consumer are passed to submit the customer to the database and update the table
      * @throws IOException
@@ -212,13 +220,8 @@ public class CustomerMainController implements Initializable {
             Parent node = loader.load();
             CustomerFormController afc = loader.getController();
             afc.customerFormInit(selectedCustomer, customerConsumer);
+            setStage(node, false);
 
-            Stage customerFormStage = new Stage();
-            customerFormStage.setScene(new Scene(node));
-            customerFormStage.setResizable(false);
-            customerFormStage.initStyle(StageStyle.DECORATED);
-
-            customerFormStage.show();
         } else {
             Alerter.warningAlert("You cannot add a new customer with one selected, unselecting customer.");
             selectedCustomer = null;
@@ -243,11 +246,7 @@ public class CustomerMainController implements Initializable {
             CustomerFormController afc = loader.getController();
             afc.customerFormInit(selectedCustomer, customerConsumer);
 
-            Stage customerFormStage = new Stage();
-            customerFormStage.setScene(new Scene(node));
-            customerFormStage.setResizable(false);
-            customerFormStage.initStyle(StageStyle.DECORATED);
-            customerFormStage.show();
+            setStage(node, false);
         } else {
             Alerter.warningAlert("You are trying to add an customer that already exists, unselecting customer");
             selectedCustomer = null;
@@ -292,7 +291,8 @@ public class CustomerMainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        if (System.getProperty("user.language").equals("fr") || LoginController.changeLang) {
+        if (System.getProperty("user.language").equals("fr") ||
+                Objects.equals(userBundle.getString("loginText"), "Connexion")){
             custCustomerID.setText("Identifiant du client");
             custCustomerName.setText("Nom");
             custAddress.setText("Adresse");
